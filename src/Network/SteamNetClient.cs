@@ -47,25 +47,10 @@ internal class SteamNetClient
     /// <summary>
     /// Gets whether this client is the host of the current lobby.
     /// </summary>
-    internal bool IsHost => NetLobby.AmLobbyHost(SteamId);
+    internal bool AmHost => NetLobby.AmLobbyHost(SteamId);
 
     /// <summary>
     /// Gets whether if P2P has been established with this client
     /// </summary>
     internal bool HasEstablishedP2P { get; set; }
-
-    /// <summary>
-    /// Retrieves a SteamNetClient instance by Steam ID.
-    /// </summary>
-    /// <param name="steamId">The Steam ID to search for.</param>
-    /// <returns>The SteamNetClient instance if found, otherwise null.</returns>
-    internal static SteamNetClient GetBySteamId(SteamId steamId)
-    {
-        if (NetLobby.LobbyData.AllClients.TryGetValue(steamId, out var client))
-        {
-            return client;
-        }
-
-        return default;
-    }
 }

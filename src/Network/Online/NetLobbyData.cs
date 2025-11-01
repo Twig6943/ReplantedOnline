@@ -29,6 +29,11 @@ internal class NetLobbyData
     internal Dictionary<SteamId, SteamNetClient> AllClients = [];
 
     /// <summary>
+    /// Gets a HashSet of all banned players.
+    /// </summary>
+    internal readonly HashSet<SteamId> Banned = [];
+
+    /// <summary>
     /// Gets or sets the last known game state of the lobby for synchronization purposes.
     /// </summary>
     internal GameState LastGameState = GameState.Lobby;
@@ -48,10 +53,10 @@ internal class NetLobbyData
             AllClients[member] = new(member);
         }
 
-        // Remove members that are no longer in the lobby
+        // Remove members that are no longer in the lobby or banned
         foreach (var id in ids)
         {
-            if (members.Contains(id)) continue;
+            if (members.Contains(id) && !Banned.Contains(id)) continue;
             AllClients.Remove(id);
         }
     }

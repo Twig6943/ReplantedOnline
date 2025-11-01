@@ -1,6 +1,7 @@
 ﻿using Il2CppReloaded.Gameplay;
 using Il2CppSteamworks;
 using MelonLoader;
+using ReplantedOnline.Helper;
 using ReplantedOnline.Items.Enums;
 using ReplantedOnline.Network.Packet;
 
@@ -18,7 +19,30 @@ internal class NetworkDispatcher
     /// <param name="packetWriter">The packet writer containing the data to send.</param>
     /// <param name="receiveLocally">Whether the local client should also process this packet.</param>
     /// <param name="tag">The packet tag identifying the packet type.</param>
-    internal static void Send(PacketWriter packetWriter, bool receiveLocally, PacketTag tag = Items.Enums.PacketTag.None)
+    internal static void SendTo(SteamId steamId, PacketWriter packetWriter, PacketTag tag = PacketTag.None)
+    {
+        if (steamId.GetNetClient().AmLocal) return;
+
+        var packet = PacketWriter.Get();
+        packet.AddTag(tag);
+        packet.WritePacket(packetWriter);
+
+        if (NetLobby.IsPlayerInOurLobby(steamId))
+        {
+            SteamNetworking.SendP2PPacket(steamId, packet.GetBytes(), packet.Length);
+        }
+
+        MelonLogger.Msg($"[NetworkDispatcher] Sent {tag} packet to {steamId.GetNetClient().Name} -> Size: {packet.Length} bytes");
+        packet.Recycle();
+    }
+
+    /// <summary>
+    /// Sends a packet to all connected clients in the lobby.
+    /// </summary>
+    /// <param name="packetWriter">The packet writer containing the data to send.</param>
+    /// <param name="receiveLocally">Whether the local client should also process this packet.</param>
+    /// <param name="tag">The packet tag identifying the packet type.</param>
+    internal static void Send(PacketWriter packetWriter, bool receiveLocally, PacketTag tag = PacketTag.None)
     {
         var packet = PacketWriter.Get();
         packet.AddTag(tag);
@@ -77,7 +101,14 @@ internal class NetworkDispatcher
 
             if (SteamNetworking.ReadP2PPacket(buffer.Data, ref buffer.Size, ref buffer.Steamid))
             {
-                var sender = SteamNetClient.GetBySteamId(buffer.Steamid);
+                if (buffer.Steamid.Banned())
+                {
+                    MelonLogger.Msg($"[NetworkDispatcher] Discarded packet from banned player: {buffer.Steamid}");
+                    buffer.Recycle();
+                    continue;
+                }
+
+                var sender = buffer.Steamid.GetNetClient();
                 MelonLogger.Msg($"[NetworkDispatcher] Received packet #{packetCount} from {sender.Name} ({buffer.Steamid}) -> Size: {buffer.Size} bytes");
 
                 if (buffer.Size > 0)
@@ -123,6 +154,14 @@ internal class NetworkDispatcher
             case PacketTag.P2P:
                 sender.HasEstablishedP2P = true;
                 MelonLogger.Msg("[NetworkDispatcher] P2P handshake packet processed");
+                break;
+            case PacketTag.P2PClose:
+                if (sender.AmHost && !NetLobby.AmLobbyHost())
+                {
+                    BanReasons reason = (BanReasons)packetReader.ReadByte();
+                    NetLobby.LeaveLobby();
+                    MelonLogger.Msg("[NetworkDispatcher] P2P closed by host");
+                }
                 break;
             case PacketTag.Rpc:
                 StreamlineRpc(sender, packetReader);

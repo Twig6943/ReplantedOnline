@@ -30,7 +30,7 @@ internal static class RPC
     /// <param name="selectionSet">The plant selection set to use for the game.</param>
     internal static void HandleGameStart(SteamNetClient sender, SelectionSet selectionSet)
     {
-        if (sender.IsHost)
+        if (sender.AmHost)
         {
             MelonLogger.Msg("Game Starting...");
             ReplantAPI.Core.ReplantAPI.GameplayActivity.VersusMode.SelectionSet = selectionSet;
@@ -57,7 +57,7 @@ internal static class RPC
     /// <param name="gameState">The new game state to apply.</param>
     internal static void HandleUpdateGameState(SteamNetClient sender, GameState gameState)
     {
-        if (sender.IsHost)
+        if (sender.AmHost)
         {
             MelonLogger.Msg($"Updating GameState: {gameState}");
 

@@ -1,5 +1,6 @@
 ﻿using Il2CppSteamworks;
 using MelonLoader;
+using ReplantedOnline.Helper;
 using ReplantedOnline.Items.Enums;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Packet;
@@ -17,7 +18,7 @@ internal static class NetLobby
     /// </summary>
     internal static NetLobbyData LobbyData = default;
 
-    private const int MAX_LOBBY_SIZE = 500;
+    private const int MAX_LOBBY_SIZE = 2;
 
     /// <summary>
     /// Initializes all Steamworks callbacks for lobby and P2P networking events.
@@ -80,6 +81,12 @@ internal static class NetLobby
     /// </summary>
     internal static void LeaveLobby()
     {
+        if (LobbyData == default)
+        {
+            MelonLogger.Warning("[NetLobby] Cannot leave - not in a lobby");
+            return;
+        }
+
         MelonLogger.Msg($"[NetLobby] Leaving lobby {LobbyData.LobbyId}");
         SteamMatchmaking.Internal.LeaveLobby(LobbyData.LobbyId);
         Transitions.ToMainMenu();
@@ -103,7 +110,7 @@ internal static class NetLobby
     /// <returns>The number of lobby members.</returns>
     internal static int GetLobbyMemberCount()
     {
-        return SteamMatchmaking.Internal.GetNumLobbyMembers(LobbyData.LobbyId);
+        return LobbyData.AllClients.Count;
     }
 
     /// <summary>
@@ -157,6 +164,8 @@ internal static class NetLobby
             LobbyData = new(data.Id);
         }
 
+        TryProcessMembers();
+
         int memberCount = GetLobbyMemberCount();
 
         Transitions.ToVersus();
@@ -169,8 +178,6 @@ internal static class NetLobby
         {
             MelonLogger.Msg($"[NetLobby] Joined lobby {LobbyData.LobbyId} with {memberCount} player");
         }
-
-        TryProcessMembers();
     }
 
     /// <summary>
@@ -216,6 +223,7 @@ internal static class NetLobby
         if (IsPlayerInOurLobby(steamId))
         {
             SteamNetworking.AcceptP2PSessionWithUser(steamId);
+            steamId.GetNetClient()?.HasEstablishedP2P = true;
             MelonLogger.Msg($"[NetLobby] Accepted P2P session with {steamId}");
         }
         else
@@ -273,8 +281,6 @@ internal static class NetLobby
 
             MelonLogger.Msg($"[NetLobby] Requesting P2P session with {client.Name} as host");
             RequestP2PSessionWithPlayer(client.SteamId);
-
-            client.HasEstablishedP2P = true;
         }
     }
 
@@ -286,11 +292,18 @@ internal static class NetLobby
     {
         try
         {
+            if (LobbyData?.Banned.Contains(steamId) == true)
+            {
+                MelonLogger.Msg($"[NetLobby] Skipping P2P request to banned player: {steamId}");
+                TryRemoveFromLobby(steamId, BanReasons.Banned);
+                return;
+            }
+
             // Send a small dummy packet to initiate P2P connection
             // This will trigger the remote client's OnP2PSessionRequest
             var packetWriter = PacketWriter.Get();
             packetWriter.AddTag(PacketTag.P2P);
-            bool sent = SteamNetworking.SendP2PPacket(steamId, packetWriter.GetBytes(), packetWriter.Length);
+            var sent = SteamNetworking.SendP2PPacket(steamId, packetWriter.GetBytes(), packetWriter.Length);
             packetWriter.Recycle();
 
             if (sent)
@@ -309,18 +322,121 @@ internal static class NetLobby
     }
 
     /// <summary>
+    /// Kicks a player from the current lobby and terminates P2P connections.
+    /// </summary>
+    /// <param name="steamId">The Steam ID of the player to kick.</param>
+    /// <param name="ban">Whether to ban the player from rejoining.</param>
+    internal static void BanPlayer(SteamId steamId, BanReasons reason = BanReasons.ByHost)
+    {
+        if (!AmInLobby())
+        {
+            MelonLogger.Warning("[NetLobby] Cannot kick player - not in a lobby");
+            return;
+        }
+
+        if (!AmLobbyHost())
+        {
+            MelonLogger.Warning("[NetLobby] Only the lobby host can kick players");
+            return;
+        }
+
+        if (steamId == SteamUser.Internal.GetSteamID())
+        {
+            MelonLogger.Warning("[NetLobby] Cannot kick yourself");
+            return;
+        }
+
+        if (!IsPlayerInOurLobby(steamId))
+        {
+            MelonLogger.Warning($"[NetLobby] Player {steamId} is not in the lobby");
+            return;
+        }
+
+        try
+        {
+            LobbyData.Banned.Add(steamId);
+
+            TryRemoveFromLobby(steamId, reason);
+
+            MelonLogger.Msg($"[NetLobby] Kicked and banned player {steamId} (P2P terminated)");
+        }
+        catch (Exception ex)
+        {
+            MelonLogger.Error($"[NetLobby] Error kicking player {steamId}: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Try to remove player from the lobby, if not the P2P will terminate ether way
+    /// </summary>
+    /// <param name="steamId">The Steam ID of the player to remove.</param>
+    internal static void TryRemoveFromLobby(SteamId steamId, BanReasons reason)
+    {
+        if (!AmInLobby())
+        {
+            MelonLogger.Warning("[NetLobby] Cannot kick player - not in a lobby");
+            return;
+        }
+
+        if (!AmLobbyHost())
+        {
+            MelonLogger.Warning("[NetLobby] Only the lobby host can kick players");
+            return;
+        }
+
+        if (steamId == SteamUser.Internal.GetSteamID())
+        {
+            MelonLogger.Warning("[NetLobby] Cannot kick yourself");
+            return;
+        }
+
+        if (!IsPlayerInOurLobby(steamId))
+        {
+            MelonLogger.Warning($"[NetLobby] Player {steamId} is not in the lobby");
+            return;
+        }
+
+        var packetWriter = PacketWriter.Get();
+        packetWriter.WriteByte((byte)reason);
+        NetworkDispatcher.SendTo(steamId, packetWriter, PacketTag.P2PClose);
+
+        TerminateP2PSession(steamId);
+    }
+
+    /// <summary>
+    /// Terminates all P2P sessions with a player, preventing network communication.
+    /// </summary>
+    /// <param name="steamId">The Steam ID of the player to disconnect from.</param>
+    private static void TerminateP2PSession(SteamId steamId)
+    {
+        try
+        {
+            bool sessionClosed = SteamNetworking.CloseP2PSessionWithUser(steamId);
+
+            if (sessionClosed)
+            {
+                MelonLogger.Msg($"[NetLobby] P2P session terminated with {steamId}");
+            }
+        }
+        catch (Exception ex)
+        {
+            MelonLogger.Error($"[NetLobby] Error terminating P2P session with {steamId}: {ex.Message}");
+        }
+    }
+
+    /// <summary>
     /// Checks if a player is currently in our lobby.
     /// </summary>
     /// <param name="steamId">The Steam ID of the player to check.</param>
     /// <returns>True if the player is in our lobby, false otherwise.</returns>
     internal static bool IsPlayerInOurLobby(SteamId steamId)
     {
-        int memberCount = GetLobbyMemberCount();
-        for (int i = 0; i < memberCount; i++)
+        foreach (var client in LobbyData.AllClients.Values)
         {
-            if (GetLobbyMemberByIndex(i) == steamId)
+            if (client.SteamId == steamId)
                 return true;
         }
+
         return false;
     }
 

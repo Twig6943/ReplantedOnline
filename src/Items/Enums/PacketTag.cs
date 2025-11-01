@@ -17,6 +17,11 @@ internal enum PacketTag
     P2P,
 
     /// <summary>
+    /// Packet used for P2P session closing.
+    /// </summary>
+    P2PClose,
+
+    /// <summary>
     /// Remote Procedure Call packet for executing methods on remote clients.
     /// </summary>
     Rpc
