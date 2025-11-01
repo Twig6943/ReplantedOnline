@@ -1,0 +1,7 @@
+﻿/.vs
+/src/.vs
+/src/bin
+/src/obj
+/src/.editorconfig
+/src/.vscode
+/src/References/**
