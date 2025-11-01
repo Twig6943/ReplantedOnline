@@ -1,5 +1,6 @@
 ﻿using Il2CppSteamworks;
 using MelonLoader;
+using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
 
 namespace ReplantedOnline.Network;
@@ -53,4 +54,16 @@ internal class SteamNetClient
     /// Gets whether if P2P has been established with this client
     /// </summary>
     internal bool HasEstablishedP2P { get; set; }
+
+    internal bool AmZombieSide()
+    {
+        if (AmHost)
+        {
+            return Instances.GameplayActivity.VersusMode.ZombiePlayerIndex == 0;
+        }
+        else
+        {
+            return Instances.GameplayActivity.VersusMode.ZombiePlayerIndex == 0;
+        }
+    }
 }

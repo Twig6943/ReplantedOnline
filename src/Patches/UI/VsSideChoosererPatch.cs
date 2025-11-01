@@ -2,6 +2,7 @@
 using Il2CppReloaded.Gameplay;
 using Il2CppTekly.PanelViews;
 using MelonLoader;
+using ReplantedOnline.Managers;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.RPC.Handlers;
 using System.Collections;
@@ -14,7 +15,7 @@ namespace ReplantedOnline.Patches.UI;
 internal static class VsSideChoosererPatch
 {
     private static GameObject InteractableBlocker;
-    private static PanelView VsSideChooser;
+    internal static PanelView VsSideChooser;
 
     [HarmonyPatch(typeof(PanelViewContainer), nameof(PanelViewContainer.Awake))]
     [HarmonyPostfix]
@@ -58,6 +59,9 @@ internal static class VsSideChoosererPatch
                 VsSideChooser.transform.Find($"Canvas/Layout/Center/Panel/ControllerTop")?.gameObject?.SetActive(false);
                 VsSideChooser.transform.Find($"Canvas/Layout/Center/Panel/ControllerBottom")?.gameObject?.SetActive(false);
             }
+
+            VersusManager.SetTextComps(VsSideChooser);
+            VersusManager.UpdateSideVisuals();
         }
     }
 
@@ -98,7 +102,7 @@ internal static class VsSideChoosererPatch
         }
     }
 
-    internal static void SetInteractable(bool interactable)
+    internal static void SetButtonsInteractable(bool interactable)
     {
         InteractableBlocker?.SetActive(!interactable);
     }

@@ -1,5 +1,6 @@
 ﻿using Il2CppSteamworks;
 using ReplantedOnline.Items.Enums;
+using ReplantedOnline.Managers;
 using ReplantedOnline.Network.RPC.Handlers;
 
 namespace ReplantedOnline.Network.Online;
@@ -60,6 +61,8 @@ internal class NetLobbyData
             if (members.Contains(id) && !Banned.Contains(id)) continue;
             AllClients.Remove(id);
         }
+
+        VersusManager.UpdateSideVisuals();
     }
 
     internal void UpdateGameState(GameState gameState)

@@ -2,6 +2,7 @@
 using MelonLoader;
 using ReplantedOnline.Items.Attributes;
 using ReplantedOnline.Items.Enums;
+using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
@@ -47,13 +48,9 @@ internal sealed class UpdateGameStateHandler : RPCHandler
             switch (gameState)
             {
                 case GameState.Lobby:
-                    // No action needed for lobby state - players are already in lobby
-                    break;
                 case GameState.HostChoosePlants:
-                    // Placeholder for future host-specific plant selection phase
-                    break;
                 case GameState.HostChooseZombie:
-                    // Placeholder for future host-specific zombie selection phase  
+                    VersusManager.UpdateSideVisuals();
                     break;
                 case GameState.PlantChoosingSeed:
                     // Transition to plant seed selection phase
