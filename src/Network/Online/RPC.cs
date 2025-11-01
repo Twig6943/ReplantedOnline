@@ -77,5 +77,7 @@ internal static class RPC
                     break;
             }
         }
+
+        NetLobby.LobbyData.LastGameState = gameState;
     }
 }

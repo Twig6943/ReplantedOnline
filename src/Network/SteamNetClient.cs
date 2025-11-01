@@ -11,9 +11,18 @@ namespace ReplantedOnline.Network;
 internal class SteamNetClient
 {
     /// <summary>
-    /// List of all currently connected network clients.
+    /// Initializes a new instance of the SteamNetClient class.
     /// </summary>
-    internal static List<SteamNetClient> AllClients = [];
+    /// <param name="id">The Steam ID of the client.</param>
+    internal SteamNetClient(SteamId id)
+    {
+        SteamId = id;
+        ClientId = (int)id.AccountId;
+        Name = SteamFriends.Internal.GetFriendPersonaName(SteamId);
+        AmLocal = id == SteamUser.Internal.GetSteamID();
+        HasEstablishedP2P = AmLocal;
+        MelonLogger.Msg($"[SteamNetClient] P2P connections initialized with {Name} ({SteamId})");
+    }
 
     /// <summary>
     /// The Steam ID of this client.
@@ -33,63 +42,30 @@ internal class SteamNetClient
     /// <summary>
     /// Gets whether this client represents the local player.
     /// </summary>
-    internal bool IsLocal { get; }
+    internal bool AmLocal { get; }
 
     /// <summary>
     /// Gets whether this client is the host of the current lobby.
     /// </summary>
-    internal bool IsHost => NetLobby.IsLobbyHost(SteamId);
+    internal bool IsHost => NetLobby.AmLobbyHost(SteamId);
 
     /// <summary>
-    /// Initializes a new instance of the SteamNetClient class.
+    /// Gets whether if P2P has been established with this client
     /// </summary>
-    /// <param name="id">The Steam ID of the client.</param>
-    internal SteamNetClient(SteamId id)
-    {
-        SteamId = id;
-        ClientId = (int)id.AccountId;
-        Name = SteamFriends.Internal.GetFriendPersonaName(SteamId);
-        IsLocal = id == SteamUser.Internal.GetSteamID();
-        MelonLogger.Msg($"[SteamNetClient] {Name} ({SteamId}) connected to lobby");
-    }
+    internal bool HasEstablishedP2P { get; set; }
 
     /// <summary>
     /// Retrieves a SteamNetClient instance by Steam ID.
     /// </summary>
     /// <param name="steamId">The Steam ID to search for.</param>
     /// <returns>The SteamNetClient instance if found, otherwise null.</returns>
-    internal static SteamNetClient GetBySteamId(SteamId steamId) => AllClients.FirstOrDefault(c => c.SteamId == steamId);
-
-    /// <summary>
-    /// Adds a new client to the network client list if it doesn't already exist.
-    /// </summary>
-    /// <param name="steamId">The Steam ID of the client to add.</param>
-    internal static void Add(SteamId steamId)
+    internal static SteamNetClient GetBySteamId(SteamId steamId)
     {
-        if (GetBySteamId(steamId) != default) return;
-
-        var client = new SteamNetClient(steamId);
-        AllClients.Add(client);
-    }
-
-    /// <summary>
-    /// Removes a client from the network client list by Steam ID.
-    /// </summary>
-    /// <param name="steamId">The Steam ID of the client to remove.</param>
-    internal static void Remove(SteamId steamId)
-    {
-        var client = GetBySteamId(steamId);
-        if (client != default)
+        if (NetLobby.LobbyData.AllClients.TryGetValue(steamId, out var client))
         {
-            AllClients.Remove(client);
+            return client;
         }
-    }
 
-    /// <summary>
-    /// Clears all clients from the network client list.
-    /// </summary>
-    internal static void Clear()
-    {
-        AllClients.Clear();
+        return default;
     }
 }

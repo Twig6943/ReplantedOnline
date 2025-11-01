@@ -10,14 +10,12 @@ namespace ReplantedOnline.Network.Online;
 /// Manages Steamworks lobby functionality for ReplantedOnline, handling lobby creation, joining,
 /// member management, and P2P connection setup between lobby members.
 /// </summary>
-internal class NetLobby
+internal static class NetLobby
 {
     /// <summary>
-    /// The Steam ID of the current lobby the player is in, or default if not in a lobby.
+    /// The LobbyData of the current lobby the player is in, or default if not in a lobby.
     /// </summary>
-    internal static SteamId CurrentLobby = default;
-
-    private static readonly HashSet<SteamId> _connectedMembers = [];
+    internal static NetLobbyData LobbyData = default;
 
     /// <summary>
     /// Initializes all Steamworks callbacks for lobby and P2P networking events.
@@ -80,12 +78,10 @@ internal class NetLobby
     /// </summary>
     internal static void LeaveLobby()
     {
-        MelonLogger.Msg($"[NetLobby] Leaving lobby {CurrentLobby}");
-        SteamMatchmaking.Internal.LeaveLobby(CurrentLobby);
-        SteamNetClient.Clear();
-        CurrentLobby = default;
-        _connectedMembers.Clear();
+        MelonLogger.Msg($"[NetLobby] Leaving lobby {LobbyData.LobbyId}");
+        SteamMatchmaking.Internal.LeaveLobby(LobbyData.LobbyId);
         Transitions.ToMainMenu();
+        LobbyData = default;
         MelonLogger.Msg("[NetLobby] Successfully left lobby");
     }
 
@@ -96,7 +92,7 @@ internal class NetLobby
     /// <returns>The lobby data value, or empty string if not found.</returns>
     internal static string GetLobbyData(string key)
     {
-        return SteamMatchmaking.Internal.GetLobbyData(CurrentLobby, key);
+        return SteamMatchmaking.Internal.GetLobbyData(LobbyData.LobbyId, key);
     }
 
     /// <summary>
@@ -105,7 +101,7 @@ internal class NetLobby
     /// <returns>The number of lobby members.</returns>
     internal static int GetLobbyMemberCount()
     {
-        return SteamMatchmaking.Internal.GetNumLobbyMembers(CurrentLobby);
+        return SteamMatchmaking.Internal.GetNumLobbyMembers(LobbyData.LobbyId);
     }
 
     /// <summary>
@@ -115,7 +111,7 @@ internal class NetLobby
     /// <returns>The Steam ID of the lobby member at the specified index.</returns>
     internal static SteamId GetLobbyMemberByIndex(int index)
     {
-        return SteamMatchmaking.Internal.GetLobbyMemberByIndex(CurrentLobby, index);
+        return SteamMatchmaking.Internal.GetLobbyMemberByIndex(LobbyData.LobbyId, index);
     }
 
     /// <summary>
@@ -124,7 +120,7 @@ internal class NetLobby
     /// <returns>The Steam ID of the lobby owner.</returns>
     internal static SteamId GetLobbyOwner()
     {
-        return SteamMatchmaking.Internal.GetLobbyOwner(CurrentLobby);
+        return SteamMatchmaking.Internal.GetLobbyOwner(LobbyData.LobbyId);
     }
 
     /// <summary>
@@ -136,13 +132,11 @@ internal class NetLobby
     {
         if (result == Result.OK)
         {
-            CurrentLobby = data.Id;
-            MelonLogger.Msg($"[NetLobby] Lobby created successfully: {CurrentLobby}");
+            LobbyData = new(data.Id);
+            MelonLogger.Msg($"[NetLobby] Lobby created successfully: {LobbyData.LobbyId}");
 
-            SteamMatchmaking.Internal.SetLobbyData(CurrentLobby, "mod_version", ModInfo.Version);
-            SteamMatchmaking.Internal.SetLobbyType(CurrentLobby, LobbyType.FriendsOnly);
-
-            MelonLogger.Msg("[NetLobby] Lobby data configured and clients initialized");
+            SteamMatchmaking.Internal.SetLobbyData(LobbyData.LobbyId, "mod_version", ModInfo.Version);
+            SteamMatchmaking.Internal.SetLobbyType(LobbyData.LobbyId, LobbyType.FriendsOnly);
         }
         else
         {
@@ -156,19 +150,25 @@ internal class NetLobby
     /// <param name="data">The lobby data that was entered.</param>
     private static void OnLobbyEnteredCompleted(Il2CppSteamworks.Data.Lobby data)
     {
-        CurrentLobby = data.Id;
+        if (LobbyData == default)
+        {
+            LobbyData = new(data.Id);
+        }
+
         int memberCount = GetLobbyMemberCount();
 
         Transitions.ToVersus();
-        MelonLogger.Msg($"[NetLobby] Joined lobby {CurrentLobby} with {memberCount} players");
 
-        // Clear and rebuild connected members
-        _connectedMembers.Clear();
-        _connectedMembers.Add(SteamUser.Internal.GetSteamID());
-        AddAllNetClients();
+        if (memberCount > 1)
+        {
+            MelonLogger.Msg($"[NetLobby] Joined lobby {LobbyData.LobbyId} with {memberCount} players");
+        }
+        else
+        {
+            MelonLogger.Msg($"[NetLobby] Joined lobby {LobbyData.LobbyId} with {memberCount} player");
+        }
 
-        SetupP2PWithLobbyMembers();
-        MelonLogger.Msg("[NetLobby] Lobby setup completed, P2P connections initialized");
+        TryProcessMembers();
     }
 
     /// <summary>
@@ -178,18 +178,17 @@ internal class NetLobby
     /// <param name="user">The friend who joined the lobby.</param>
     private static void OnLobbyMemberJoined(Il2CppSteamworks.Data.Lobby lobby, Friend user)
     {
-        if (lobby.Id != CurrentLobby)
+        if (lobby.Id != LobbyData.LobbyId)
         {
-            MelonLogger.Warning($"[NetLobby] Member joined different lobby (ours: {CurrentLobby}, theirs: {lobby.Id})");
+            MelonLogger.Warning($"[NetLobby] Member joined different lobby (ours: {LobbyData.LobbyId}, theirs: {lobby.Id})");
             return;
         }
 
-        SteamNetClient.Add(user.Id);
         SteamId joinedPlayerId = user.Id;
         MelonLogger.Msg($"[NetLobby] Player {joinedPlayerId} ({user.Name}) joined the lobby");
 
         // If we're the host, request P2P session with the new player
-        if (IsLobbyHost())
+        if (AmLobbyHost())
         {
             MelonLogger.Msg($"[NetLobby] Host initiating P2P connection with new player {joinedPlayerId}");
             RequestP2PSessionWithPlayer(joinedPlayerId);
@@ -203,9 +202,62 @@ internal class NetLobby
     /// <param name="user">The friend who left the lobby.</param>
     private static void OnLobbyMemberLeave(Il2CppSteamworks.Data.Lobby lobby, Friend user)
     {
-        SteamNetClient.Remove(user.Id);
-        _connectedMembers.Remove(user.Id);
-        MelonLogger.Msg($"[NetLobby] Player {user.Id} ({user.Name}) left the lobby");
+        TryProcessMembers();
+    }
+
+    /// <summary>
+    /// Callback handler for when a P2P session request is received from another player.
+    /// </summary>
+    /// <param name="steamId">The Steam ID of the player requesting the session.</param>
+    private static void OnP2PSessionRequest(SteamId steamId)
+    {
+        if (IsPlayerInOurLobby(steamId))
+        {
+            SteamNetworking.AcceptP2PSessionWithUser(steamId);
+            MelonLogger.Msg($"[NetLobby] Accepted P2P session with {steamId}");
+        }
+        else
+        {
+            MelonLogger.Warning($"[NetLobby] Rejected P2P session from non-lobby member: {steamId}");
+        }
+    }
+
+    /// <summary>
+    /// Callback handler for when a P2P session connection fails.
+    /// </summary>
+    /// <param name="steamId">The Steam ID of the player the connection failed with.</param>
+    /// <param name="error">The error that occurred during connection.</param>
+    private static void OnP2PSessionConnectFail(SteamId steamId, P2PSessionError error)
+    {
+        MelonLogger.Warning($"[NetLobby] P2P session connection failed with {steamId}: {error}");
+
+        if (IsPlayerInOurLobby(steamId) && AmLobbyHost())
+        {
+            MelonLogger.Msg($"[NetLobby] Retrying P2P connection with {steamId}");
+            RequestP2PSessionWithPlayer(steamId);
+        }
+    }
+
+    /// <summary>
+    /// Synchronizes the internal client list with the current lobby members from Steamworks.
+    /// Clears the existing client list and repopulates it with current lobby members.
+    /// </summary>
+    internal static void TryProcessMembers()
+    {
+        LobbyData.AllClients.Clear();
+        List<SteamId> members = [];
+        var num = SteamMatchmaking.Internal.GetNumLobbyMembers(LobbyData.LobbyId);
+        for (int i = 0; i < num; i++)
+        {
+            var member = SteamMatchmaking.Internal.GetLobbyMemberByIndex(LobbyData.LobbyId, i);
+            members.Add(member);
+        }
+        LobbyData.ProcessMembers(members);
+
+        if (AmLobbyHost())
+        {
+            SetupP2PWithLobbyMembers();
+        }
     }
 
     /// <summary>
@@ -213,22 +265,14 @@ internal class NetLobby
     /// </summary>
     private static void SetupP2PWithLobbyMembers()
     {
-        int memberCount = GetLobbyMemberCount();
-        MelonLogger.Msg($"[NetLobby] Setting up P2P connections with {memberCount - 1} other players");
-
-        for (int i = 0; i < memberCount; i++)
+        foreach (var client in LobbyData.AllClients.Values)
         {
-            SteamId member = GetLobbyMemberByIndex(i);
-            if (member != SteamUser.Internal.GetSteamID())
-            {
-                if (IsLobbyHost())
-                {
-                    // Host initiates P2P connection to all existing members
-                    MelonLogger.Msg($"[NetLobby] Host requesting P2P session with {member}");
-                    RequestP2PSessionWithPlayer(member);
-                }
-                _connectedMembers.Add(member);
-            }
+            if (client.AmLocal || client.HasEstablishedP2P) continue;
+
+            MelonLogger.Msg($"[NetLobby] Requesting P2P session with {client.Name} as host");
+            RequestP2PSessionWithPlayer(client.SteamId);
+
+            client.HasEstablishedP2P = true;
         }
     }
 
@@ -238,12 +282,6 @@ internal class NetLobby
     /// <param name="steamId">The Steam ID of the player to connect with.</param>
     private static void RequestP2PSessionWithPlayer(SteamId steamId)
     {
-        if (_connectedMembers.Contains(steamId))
-        {
-            MelonLogger.Msg($"[NetLobby] P2P session already established with {steamId}");
-            return;
-        }
-
         try
         {
             // Send a small dummy packet to initiate P2P connection
@@ -269,41 +307,6 @@ internal class NetLobby
     }
 
     /// <summary>
-    /// Callback handler for when a P2P session request is received from another player.
-    /// </summary>
-    /// <param name="steamId">The Steam ID of the player requesting the session.</param>
-    private static void OnP2PSessionRequest(SteamId steamId)
-    {
-        if (IsPlayerInOurLobby(steamId))
-        {
-            SteamNetworking.AcceptP2PSessionWithUser(steamId);
-            _connectedMembers.Add(steamId);
-            MelonLogger.Msg($"[NetLobby] Accepted P2P session with {steamId}");
-        }
-        else
-        {
-            MelonLogger.Warning($"[NetLobby] Rejected P2P session from non-lobby member: {steamId}");
-        }
-    }
-
-    /// <summary>
-    /// Callback handler for when a P2P session connection fails.
-    /// </summary>
-    /// <param name="steamId">The Steam ID of the player the connection failed with.</param>
-    /// <param name="error">The error that occurred during connection.</param>
-    private static void OnP2PSessionConnectFail(SteamId steamId, P2PSessionError error)
-    {
-        MelonLogger.Warning($"[NetLobby] P2P session connection failed with {steamId}: {error}");
-        _connectedMembers.Remove(steamId);
-
-        if (IsPlayerInOurLobby(steamId) && IsLobbyHost())
-        {
-            MelonLogger.Msg($"[NetLobby] Retrying P2P connection with {steamId}");
-            RequestP2PSessionWithPlayer(steamId);
-        }
-    }
-
-    /// <summary>
     /// Checks if a player is currently in our lobby.
     /// </summary>
     /// <param name="steamId">The Steam ID of the player to check.</param>
@@ -323,13 +326,13 @@ internal class NetLobby
     /// Checks if the player is currently in a lobby.
     /// </summary>
     /// <returns>True if the player is in a lobby, false otherwise.</returns>
-    internal static bool IsInLobby() => CurrentLobby != default;
+    internal static bool AmInLobby() => LobbyData != default;
 
     /// <summary>
     /// Checks if the local player is the host of the current lobby.
     /// </summary>
     /// <returns>True if the local player is the lobby host, false otherwise.</returns>
-    internal static bool IsLobbyHost()
+    internal static bool AmLobbyHost()
     {
         return GetLobbyOwner() == SteamUser.Internal.GetSteamID();
     }
@@ -339,22 +342,8 @@ internal class NetLobby
     /// </summary>
     /// <param name="id">The Steam ID of the player to check.</param>
     /// <returns>True if the specified player is the lobby host, false otherwise.</returns>
-    internal static bool IsLobbyHost(SteamId id)
+    internal static bool AmLobbyHost(SteamId id)
     {
         return GetLobbyOwner() == id;
-    }
-
-    /// <summary>
-    /// Adds all current lobby members to the network client list.
-    /// </summary>
-    internal static void AddAllNetClients()
-    {
-        var num = SteamMatchmaking.Internal.GetNumLobbyMembers(CurrentLobby);
-
-        for (int i = 0; i < num; i++)
-        {
-            var member = SteamMatchmaking.Internal.GetLobbyMemberByIndex(CurrentLobby, i);
-            SteamNetClient.Add(member);
-        }
     }
 }

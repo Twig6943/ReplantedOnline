@@ -17,13 +17,13 @@ internal static class PanelViewContainerPatch
     internal static void Awake_Postfix(PanelViewContainer __instance)
     {
         // Only modify UI if we're in an online lobby
-        if (!NetLobby.IsInLobby()) return;
+        if (!NetLobby.AmInLobby()) return;
 
         // Find the VS side chooser panel
         var VsSideChooser = __instance.m_panels.FirstOrDefault(pan => pan.gameObject.name == "P_VsSideChooser");
         if (VsSideChooser != null)
         {
-            if (NetLobby.IsLobbyHost())
+            if (NetLobby.AmLobbyHost())
             {
                 // Host gets all game mode options
                 VsSideChooser.RemoveVSButton("Custom"); // Remove original custom button

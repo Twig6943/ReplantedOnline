@@ -25,9 +25,9 @@ internal class NetworkDispatcher
         packet.WritePacket(packetWriter);
 
         int sentCount = 0;
-        foreach (var client in SteamNetClient.AllClients)
+        foreach (var client in NetLobby.LobbyData.AllClients.Values)
         {
-            if (client.IsLocal && !receiveLocally) continue;
+            if (client.AmLocal && !receiveLocally) continue;
 
             if (NetLobby.IsPlayerInOurLobby(client.SteamId))
             {
@@ -121,6 +121,7 @@ internal class NetworkDispatcher
                 MelonLogger.Warning("[NetworkDispatcher] Received packet with no tag");
                 break;
             case PacketTag.P2P:
+                sender.HasEstablishedP2P = true;
                 MelonLogger.Msg("[NetworkDispatcher] P2P handshake packet processed");
                 break;
             case PacketTag.Rpc:
