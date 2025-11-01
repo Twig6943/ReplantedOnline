@@ -53,6 +53,8 @@ internal class NetLobby
         {
             OnP2PSessionConnectFail(steamId, error);
         });
+
+        MelonLogger.Msg("[NetLobby] Steamworks callbacks initialized");
     }
 
     /// <summary>
@@ -61,7 +63,7 @@ internal class NetLobby
     internal static void CreateLobby()
     {
         SteamMatchmaking.CreateLobbyAsync(2);
-        MelonLogger.Msg("Creating lobby...");
+        MelonLogger.Msg("[NetLobby] Creating lobby...");
     }
 
     /// <summary>
@@ -70,7 +72,7 @@ internal class NetLobby
     internal static void JoinLobby(SteamId lobbyId)
     {
         SteamMatchmaking.JoinLobbyAsync(lobbyId);
-        MelonLogger.Msg($"Joining lobby: {lobbyId}");
+        MelonLogger.Msg($"[NetLobby] Joining lobby: {lobbyId}");
     }
 
     /// <summary>
@@ -78,12 +80,13 @@ internal class NetLobby
     /// </summary>
     internal static void LeaveLobby()
     {
+        MelonLogger.Msg($"[NetLobby] Leaving lobby {CurrentLobby}");
         SteamMatchmaking.Internal.LeaveLobby(CurrentLobby);
         SteamNetClient.Clear();
         CurrentLobby = default;
         _connectedMembers.Clear();
         Transitions.ToMainMenu();
-        MelonLogger.Msg("Left lobby");
+        MelonLogger.Msg("[NetLobby] Successfully left lobby");
     }
 
     /// <summary>
@@ -134,20 +137,16 @@ internal class NetLobby
         if (result == Result.OK)
         {
             CurrentLobby = data.Id;
-            MelonLogger.Msg($"Lobby created successfully: {CurrentLobby}");
+            MelonLogger.Msg($"[NetLobby] Lobby created successfully: {CurrentLobby}");
 
             SteamMatchmaking.Internal.SetLobbyData(CurrentLobby, "mod_version", ModInfo.Version);
-            SteamMatchmaking.Internal.SetLobbyData(CurrentLobby, "game", "ReplantedOnline");
             SteamMatchmaking.Internal.SetLobbyType(CurrentLobby, LobbyType.FriendsOnly);
 
-            // Clear connected members when creating a new lobby
-            _connectedMembers.Clear();
-            _connectedMembers.Add(SteamUser.Internal.GetSteamID());
-            AddAllNetClients();
+            MelonLogger.Msg("[NetLobby] Lobby data configured and clients initialized");
         }
         else
         {
-            MelonLogger.Error($"Lobby creation failed");
+            MelonLogger.Error($"[NetLobby] Lobby creation failed with result: {result}");
         }
     }
 
@@ -161,7 +160,7 @@ internal class NetLobby
         int memberCount = GetLobbyMemberCount();
 
         Transitions.ToVersus();
-        MelonLogger.Msg($"Joined lobby with {memberCount} players");
+        MelonLogger.Msg($"[NetLobby] Joined lobby {CurrentLobby} with {memberCount} players");
 
         // Clear and rebuild connected members
         _connectedMembers.Clear();
@@ -169,6 +168,7 @@ internal class NetLobby
         AddAllNetClients();
 
         SetupP2PWithLobbyMembers();
+        MelonLogger.Msg("[NetLobby] Lobby setup completed, P2P connections initialized");
     }
 
     /// <summary>
@@ -178,15 +178,20 @@ internal class NetLobby
     /// <param name="user">The friend who joined the lobby.</param>
     private static void OnLobbyMemberJoined(Il2CppSteamworks.Data.Lobby lobby, Friend user)
     {
-        if (lobby.Id != CurrentLobby) return;
+        if (lobby.Id != CurrentLobby)
+        {
+            MelonLogger.Warning($"[NetLobby] Member joined different lobby (ours: {CurrentLobby}, theirs: {lobby.Id})");
+            return;
+        }
 
         SteamNetClient.Add(user.Id);
         SteamId joinedPlayerId = user.Id;
-        MelonLogger.Msg($"Player {joinedPlayerId} joined the lobby");
+        MelonLogger.Msg($"[NetLobby] Player {joinedPlayerId} ({user.Name}) joined the lobby");
 
         // If we're the host, request P2P session with the new player
         if (IsLobbyHost())
         {
+            MelonLogger.Msg($"[NetLobby] Host initiating P2P connection with new player {joinedPlayerId}");
             RequestP2PSessionWithPlayer(joinedPlayerId);
         }
     }
@@ -200,7 +205,7 @@ internal class NetLobby
     {
         SteamNetClient.Remove(user.Id);
         _connectedMembers.Remove(user.Id);
-        MelonLogger.Msg($"Player {user.Id} left the lobby");
+        MelonLogger.Msg($"[NetLobby] Player {user.Id} ({user.Name}) left the lobby");
     }
 
     /// <summary>
@@ -209,6 +214,8 @@ internal class NetLobby
     private static void SetupP2PWithLobbyMembers()
     {
         int memberCount = GetLobbyMemberCount();
+        MelonLogger.Msg($"[NetLobby] Setting up P2P connections with {memberCount - 1} other players");
+
         for (int i = 0; i < memberCount; i++)
         {
             SteamId member = GetLobbyMemberByIndex(i);
@@ -217,6 +224,7 @@ internal class NetLobby
                 if (IsLobbyHost())
                 {
                     // Host initiates P2P connection to all existing members
+                    MelonLogger.Msg($"[NetLobby] Host requesting P2P session with {member}");
                     RequestP2PSessionWithPlayer(member);
                 }
                 _connectedMembers.Add(member);
@@ -232,7 +240,7 @@ internal class NetLobby
     {
         if (_connectedMembers.Contains(steamId))
         {
-            MelonLogger.Msg($"P2P session already established with {steamId}");
+            MelonLogger.Msg($"[NetLobby] P2P session already established with {steamId}");
             return;
         }
 
@@ -247,16 +255,16 @@ internal class NetLobby
 
             if (sent)
             {
-                MelonLogger.Msg($"Requested P2P session with {steamId}");
+                MelonLogger.Msg($"[NetLobby] Successfully requested P2P session with {steamId}");
             }
             else
             {
-                MelonLogger.Warning($"Failed to request P2P session with {steamId}");
+                MelonLogger.Warning($"[NetLobby] Failed to request P2P session with {steamId}");
             }
         }
         catch (Exception ex)
         {
-            MelonLogger.Error($"Error requesting P2P session with {steamId}: {ex.Message}");
+            MelonLogger.Error($"[NetLobby] Error requesting P2P session with {steamId}: {ex.Message}");
         }
     }
 
@@ -270,11 +278,11 @@ internal class NetLobby
         {
             SteamNetworking.AcceptP2PSessionWithUser(steamId);
             _connectedMembers.Add(steamId);
-            MelonLogger.Msg($"Accepted P2P session with {steamId}");
+            MelonLogger.Msg($"[NetLobby] Accepted P2P session with {steamId}");
         }
         else
         {
-            MelonLogger.Warning($"Rejected P2P session from non-lobby member: {steamId}");
+            MelonLogger.Warning($"[NetLobby] Rejected P2P session from non-lobby member: {steamId}");
         }
     }
 
@@ -285,12 +293,13 @@ internal class NetLobby
     /// <param name="error">The error that occurred during connection.</param>
     private static void OnP2PSessionConnectFail(SteamId steamId, P2PSessionError error)
     {
-        MelonLogger.Warning($"P2P session connection failed with {steamId}: {error}");
+        MelonLogger.Warning($"[NetLobby] P2P session connection failed with {steamId}: {error}");
         _connectedMembers.Remove(steamId);
 
         if (IsPlayerInOurLobby(steamId) && IsLobbyHost())
         {
-            MelonLogger.Msg($"Retrying P2P connection with {steamId}");
+            MelonLogger.Msg($"[NetLobby] Retrying P2P connection with {steamId}");
+            RequestP2PSessionWithPlayer(steamId);
         }
     }
 
@@ -341,6 +350,7 @@ internal class NetLobby
     internal static void AddAllNetClients()
     {
         var num = SteamMatchmaking.Internal.GetNumLobbyMembers(CurrentLobby);
+
         for (int i = 0; i < num; i++)
         {
             var member = SteamMatchmaking.Internal.GetLobbyMemberByIndex(CurrentLobby, i);

@@ -1,4 +1,5 @@
 ﻿using Il2CppSteamworks;
+using MelonLoader;
 using ReplantedOnline.Network.Online;
 
 namespace ReplantedOnline.Network;
@@ -27,7 +28,7 @@ internal class SteamNetClient
     /// <summary>
     /// The display name of this client from Steam friends.
     /// </summary>
-    internal readonly string Name;
+    internal readonly string Name = "Player";
 
     /// <summary>
     /// Gets whether this client represents the local player.
@@ -49,6 +50,7 @@ internal class SteamNetClient
         ClientId = (int)id.AccountId;
         Name = SteamFriends.Internal.GetFriendPersonaName(SteamId);
         IsLocal = id == SteamUser.Internal.GetSteamID();
+        MelonLogger.Msg($"[SteamNetClient] {Name} ({SteamId}) connected to lobby");
     }
 
     /// <summary>

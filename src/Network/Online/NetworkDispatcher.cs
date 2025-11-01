@@ -24,18 +24,19 @@ internal class NetworkDispatcher
         packet.AddTag(tag);
         packet.WritePacket(packetWriter);
 
+        int sentCount = 0;
         foreach (var client in SteamNetClient.AllClients)
         {
             if (client.IsLocal && !receiveLocally) continue;
 
             if (NetLobby.IsPlayerInOurLobby(client.SteamId))
             {
-                SteamNetworking.SendP2PPacket(client.SteamId, packet.GetBytes(), packet.Length);
+                bool sent = SteamNetworking.SendP2PPacket(client.SteamId, packet.GetBytes(), packet.Length);
+                if (sent) sentCount++;
             }
         }
 
-        MelonLogger.Msg($"NetworkDispatcher: Sending Packet -> Size = {packet.Length}");
-
+        MelonLogger.Msg($"[NetworkDispatcher] Sent {tag} packet to {sentCount} clients -> Size: {packet.Length} bytes");
         packet.Recycle();
     }
 
@@ -47,6 +48,7 @@ internal class NetworkDispatcher
     /// <param name="receiveLocally">Whether the local client should also process this RPC.</param>
     internal static void SendRpc(RpcType rpc, PacketWriter packetWriter, bool receiveLocally = false)
     {
+        MelonLogger.Msg($"[NetworkDispatcher] Sending RPC: {rpc}");
         var packet = PacketWriter.Get();
         packet.WriteByte((byte)rpc);
         packet.WritePacket(packetWriter);
@@ -63,19 +65,20 @@ internal class NetworkDispatcher
     /// </summary>
     internal static void Update()
     {
+        int packetCount = 0;
         while (SteamNetworking.IsP2PPacketAvailable(out uint messageSize))
         {
+            packetCount++;
             var buffer = P2PPacketBuffer.Get();
 
             buffer.EnsureCapacity(messageSize);
-
             buffer.Size = messageSize;
             buffer.Steamid = 0;
 
             if (SteamNetworking.ReadP2PPacket(buffer.Data, ref buffer.Size, ref buffer.Steamid))
             {
                 var sender = SteamNetClient.GetBySteamId(buffer.Steamid);
-                MelonLogger.Msg($"NetworkDispatcher: Received Packet from {sender?.Name ?? "Unknown"} -> Size = {buffer.Size}");
+                MelonLogger.Msg($"[NetworkDispatcher] Received packet #{packetCount} from {sender.Name} ({buffer.Steamid}) -> Size: {buffer.Size} bytes");
 
                 if (buffer.Size > 0)
                 {
@@ -85,15 +88,20 @@ internal class NetworkDispatcher
                 }
                 else
                 {
-                    MelonLogger.Error("NetworkDispatcher: Received Packet with zero size");
+                    MelonLogger.Error("[NetworkDispatcher] Received packet with zero size");
                 }
             }
             else
             {
-                MelonLogger.Error("NetworkDispatcher: Failed to read P2P packet");
+                MelonLogger.Error("[NetworkDispatcher] Failed to read P2P packet from network buffer");
             }
 
             buffer.Recycle();
+        }
+
+        if (packetCount > 0)
+        {
+            MelonLogger.Msg($"[NetworkDispatcher] Processed {packetCount} packets this frame");
         }
     }
 
@@ -105,16 +113,21 @@ internal class NetworkDispatcher
     internal static void Streamline(SteamNetClient sender, PacketReader packetReader)
     {
         var tag = packetReader.GetTag();
+        MelonLogger.Msg($"[NetworkDispatcher] Processing {tag} packet from {sender?.Name ?? "Unknown"}");
 
         switch (tag)
         {
             case PacketTag.None:
+                MelonLogger.Warning("[NetworkDispatcher] Received packet with no tag");
                 break;
             case PacketTag.P2P:
-                MelonLogger.Msg($"NetworkDispatcher: P2P session established!");
+                MelonLogger.Msg("[NetworkDispatcher] P2P handshake packet processed");
                 break;
             case PacketTag.Rpc:
                 StreamlineRpc(sender, packetReader);
+                break;
+            default:
+                MelonLogger.Warning($"[NetworkDispatcher] Unknown packet tag: {tag}");
                 break;
         }
 
@@ -129,7 +142,7 @@ internal class NetworkDispatcher
     private static void StreamlineRpc(SteamNetClient sender, PacketReader packetReader)
     {
         RpcType rpc = (RpcType)packetReader.ReadByte();
-        MelonLogger.Msg($"NetworkDispatcher: Received Rpc from {sender.Name}: {Enum.GetName(rpc)}");
+        MelonLogger.Msg($"[NetworkDispatcher] Processing RPC from {sender.Name}: {rpc}");
 
         switch (rpc)
         {
@@ -140,6 +153,8 @@ internal class NetworkDispatcher
             case RpcType.UpdateGameState:
                 var state = (GameState)packetReader.ReadByte();
                 RPC.HandleUpdateGameState(sender, state);
+                break;
+            default:
                 break;
         }
     }
