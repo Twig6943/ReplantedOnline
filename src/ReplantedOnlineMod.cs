@@ -6,7 +6,7 @@ namespace ReplantedOnline;
 
 internal class ReplantedOnlineMod : MelonMod
 {
-    internal static readonly HarmonyLib.Harmony _Harmony = new("com.d1gq.onlinemod");
+    internal static readonly HarmonyLib.Harmony _Harmony = new(ModInfo.ModGUID);
 
     public override void OnUpdate()
     {
@@ -15,6 +15,8 @@ internal class ReplantedOnlineMod : MelonMod
         NetworkDispatcher.Update();
     }
 
+    // Delayed initialized for BootStrap sequence...
+    // For some reason the game likes to occasionally black screen if not delayed ¯\_(ツ)_/¯
     private bool loaded;
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {
@@ -23,10 +25,12 @@ internal class ReplantedOnlineMod : MelonMod
             if (loaded) return;
             loaded = true;
 
+            // Must make sure Il2CppSteamworks has initialized!
             if (!SteamClient.initialized)
             {
                 SteamClient.Init(3654560);
             }
+
             NetLobby.Initialize();
         }
     }

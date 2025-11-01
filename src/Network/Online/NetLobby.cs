@@ -137,7 +137,7 @@ internal static class NetLobby
             LobbyData = new(data.Id);
             MelonLogger.Msg($"[NetLobby] Lobby created successfully: {LobbyData.LobbyId}");
 
-            SteamMatchmaking.Internal.SetLobbyData(LobbyData.LobbyId, "mod_version", ModInfo.Version);
+            SteamMatchmaking.Internal.SetLobbyData(LobbyData.LobbyId, "mod_version", ModInfo.ModVersion);
             SteamMatchmaking.Internal.SetLobbyType(LobbyData.LobbyId, LobbyType.FriendsOnly);
         }
         else
