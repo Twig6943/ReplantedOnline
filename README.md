@@ -49,6 +49,12 @@ Areas where help is needed:
 - Patching Code
 - Testing and bug reporting
 
+Architecture Overview:
+- NetworkDispatcher: Handles packet routing
+- NetLobby: Steamworks lobby management  
+- Packet Reader/Writer: Binary serialization
+- RPC: Remote procedure calls
+
 ## 🔧 Installation
 
 *Installation instructions will be provided once the mod reaches beta status.*
