@@ -22,10 +22,11 @@ internal class P2PPacketBuffer
     /// <summary>
     /// The packet data stored in an Il2Cpp-compatible byte array.
     /// </summary>
-    public Il2CppStructArray<byte> Data = new(1000);
+    public Il2CppStructArray<byte> Data = new(BUFFER_SIZE);
 
     private static readonly Queue<P2PPacketBuffer> _pool = [];
     private const int MAX_POOL_SIZE = 10;
+    private const int BUFFER_SIZE = 500;
 
     /// <summary>
     /// Retrieves a P2PPacketBuffer instance from the pool or creates a new one if the pool is empty.

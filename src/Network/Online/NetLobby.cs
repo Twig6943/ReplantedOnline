@@ -17,6 +17,8 @@ internal static class NetLobby
     /// </summary>
     internal static NetLobbyData LobbyData = default;
 
+    private const int MAX_LOBBY_SIZE = 500;
+
     /// <summary>
     /// Initializes all Steamworks callbacks for lobby and P2P networking events.
     /// </summary>
@@ -60,7 +62,7 @@ internal static class NetLobby
     /// </summary>
     internal static void CreateLobby()
     {
-        SteamMatchmaking.CreateLobbyAsync(2);
+        SteamMatchmaking.CreateLobbyAsync(MAX_LOBBY_SIZE);
         MelonLogger.Msg("[NetLobby] Creating lobby...");
     }
 
