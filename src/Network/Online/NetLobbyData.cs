@@ -71,6 +71,7 @@ internal class NetLobbyData
         {
             UpdateGameStateHandler.Send(gameState);
             LastGameState = gameState;
+            VersusManager.UpdateSideVisuals();
         }
     }
 }

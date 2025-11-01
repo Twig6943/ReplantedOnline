@@ -85,6 +85,12 @@ internal static class VersusManager
         // Handle button interactability for the host player
         if (NetLobby.AmLobbyHost())
         {
+
+#if DEBUG
+            VsSideChoosererPatch.SetButtonsInteractable(true);
+            return;
+#endif
+
             // Enable buttons only when game is in progress (not in lobby) and there are at least 2 players
             if (NetLobby.LobbyData.LastGameState != GameState.Lobby && NetLobby.LobbyData.AllClients.Values.Count > 1)
             {
