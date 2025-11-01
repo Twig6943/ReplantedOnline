@@ -44,7 +44,7 @@ internal sealed class StartGameHandler : RPCHandler
             Instances.GameplayActivity.VersusMode.Phase = VersusPhase.ChoosePlantPacket;
 
             // Transition to versus scene to begin the game
-            Transitions.ToVersus();
+            Transitions.ToChooseSeeds();
         }
         else
         {
