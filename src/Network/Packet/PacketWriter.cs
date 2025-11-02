@@ -1,5 +1,6 @@
 ﻿using ReplantedOnline.Items.Enums;
 using System.Text;
+using UnityEngine;
 
 namespace ReplantedOnline.Network.Packet;
 
@@ -29,6 +30,16 @@ internal class PacketWriter
     internal void WritePacket(PacketWriter packetWriter)
     {
         _data.AddRange(packetWriter.GetBytes());
+    }
+
+    /// <summary>
+    /// Writes a Vector2 to the packet as two consecutive float values (X and Y).
+    /// </summary>
+    /// <param name="value">The Vector2 value to write.</param>
+    internal void WriteVector2(Vector2 value)
+    {
+        _data.AddRange(BitConverter.GetBytes(value.x));
+        _data.AddRange(BitConverter.GetBytes(value.y));
     }
 
     /// <summary>

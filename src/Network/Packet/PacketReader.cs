@@ -1,5 +1,6 @@
 ﻿using ReplantedOnline.Items.Enums;
 using System.Text;
+using UnityEngine;
 
 namespace ReplantedOnline.Network.Packet;
 
@@ -53,6 +54,21 @@ internal class PacketReader
     internal PacketTag GetTag()
     {
         return (PacketTag)ReadByte();
+    }
+
+    /// Reads a Vector2 from the packet as two consecutive float values (X and Y).
+    /// </summary>
+    /// <returns>The Vector2 value.</returns>
+    /// <exception cref="IndexOutOfRangeException">Thrown when there's not enough data to read a Vector2.</exception>
+    internal Vector2 ReadVector2()
+    {
+        if (_position + 8 > _data.Length)
+            throw new IndexOutOfRangeException("Not enough data to read Vector2");
+
+        float x = BitConverter.ToSingle(_data, _position);
+        float y = BitConverter.ToSingle(_data, _position + 4);
+        _position += 8;
+        return new Vector2(x, y);
     }
 
     /// <summary>
