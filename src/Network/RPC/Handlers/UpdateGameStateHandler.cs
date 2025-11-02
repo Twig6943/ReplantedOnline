@@ -48,17 +48,28 @@ internal sealed class UpdateGameStateHandler : RPCHandler
             switch (gameState)
             {
                 case GameState.Lobby:
-                case GameState.HostChoosePlants:
-                case GameState.HostChooseZombie:
+                    if (!NetLobby.AmLobbyHost())
+                    {
+                        Instances.GameplayActivity.VersusMode.PlantPlayerIndex = -1;
+                        Instances.GameplayActivity.VersusMode.ZombiePlayerIndex = -1;
+                    }
                     VersusManager.UpdateSideVisuals();
                     break;
-                case GameState.PlantChoosingSeed:
-                    // Transition to plant seed selection phase
-                    Instances.GameplayActivity.VersusMode.Phase = VersusPhase.ChoosePlantPacket;
+                case GameState.HostChoosePlants:
+                    if (!NetLobby.AmLobbyHost())
+                    {
+                        Instances.GameplayActivity.VersusMode.PlantPlayerIndex = 1;
+                        Instances.GameplayActivity.VersusMode.ZombiePlayerIndex = 0;
+                    }
+                    VersusManager.UpdateSideVisuals();
                     break;
-                case GameState.ZombieChoosingSeed:
-                    // Transition to zombie seed selection phase
-                    Instances.GameplayActivity.VersusMode.Phase = VersusPhase.ChooseZombiePacket;
+                case GameState.HostChooseZombie:
+                    if (!NetLobby.AmLobbyHost())
+                    {
+                        Instances.GameplayActivity.VersusMode.PlantPlayerIndex = 0;
+                        Instances.GameplayActivity.VersusMode.ZombiePlayerIndex = 1;
+                    }
+                    VersusManager.UpdateSideVisuals();
                     break;
                 case GameState.Gameplay:
                     // Transition to active gameplay phase

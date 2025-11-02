@@ -15,4 +15,9 @@ internal enum RpcType
     /// Updates the current game state on all connected clients.
     /// </summary>
     UpdateGameState,
+
+    /// <summary>
+    /// Sync when a player chooses their seed/plant selection.
+    /// </summary>
+    ChooseSeed
 }

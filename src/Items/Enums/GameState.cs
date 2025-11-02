@@ -22,11 +22,6 @@ internal enum GameState
     HostChooseZombie,
 
     /// <summary>
-    /// The plant player is currently selecting their seeds.
-    /// </summary>
-    PlantChoosingSeed,
-
-    /// <summary>
     /// The zombie player is currently selecting their seeds.
     /// </summary>
     ZombieChoosingSeed,

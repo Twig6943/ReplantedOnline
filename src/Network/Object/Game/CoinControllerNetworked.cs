@@ -38,7 +38,7 @@ internal class CoinControllerNetworked : NetworkClass
             case 0:
                 // RPC ID 0: Coin collection notification
                 // When receiving collection from another player, collect as player 1 (opposite player)
-                coin.OriginalCoinCollect(1, false);
+                coin.CollectOriginal(1, false);
                 break;
         }
     }
@@ -66,7 +66,7 @@ internal class CoinControllerNetworked : NetworkClass
             theCoinMotion = (CoinMotion)packetReader.ReadByte();
 
             // Recreate the actual coin object in the game world using the original method
-            coin = Instances.GameplayActivity.Board.BoardAddCoinOriginal(boardPos.x, boardPos.y, theCoinType, theCoinMotion);
+            coin = Instances.GameplayActivity.Board.AddCoinOriginal(boardPos.x, boardPos.y, theCoinType, theCoinMotion);
 
             // Register this network controller with the newly created coin
             NetworkedCoinControllers[coin] = this;
