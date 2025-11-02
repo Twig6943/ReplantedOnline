@@ -1,5 +1,7 @@
 ﻿using Il2CppSteamworks;
+using ReplantedOnline.Items.Enums;
 using ReplantedOnline.Items.Interfaces;
+using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
 using UnityEngine;
 
@@ -45,6 +47,12 @@ internal class NetworkClass : MonoBehaviour, INetworkClass
     /// The owner has authority over the object's state and behavior.
     /// </summary>
     public SteamId OwnerId { get; set; } = default;
+
+    /// <summary>
+    /// Gets or sets whether this network object has been successfully spawned across the network.
+    /// Indicates if the object is currently active and synchronized with other clients.
+    /// </summary>
+    internal bool HasSpawned { get; set; }
 
     /// <summary>
     /// Gets or sets the unique network identifier for this object.
@@ -142,4 +150,39 @@ internal class NetworkClass : MonoBehaviour, INetworkClass
     /// <param name="packetReader">The packet reader to deserialize data from.</param>
     /// <param name="init">Whether this is initial deserialization or update deserialization.</param>
     public virtual void Deserialize(PacketReader packetReader, bool init) { }
+
+    /// <summary>
+    /// Despawns the network object and removes it from all connected clients.
+    /// Cleans up network resources and sends despawn notification to other clients.
+    /// </summary>
+    public void Despawn()
+    {
+        if (HasSpawned)
+        {
+            NetLobby.LobbyData.NetworkClassSpawned.Remove(NetworkId);
+            var packet = PacketWriter.Get();
+            packet.WriteUInt(NetworkId);
+            NetworkDispatcher.Send(packet, false, PacketTag.NetworkClassDespawn);
+
+            OwnerId = default;
+            NetworkId = 0;
+            HasSpawned = false;
+        }
+    }
+
+    /// <summary>
+    /// Spawns a new instance of a NetworkClass-derived type across the network.
+    /// Creates the object locally and broadcasts spawn notification to all clients.
+    /// </summary>
+    /// <typeparam name="T">The type of NetworkClass to spawn, must derive from NetworkClass.</typeparam>
+    /// <param name="callback">Optional callback to configure the object before spawning.</param>
+    /// <returns>The newly spawned NetworkClass instance.</returns>
+    public static T SpawnNew<T>(Action<T> callback = default) where T : NetworkClass
+    {
+        T networkClass = new GameObject("NetworkClass(???)").AddComponent<T>();
+        callback?.Invoke(networkClass);
+        NetworkDispatcher.Spawn(networkClass, SteamNetClient.LocalClient.SteamId);
+        networkClass.gameObject.name = $"NetworkClass({networkClass.NetworkId})";
+        return networkClass;
+    }
 }
