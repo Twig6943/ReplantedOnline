@@ -71,9 +71,11 @@ internal static class NetLobby
     /// </summary>
     internal static void ResetLobby()
     {
+        MelonLogger.Msg("[NetLobby] Restarting the lobby");
         LobbyData.LastGameState = GameState.Lobby;
         LobbyData.LocalDespawnAll();
         Transitions.ToVersus();
+        Transitions.ToGameplay();
     }
 
     /// <summary>

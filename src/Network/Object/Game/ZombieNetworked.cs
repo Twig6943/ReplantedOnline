@@ -130,6 +130,7 @@ internal class ZombieNetworked : NetworkClass
         }
     }
 
+    [HideFromIl2Cpp]
     private IEnumerator CoLarpPos(float posX)
     {
         if (this == null || _Zombie == null)

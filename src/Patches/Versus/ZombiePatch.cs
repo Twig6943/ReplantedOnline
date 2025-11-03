@@ -37,6 +37,25 @@ internal class ZombiePatch
     }
 
     /// <summary>
+    /// rework spawning wave zombies to use RPCs.
+    /// </summary>
+    [HarmonyPatch(typeof(Board), nameof(Board.AddZombieInRow))]
+    [HarmonyPrefix]
+    internal static bool AddZombieInRow_Prefix(Board __instance, ZombieType theZombieType, int theRow, ref Zombie __result)
+    {
+        if (NetLobby.AmInLobby() && VersusState.VersusPhase == VersusPhase.Gameplay)
+        {
+            if (theZombieType == ZombieType.Target) return true;
+
+            __result = SeedPacketSyncPatch.SpawnZombie(theZombieType, 9, theRow, true);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// rework spawning backup dancers to use RPCs.
     /// </summary>
     [HarmonyPatch(typeof(Zombie), nameof(Zombie.SummonBackupDancer))]
