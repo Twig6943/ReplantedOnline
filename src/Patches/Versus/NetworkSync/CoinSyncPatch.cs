@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.Gameplay;
+using ReplantedOnline.Helper;
 using ReplantedOnline.Network.Object;
 using ReplantedOnline.Network.Object.Game;
 using ReplantedOnline.Network.Online;
@@ -30,10 +31,10 @@ internal static class CoinSyncPatch
             // Spawn a networked controller for this coin to sync across clients
             var netClass = NetworkClass.SpawnNew<CoinControllerNetworked>(net =>
             {
-                net.coin = coin;
-                net.boardGridPos = new Vector2(theX, theY);
-                net.theCoinType = theCoinType;
-                net.theCoinMotion = theCoinMotion;
+                net._Coin = coin;
+                net.BoardGridPos = new Vector2(theX, theY);
+                net.TheCoinType = theCoinType;
+                net.TheCoinMotion = theCoinMotion;
             });
 
             // Track the relationship between coin and its network controller
@@ -73,10 +74,7 @@ internal static class CoinSyncPatch
         if (NetLobby.AmInLobby())
         {
             // If this coin has a network controller, notify other clients about collection
-            if (CoinControllerNetworked.NetworkedCoinControllers.TryGetValue(__instance, out var networkedCoinControllers))
-            {
-                networkedCoinControllers.SendRpc(0, null, false);
-            }
+            __instance.GetNetworkedCoinController()?.SendCollectRpc();
 
             // Call the original collection logic
             __instance.CollectOriginal(playerIndex, spawnCoins);

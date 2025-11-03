@@ -50,7 +50,11 @@ internal class NetworkClass : MonoBehaviour, INetworkClass
     {
         NetworkPrefabsObj = new GameObject($"NetworkPrefabs");
         DontDestroyOnLoad(NetworkPrefabsObj);
+
         CreatePrefabs<CoinControllerNetworked>(1);
+        CreatePrefabs<PlantNetworked>(2);
+        CreatePrefabs<ZombieNetworked>(3);
+        CreatePrefabs<VersusModeNetworked>(4);
     }
 
     /// <summary>

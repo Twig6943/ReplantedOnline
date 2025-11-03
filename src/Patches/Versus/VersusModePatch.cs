@@ -38,6 +38,7 @@ internal static class VersusModePatch
     [HarmonyPrefix]
     internal static bool IZombiePlaceZombie_Prefix(ZombieType theZombieType)
     {
+        // allow game to initially place down the target zombies
         if (theZombieType == ZombieType.Target) return true;
 
         if (NetLobby.AmInLobby() && Instances.GameplayActivity.VersusMode.m_versusTime < 1f)

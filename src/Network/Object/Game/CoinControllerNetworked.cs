@@ -2,6 +2,7 @@
 using Il2CppReloaded.Gameplay;
 using MelonLoader;
 using ReplantedOnline.Modules;
+using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
 using ReplantedOnline.Patches.Versus.NetworkSync;
 using System.Collections;
@@ -16,19 +17,19 @@ internal class CoinControllerNetworked : NetworkClass
     internal static Dictionary<Coin, CoinControllerNetworked> NetworkedCoinControllers = [];
 
     // Local coin instance this controller manages
-    internal Coin coin;
+    internal Coin _Coin;
     // Original spawn position of the coin on the board
-    internal Vector2 boardGridPos;
+    internal Vector2 BoardGridPos;
     // Type of coin (e.g., silver, gold, etc.)
-    internal CoinType theCoinType;
+    internal CoinType TheCoinType;
     // Motion behavior of the coin (e.g., falling, bouncing, etc.)
-    internal CoinMotion theCoinMotion;
+    internal CoinMotion TheCoinMotion;
 
     public void Update()
     {
         if (AmOwner && !Despawning)
         {
-            if ((HasSpawned && coin == null) || (coin.mDead || coin.WasCollected))
+            if ((HasSpawned && _Coin == null) || (_Coin.mDead || _Coin.WasCollected))
             {
                 Despawning = true;
                 MelonCoroutines.Start(CoDespawn());
@@ -50,9 +51,9 @@ internal class CoinControllerNetworked : NetworkClass
 
     public void OnDestroy()
     {
-        if (coin != null)
+        if (_Coin != null)
         {
-            NetworkedCoinControllers.Remove(coin);
+            NetworkedCoinControllers.Remove(_Coin);
         }
     }
 
@@ -62,11 +63,19 @@ internal class CoinControllerNetworked : NetworkClass
         switch (rpcId)
         {
             case 0:
-                // RPC ID 0: Coin collection notification
-                // When receiving collection from another player, collect as player 1 (opposite player)
-                coin.CollectOriginal(1, false);
+                HandleCollectRpc();
                 break;
         }
+    }
+
+    internal void SendCollectRpc()
+    {
+        this.SendRpc(0, null, false);
+    }
+
+    private void HandleCollectRpc()
+    {
+        _Coin.CollectOriginal(1, false);
     }
 
     [HideFromIl2Cpp]
@@ -75,10 +84,9 @@ internal class CoinControllerNetworked : NetworkClass
         if (init)
         {
             // Only send full state during initial spawn
-            packetWriter.WriteInt((int)boardGridPos.x);
-            packetWriter.WriteInt((int)boardGridPos.y);
-            packetWriter.WriteByte((byte)theCoinType);
-            packetWriter.WriteByte((byte)theCoinMotion);
+            packetWriter.WriteVector2(BoardGridPos);
+            packetWriter.WriteByte((byte)TheCoinType);
+            packetWriter.WriteByte((byte)TheCoinMotion);
         }
     }
 
@@ -88,17 +96,15 @@ internal class CoinControllerNetworked : NetworkClass
         if (init)
         {
             // Only process full state during initial spawn
-            var posX = packetReader.ReadInt();
-            var posY = packetReader.ReadInt();
-            boardGridPos = new(posX, posY);
-            theCoinType = (CoinType)packetReader.ReadByte();
-            theCoinMotion = (CoinMotion)packetReader.ReadByte();
+            BoardGridPos = packetReader.ReadVector2();
+            TheCoinType = (CoinType)packetReader.ReadByte();
+            TheCoinMotion = (CoinMotion)packetReader.ReadByte();
 
             // Recreate the actual coin object in the game world using the original method
-            coin = Instances.GameplayActivity.Board.AddCoinOriginal(boardGridPos.x, boardGridPos.y, theCoinType, theCoinMotion);
+            _Coin = Instances.GameplayActivity.Board.AddCoinOriginal(BoardGridPos.x, BoardGridPos.y, TheCoinType, TheCoinMotion);
 
             // Register this network controller with the newly created coin
-            NetworkedCoinControllers[coin] = this;
+            NetworkedCoinControllers[_Coin] = this;
         }
     }
 }
