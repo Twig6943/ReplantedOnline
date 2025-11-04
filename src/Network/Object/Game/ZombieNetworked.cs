@@ -4,6 +4,7 @@ using MelonLoader;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
+using ReplantedOnline.Patches.Versus.NetworkSync;
 using System.Collections;
 using UnityEngine;
 
@@ -66,30 +67,40 @@ internal class ZombieNetworked : NetworkClass
     /// </summary>
     public void Update()
     {
-        if (syncCooldown <= 0f)
+        if (AmOwner)
         {
-            MarkDirty();
-            syncCooldown = 2f;
+            if (_Zombie?.mDead != true)
+            {
+                if (syncCooldown <= 0f)
+                {
+                    MarkDirty();
+                    syncCooldown = 2f;
+                }
+                syncCooldown -= Time.deltaTime;
+            }
+            else if (!IsDespawning)
+            {
+                DespawnAndDestroyWithDelay(5f);
+            }
         }
-        syncCooldown -= Time.deltaTime;
     }
 
     [HideFromIl2Cpp]
     public override void HandleRpc(SteamNetClient sender, byte rpcId, PacketReader packetReader)
     {
+        if (sender.SteamId != OwnerId) return;
+
         switch (rpcId)
         {
             case 0:
                 HandleSetFollowerZombieIdRpc(packetReader);
                 break;
+            case 1:
+                HandleDeathRpc(packetReader);
+                break;
         }
     }
 
-    /// <summary>
-    /// Sends an RPC to set a follower zombie ID for this zombie.
-    /// </summary>
-    /// <param name="index">The index in the follower array to set</param>
-    /// <param name="zombieID">The zombie ID to set as follower</param>
     internal void SendSetFollowerZombieIdRpc(int index, ZombieID zombieID)
     {
         var writer = PacketWriter.Get();
@@ -98,16 +109,26 @@ internal class ZombieNetworked : NetworkClass
         this.SendRpc(0, writer, false);
     }
 
-    /// <summary>
-    /// Handles the RPC for setting a follower zombie ID.
-    /// </summary>
-    /// <param name="packetReader">The packet reader containing the follower data</param>
     [HideFromIl2Cpp]
     private void HandleSetFollowerZombieIdRpc(PacketReader packetReader)
     {
         var index = packetReader.ReadInt();
         var zombieId = (ZombieID)packetReader.ReadInt();
         _Zombie?.mFollowerZombieID[index] = zombieId;
+    }
+
+    internal void SendDeathRpc(DamageFlags damageFlags)
+    {
+        var writer = PacketWriter.Get();
+        writer.WriteByte((byte)damageFlags);
+        this.SendRpc(1, writer, false);
+    }
+
+    [HideFromIl2Cpp]
+    private void HandleDeathRpc(PacketReader packetReader)
+    {
+        var damageFlags = (DamageFlags)packetReader.ReadByte();
+        _Zombie.PlayDeathAnimOriginal(damageFlags);
     }
 
     [HideFromIl2Cpp]

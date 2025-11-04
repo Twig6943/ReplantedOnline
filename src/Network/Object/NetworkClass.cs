@@ -1,10 +1,12 @@
 ﻿using Il2CppInterop.Runtime.Attributes;
 using Il2CppSteamworks;
+using MelonLoader;
 using ReplantedOnline.Items.Enums;
 using ReplantedOnline.Items.Interfaces;
 using ReplantedOnline.Network.Object.Game;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
+using System.Collections;
 using UnityEngine;
 
 namespace ReplantedOnline.Network.Object;
@@ -205,25 +207,6 @@ internal class NetworkClass : MonoBehaviour, INetworkClass
     public virtual void Deserialize(PacketReader packetReader, bool init) { }
 
     /// <summary>
-    /// Despawns the network object and removes it from all connected clients.
-    /// Cleans up network resources and sends despawn notification to other clients.
-    /// </summary>
-    public void Despawn()
-    {
-        if (HasSpawned)
-        {
-            NetLobby.LobbyData.NetworkClassSpawned.Remove(NetworkId);
-            var packet = PacketWriter.Get();
-            packet.WriteUInt(NetworkId);
-            NetworkDispatcher.Send(packet, false, PacketTag.NetworkClassDespawn);
-
-            OwnerId = default;
-            NetworkId = 0;
-            HasSpawned = false;
-        }
-    }
-
-    /// <summary>
     /// Spawns a new instance of a NetworkClass-derived type across the network.
     /// Creates the object locally and broadcasts spawn notification to all clients.
     /// </summary>
@@ -255,6 +238,63 @@ internal class NetworkClass : MonoBehaviour, INetworkClass
             NetworkDispatcher.Spawn(networkClass, SteamUser.Internal.GetSteamID());
             networkClass.gameObject.name = $"{typeof(T).Name}({networkClass.NetworkId})";
             return networkClass;
+        }
+    }
+
+    /// <summary>
+    /// Despawns the network object and removes it from all connected clients.
+    /// Cleans up network resources and sends despawn notification to other clients.
+    /// </summary>
+    public void Despawn()
+    {
+        if (HasSpawned)
+        {
+            NetLobby.LobbyData.NetworkClassSpawned.Remove(NetworkId);
+            var packet = PacketWriter.Get();
+            packet.WriteUInt(NetworkId);
+            NetworkDispatcher.Send(packet, false, PacketTag.NetworkClassDespawn);
+
+            OwnerId = default;
+            NetworkId = 0;
+            HasSpawned = false;
+        }
+    }
+
+    /// <summary>
+    /// Gets whether this network object is currently in the process of despawning.
+    /// Prevents duplicate despawn operations from occurring simultaneously.
+    /// </summary>
+    internal bool IsDespawning { get; private set; }
+
+    /// <summary>
+    /// Initiates the despawn process with a specified delay before destruction.
+    /// Marks the object as despawning and starts the delayed destruction coroutine.
+    /// </summary>
+    /// <param name="sDelay">The delay in seconds before the object is fully destroyed</param>
+    public void DespawnAndDestroyWithDelay(float sDelay)
+    {
+        if (!IsDespawning)
+        {
+            IsDespawning = true;
+            MelonCoroutines.Start(CoDespawnWithDelay(sDelay));
+        }
+    }
+
+    /// <summary>
+    /// Coroutine that waits for the specified delay before despawning and destroying the network object.
+    /// Includes safety checks to ensure the object still exists before performing destruction operations.
+    /// </summary>
+    /// <param name="sDelay">The delay in seconds to wait before despawn and destruction</param>
+    /// <returns>IEnumerator for coroutine execution</returns>
+    [HideFromIl2Cpp]
+    private IEnumerator CoDespawnWithDelay(float sDelay)
+    {
+        // wait for desync
+        yield return new WaitForSeconds(sDelay);
+        if (this != null)
+        {
+            Despawn();
+            Destroy(gameObject);
         }
     }
 

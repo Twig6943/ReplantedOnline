@@ -1,11 +1,9 @@
 ﻿using Il2CppInterop.Runtime.Attributes;
 using Il2CppReloaded.Gameplay;
-using MelonLoader;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
 using ReplantedOnline.Patches.Versus.NetworkSync;
-using System.Collections;
 using UnityEngine;
 
 namespace ReplantedOnline.Network.Object.Game;
@@ -47,34 +45,12 @@ internal class CoinControllerNetworked : NetworkClass
     /// </summary>
     public void Update()
     {
-        if (AmOwner && !Despawning)
+        if (AmOwner && !IsDespawning)
         {
             if ((HasSpawned && _Coin == null) || (_Coin.mDead || _Coin.WasCollected))
             {
-                Despawning = true;
-                MelonCoroutines.Start(CoDespawn());
+                DespawnAndDestroyWithDelay(3f);
             }
-        }
-    }
-
-    /// <summary>
-    /// Flag indicating whether this coin is currently in the process of despawning.
-    /// </summary>
-    private bool Despawning;
-
-    /// <summary>
-    /// Coroutine that handles the delayed despawning of coins to account for network synchronization.
-    /// </summary>
-    /// <returns>IEnumerator for coroutine execution</returns>
-    [HideFromIl2Cpp]
-    private IEnumerator CoDespawn()
-    {
-        // wait for desync
-        yield return new WaitForSeconds(3f);
-        if (this != null)
-        {
-            Despawn();
-            Destroy(gameObject);
         }
     }
 
