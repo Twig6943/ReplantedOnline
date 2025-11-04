@@ -11,7 +11,7 @@ internal static class PlantSyncPatch
 {
     [HarmonyPatch(typeof(Plant), nameof(Plant.Die))]
     [HarmonyPrefix]
-    internal static bool BoardAddCoin_Prefix(Plant __instance)
+    internal static bool Die_Prefix(Plant __instance)
     {
         if (InternalCallContext.IsInternalCall_Die) return true;
 

@@ -11,8 +11,10 @@ internal static class ZombieSyncPatch
 {
     [HarmonyPatch(typeof(Zombie), nameof(Zombie.PlayDeathAnim))]
     [HarmonyPrefix]
-    internal static bool BoardAddCoin_Prefix(Zombie __instance, DamageFlags theDamageFlags)
+    internal static bool PlayDeathAnim_Prefix(Zombie __instance, DamageFlags theDamageFlags)
     {
+        if (InternalCallContext.IsInternalCall_PlayDeathAnim) return true;
+
         if (NetLobby.AmInLobby())
         {
             if (VersusState.PlantSide) return false;

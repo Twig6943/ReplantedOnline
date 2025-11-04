@@ -4,6 +4,7 @@ using Il2CppReloaded.TreeStateActivities;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object;
 using ReplantedOnline.Network.Object.Game;
+using ReplantedOnline.Network.Online;
 using static Il2CppReloaded.Constants;
 
 namespace ReplantedOnline.Patches.Versus.NetworkSync;
@@ -17,44 +18,47 @@ internal static class SeedPacketSyncPatch
     [HarmonyPrefix]
     internal static bool Selected_Prefix(GameplayActivity __instance, int mouseButton, int playerIndex)
     {
-        // Get the type of seed being planted
-        var seedType = __instance.Board.GetSeedTypeInCursor(0);
-
-        // Check if the player is currently holding a plant in their cursor
-        if (seedType != SeedType.None)
+        if (NetLobby.AmInLobby())
         {
-            // Get the mouse position and convert it to grid coordinates
-            var pos = Instances.GameplayActivity.GetMousePosition();
-            var gridX = Instances.GameplayActivity.Board.PixelToGridXKeepOnBoard(pos.x, pos.y);
-            var gridY = Instances.GameplayActivity.Board.PixelToGridYKeepOnBoard(pos.x, pos.y);
+            // Get the type of seed being planted
+            var seedType = __instance.Board.GetSeedTypeInCursor(0);
 
-            // Check if planting at this position is valid
-            if (CanPlace(seedType, gridX, gridY))
+            // Check if the player is currently holding a plant in their cursor
+            if (seedType != SeedType.None)
             {
-                // Find the seed packet from the seed bank that matches the seed type
-                var packet = __instance.Board.mSeedBank.SeedPackets.FirstOrDefault(packet => packet.mPacketType == seedType);
+                // Get the mouse position and convert it to grid coordinates
+                var pos = Instances.GameplayActivity.GetMousePosition();
+                var gridX = Instances.GameplayActivity.Board.PixelToGridXKeepOnBoard(pos.x, pos.y);
+                var gridY = Instances.GameplayActivity.Board.PixelToGridYKeepOnBoard(pos.x, pos.y);
 
-                // Get the cost of the seed and check if player has enough sun
-                var cost = packet.GetCost();
-                if (__instance.Board.CanTakeSunMoney(cost, 0))
+                // Check if planting at this position is valid
+                if (CanPlace(seedType, gridX, gridY))
                 {
-                    // Mark the packet as used and deduct the sun cost
-                    packet.WasPlanted(0);
-                    __instance.Board.TakeSunMoney(cost, 0);
-                    __instance.Board.ClearCursor();
-                    PlaceSeed(seedType, packet.mImitaterType, gridX, gridY, true);
-                    Instances.GameplayActivity.m_audioService.PlaySample(Sound.SOUND_PLANT);
+                    // Find the seed packet from the seed bank that matches the seed type
+                    var packet = __instance.Board.mSeedBank.SeedPackets.FirstOrDefault(packet => packet.mPacketType == seedType);
+
+                    // Get the cost of the seed and check if player has enough sun
+                    var cost = packet.GetCost();
+                    if (__instance.Board.CanTakeSunMoney(cost, 0))
+                    {
+                        // Mark the packet as used and deduct the sun cost
+                        packet.WasPlanted(0);
+                        __instance.Board.TakeSunMoney(cost, 0);
+                        __instance.Board.ClearCursor();
+                        PlaceSeed(seedType, packet.mImitaterType, gridX, gridY, true);
+                        Instances.GameplayActivity.m_audioService.PlaySample(Sound.SOUND_PLANT);
+                    }
+
+                    // Return false to skip the original method since we've handled planting
+                    return false;
                 }
 
-                // Return false to skip the original method since we've handled planting
+                // If planting is not valid, play buzzer sound
+                Instances.GameplayActivity.m_audioService.PlaySample(Sound.SOUND_BUZZER);
+
+                // Return false to skip original method (invalid placement)
                 return false;
             }
-
-            // If planting is not valid, play buzzer sound
-            Instances.GameplayActivity.m_audioService.PlaySample(Sound.SOUND_BUZZER);
-
-            // Return false to skip original method (invalid placement)
-            return false;
         }
 
         // Return true to execute original method (no plant in cursor, normal behavior)
@@ -67,7 +71,7 @@ internal static class SeedPacketSyncPatch
         var checkDancerGrid = seedType != SeedType.ZombieDancer || (gridY != 0 && gridY != 4);
 
         return Instances.GameplayActivity.Board.CanPlantAt(gridX, gridY, seedType) == PlantingReason.Ok
-            && VersusState.VersusPhase == VersusPhase.Gameplay
+            && VersusState.VersusPhase is VersusPhase.Gameplay or VersusPhase.SuddenDeath
             && checkDancerGrid;
     }
 

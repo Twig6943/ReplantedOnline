@@ -18,7 +18,7 @@ internal static class NetLobby
     /// <summary>
     /// The LobbyData of the current lobby the player is in, or default if not in a lobby.
     /// </summary>
-    internal static NetLobbyData LobbyData = default;
+    internal static NetLobbyData LobbyData;
 
     private const int MAX_LOBBY_SIZE = 2;
 
@@ -102,7 +102,7 @@ internal static class NetLobby
     /// </summary>
     internal static void LeaveLobby()
     {
-        if (LobbyData == default)
+        if (LobbyData == null)
         {
             MelonLogger.Warning("[NetLobby] Cannot leave - not in a lobby");
             return;
@@ -112,7 +112,7 @@ internal static class NetLobby
         SteamMatchmaking.Internal.LeaveLobby(LobbyData.LobbyId);
         LobbyData.LocalDespawnAll();
         Transitions.ToMainMenu();
-        LobbyData = default;
+        LobbyData = null;
         MelonLogger.Msg("[NetLobby] Successfully left lobby");
     }
 
@@ -181,16 +181,13 @@ internal static class NetLobby
     /// <param name="data">The lobby data that was entered.</param>
     private static void OnLobbyEnteredCompleted(Lobby data)
     {
-        if (LobbyData == default)
-        {
-            LobbyData = new(data.Id, data.Owner.Id);
-        }
+        LobbyData ??= new(data.Id, data.Owner.Id);
+
+        Transitions.ToVersus();
 
         TryProcessMembers();
 
         int memberCount = GetLobbyMemberCount();
-
-        Transitions.ToVersus();
 
         if (memberCount > 1)
         {
@@ -230,6 +227,7 @@ internal static class NetLobby
 
         SteamId joinedPlayerId = user.Id;
         MelonLogger.Msg($"[NetLobby] Player {joinedPlayerId} ({user.Name}) joined the lobby");
+        TryProcessMembers();
 
         // If we're the host, request P2P session with the new player
         if (AmLobbyHost())
@@ -488,7 +486,7 @@ internal static class NetLobby
     /// Checks if the player is currently in a lobby.
     /// </summary>
     /// <returns>True if the player is in a lobby, false otherwise.</returns>
-    internal static bool AmInLobby() => LobbyData != default;
+    internal static bool AmInLobby() => LobbyData != null;
 
     /// <summary>
     /// Checks if the local player is the host of the current lobby.

@@ -22,13 +22,16 @@ internal static class NetworkDispatcher
     /// <param name="steamId">The Steam ID of the target client to receive the packet.</param>
     internal static void SendNetworkClasssTo(SteamId steamId)
     {
-        foreach (var networkClass in NetLobby.LobbyData.NetworkClassSpawned.Values)
+        if (NetLobby.LobbyData.NetworkClassSpawned.Count > 0)
         {
-            if (networkClass.HasSpawned)
+            foreach (var networkClass in NetLobby.LobbyData.NetworkClassSpawned.Values)
             {
-                var packet = PacketWriter.Get();
-                NetworkSpawnPacket.SerializePacket(networkClass, packet);
-                SendTo(steamId, packet, PacketTag.NetworkClassSpawn);
+                if (networkClass.HasSpawned)
+                {
+                    var packet = PacketWriter.Get();
+                    NetworkSpawnPacket.SerializePacket(networkClass, packet);
+                    SendTo(steamId, packet, PacketTag.NetworkClassSpawn);
+                }
             }
         }
     }

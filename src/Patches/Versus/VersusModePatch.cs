@@ -78,10 +78,4 @@ internal static class VersusModePatch
 
         NetLobby.LobbyData.UpdateGameState(GameState.Lobby);
     }
-
-    [HarmonyPatch(typeof(VersusPlayerModel), nameof(VersusPlayerModel.Move))]
-    [HarmonyPostfix]
-    internal static void Move_Postfix(VersusPlayerModel __instance, float x)
-    {
-    }
 }

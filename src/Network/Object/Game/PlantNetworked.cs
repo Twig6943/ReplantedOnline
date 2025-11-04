@@ -3,6 +3,7 @@ using Il2CppReloaded.Gameplay;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
+using ReplantedOnline.Patches.Versus.NetworkSync;
 
 namespace ReplantedOnline.Network.Object.Game;
 
@@ -98,7 +99,7 @@ internal class PlantNetworked : NetworkClass
     [HideFromIl2Cpp]
     private void HandleDieRpc()
     {
-        _Plant.Die();
+        _Plant.DieOriginal();
     }
 
     /// <summary>

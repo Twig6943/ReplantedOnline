@@ -38,6 +38,11 @@ internal sealed class UpdateGameStateHandler : RPCHandler
     {
         var gameState = (GameState)packetReader.ReadByte();
 
+        if (!NetLobby.AmLobbyHost())
+        {
+            NetLobby.LobbyData.LastGameState = gameState;
+        }
+
         // Only process state updates from the actual lobby host
         if (sender.AmHost)
         {
@@ -65,12 +70,6 @@ internal sealed class UpdateGameStateHandler : RPCHandler
         else
         {
             MelonLogger.Warning($"[RPCHandler] Rejected GameState update from non-host: {sender.Name}");
-        }
-
-        // Always update the last known game state for synchronization purposes
-        if (!NetLobby.AmLobbyHost())
-        {
-            NetLobby.LobbyData.LastGameState = gameState;
         }
     }
 }
