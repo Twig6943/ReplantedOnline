@@ -78,7 +78,7 @@ internal class CoinControllerNetworked : NetworkClass
 
     internal void SendCollectRpc()
     {
-        this.SendRpc(0, null, false);
+        this.SendRpc(0, false);
     }
 
     private void HandleCollectRpc()

@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Attributes;
 using Il2CppReloaded.Gameplay;
 using ReplantedOnline.Helper;
+using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
 
 namespace ReplantedOnline.Network.Object.Game;
@@ -46,6 +47,21 @@ internal class PlantNetworked : NetworkClass
     /// </summary>
     internal int GridY;
 
+    public void Update()
+    {
+        if (AmOwner)
+        {
+            if (_Plant?.mDead != true)
+            {
+
+            }
+            else if (!IsDespawning)
+            {
+                DespawnAndDestroyWithDelay(3f);
+            }
+        }
+    }
+
     /// <summary>
     /// Called when the plant is destroyed, cleans up the plant from the networked plants dictionary.
     /// </summary>
@@ -66,7 +82,23 @@ internal class PlantNetworked : NetworkClass
     [HideFromIl2Cpp]
     public override void HandleRpc(SteamNetClient sender, byte rpcId, PacketReader packetReader)
     {
-        // Currently no RPC handlers implemented for plants
+        switch (rpcId)
+        {
+            case 0:
+                HandleDieRpc();
+                break;
+        }
+    }
+
+    internal void SendDieRpc()
+    {
+        this.SendRpc(0, false);
+    }
+
+    [HideFromIl2Cpp]
+    private void HandleDieRpc()
+    {
+        _Plant.Die();
     }
 
     /// <summary>

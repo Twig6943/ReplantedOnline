@@ -134,6 +134,9 @@ internal static class NetworkDispatcher
         packet.Recycle();
     }
 
+    internal static void SendRpc(this INetworkClass networkClass, byte rpcId, bool receiveLocally = false)
+        => SendRpc(networkClass, rpcId, null, receiveLocally);
+
     /// <summary>
     /// Sends an RPC (Remote Procedure Call) to a specific network class instance across all clients.
     /// Used for invoking targeted RPC methods on specific network objects.
