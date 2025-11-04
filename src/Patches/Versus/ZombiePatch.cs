@@ -8,7 +8,7 @@ using ReplantedOnline.Patches.Versus.NetworkSync;
 namespace ReplantedOnline.Patches.Versus;
 
 [HarmonyPatch]
-internal class ZombiePatch
+internal static class ZombiePatch
 {
     // Fix Bungee spawning in a random position
     [HarmonyPatch(typeof(Zombie), nameof(Zombie.PickBungeeZombieTarget))]

@@ -58,11 +58,19 @@ internal static class VersusManager
         // Find and cache the zombie team player name text components
         // Using GetComponentInChildren with includeInactive = true to find components even if parent objects are disabled
         zombiePlayer1 = vsPanelView.transform.Find($"Canvas/Layout/Center/Panel/SideZombies/Selected/PlayerNumber1")?.GetComponentInChildren<TextMeshProUGUI>(true);
+        zombiePlayer1.enableAutoSizing = false;
+        zombiePlayer1.fontSize = 100f;
         zombiePlayer2 = vsPanelView.transform.Find($"Canvas/Layout/Center/Panel/SideZombies/Selected/PlayerNumber2")?.GetComponentInChildren<TextMeshProUGUI>(true);
+        zombiePlayer2.enableAutoSizing = false;
+        zombiePlayer2.fontSize = 100f;
 
         // Find and cache the plant team player name text components
         plantPlayer1 = vsPanelView.transform.Find($"Canvas/Layout/Center/Panel/SidePlants/Selected/PlayerNumber1")?.GetComponentInChildren<TextMeshProUGUI>(true);
+        plantPlayer1.enableAutoSizing = false;
+        plantPlayer1.fontSize = 100f;
         plantPlayer2 = vsPanelView.transform.Find($"Canvas/Layout/Center/Panel/SidePlants/Selected/PlayerNumber2")?.GetComponentInChildren<TextMeshProUGUI>(true);
+        plantPlayer2.enableAutoSizing = false;
+        plantPlayer2.fontSize = 100f;
     }
 
     /// <summary>
