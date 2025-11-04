@@ -34,5 +34,5 @@ internal enum RpcType
     /// <summary>
     /// Sync starting a mower
     /// </summary>
-    StartMower
+    MowZombie
 }

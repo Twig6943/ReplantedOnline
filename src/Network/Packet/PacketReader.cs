@@ -1,4 +1,6 @@
 ﻿using ReplantedOnline.Items.Enums;
+using ReplantedOnline.Network.Object;
+using ReplantedOnline.Network.Online;
 using System.Text;
 using UnityEngine;
 
@@ -54,6 +56,20 @@ internal class PacketReader
     internal PacketTag GetTag()
     {
         return (PacketTag)ReadByte();
+    }
+
+    /// <summary>
+    /// Reads a networkclass from the packet
+    /// </summary>
+    /// <returns>The decoded networkclass value.</returns>
+    internal NetworkClass ReadNetworkClass()
+    {
+        var netId = ReadUInt();
+        if (NetLobby.LobbyData.NetworkClassSpawned.TryGetValue(netId, out var netClass))
+        {
+            return netClass;
+        }
+        return null;
     }
 
     /// Reads a Vector2 from the packet as two consecutive float values (X and Y).

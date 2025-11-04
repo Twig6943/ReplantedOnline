@@ -1,35 +1,38 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.Gameplay;
+using ReplantedOnline.Helper;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
+using ReplantedOnline.Network.RPC.Handlers;
 
 namespace ReplantedOnline.Patches.Versus.NetworkSync;
 
 [HarmonyPatch]
 internal static class LawnMowerSyncPatch
 {
-    [HarmonyPatch(typeof(LawnMower), nameof(LawnMower.StartMower))]
+    [HarmonyPatch(typeof(LawnMower), nameof(LawnMower.MowZombie))]
     [HarmonyPrefix]
-    internal static bool StartMower_Prefix(LawnMower __instance)
+    internal static bool StartMower_Prefix(LawnMower __instance, Zombie theZombie)
     {
         if (InternalCallContext.IsInternalCall_StartMower) return true;
 
         if (NetLobby.AmInLobby())
         {
-            if (VersusState.ZombieSide) return false;
+            if (VersusState.PlantSide) return false;
 
-            __instance.StartMowerOriginal();
+            __instance.MowZombieOriginal(theZombie);
+            MowZombieHandler.Send(__instance.Row, theZombie.GetNetworkedZombie());
         }
 
         return true;
     }
 
-    internal static void StartMowerOriginal(this LawnMower __instance)
+    internal static void MowZombieOriginal(this LawnMower __instance, Zombie theZombie)
     {
         InternalCallContext.IsInternalCall_StartMower = true;
         try
         {
-            __instance.StartMower();
+            __instance.MowZombie(theZombie);
         }
         finally
         {

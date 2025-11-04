@@ -1,4 +1,5 @@
 ﻿using ReplantedOnline.Items.Enums;
+using ReplantedOnline.Network.Object;
 using System.Text;
 using UnityEngine;
 
@@ -21,6 +22,14 @@ internal class PacketWriter
     internal static PacketWriter Get()
     {
         return _pool.Count > 0 ? _pool.Dequeue() : new PacketWriter();
+    }
+
+    /// <summary>
+    /// Writes an networkclass.
+    /// </summary>
+    internal void WriteNetworkClass(NetworkClass networkClass)
+    {
+        WriteUInt(networkClass.NetworkId);
     }
 
     /// <summary>
