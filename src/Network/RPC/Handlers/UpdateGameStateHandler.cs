@@ -21,11 +21,6 @@ internal sealed class UpdateGameStateHandler : RPCHandler
     /// <inheritdoc/>
     internal sealed override RpcType Rpc => RpcType.UpdateGameState;
 
-    /// <summary>
-    /// Sends an UpdateGameState RPC to synchronize game phase across all connected clients.
-    /// </summary>
-    /// <param name="gameState">The new game state to transition to.</param>
-    /// <param name="updateLocally">Whether the local client should also process this state change.</param>
     internal static void Send(GameState gameState, bool updateLocally = true)
     {
         var packetWriter = PacketWriter.Get();

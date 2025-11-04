@@ -12,9 +12,6 @@ internal class ChooseSeedHandler : RPCHandler
     /// <inheritdoc/>
     internal sealed override RpcType Rpc => RpcType.ChooseSeed;
 
-    /// <summary>
-    /// Sends a ChooseSeed RPC to all connected clients to chooses their seed/plant.
-    /// </summary>
     internal static void Send(ChosenSeed theChosenSeed)
     {
         var packetWriter = PacketWriter.Get();

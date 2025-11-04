@@ -20,10 +20,6 @@ internal sealed class StartGameHandler : RPCHandler
     /// <inheritdoc/>
     internal sealed override RpcType Rpc => RpcType.StartGame;
 
-    /// <summary>
-    /// Sends a StartGame RPC to all connected clients to initiate a game session.
-    /// </summary>
-    /// <param name="selectionSet">The plant selection set to use for the game.</param>
     internal static void Send(SelectionSet selectionSet)
     {
         var packetWriter = PacketWriter.Get();

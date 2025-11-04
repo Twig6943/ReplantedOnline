@@ -5,6 +5,7 @@ using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object;
 using ReplantedOnline.Network.Object.Game;
 using ReplantedOnline.Network.Online;
+using ReplantedOnline.Network.RPC.Handlers;
 using static Il2CppReloaded.Constants;
 
 namespace ReplantedOnline.Patches.Versus.NetworkSync;
@@ -16,7 +17,7 @@ internal static class SeedPacketSyncPatch
     // This actually took hours to find out what's doing what :(
     [HarmonyPatch(typeof(GameplayActivity), nameof(GameplayActivity.OnMouseDownBG))]
     [HarmonyPrefix]
-    internal static bool Selected_Prefix(GameplayActivity __instance, int mouseButton, int playerIndex)
+    internal static bool OnMouseDownBG_Prefix(GameplayActivity __instance, int mouseButton, int playerIndex)
     {
         if (NetLobby.AmInLobby())
         {
@@ -46,6 +47,7 @@ internal static class SeedPacketSyncPatch
                         __instance.Board.TakeSunMoney(cost, 0);
                         __instance.Board.ClearCursor();
                         PlaceSeed(seedType, packet.mImitaterType, gridX, gridY, true);
+                        SetSeedPacketCooldownHandler.Send(seedType);
                         Instances.GameplayActivity.m_audioService.PlaySample(Sound.SOUND_PLANT);
                     }
 

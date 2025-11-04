@@ -1,9 +1,10 @@
 ﻿using Il2CppReloaded.Gameplay;
+using ReplantedOnline.Modules;
 using ReplantedOnline.Patches.Versus.NetworkSync;
 
 namespace ReplantedOnline.Helper;
 
-internal class Utils
+internal static class Utils
 {
     /// <summary>
     /// Places a seed (plant or zombie) at the specified grid position with network synchronization support
@@ -45,5 +46,16 @@ internal class Utils
     internal static Zombie SpawnZombie(ZombieType zombieType, int gridX, int gridY, bool shakeBush, bool spawnOnNetwork)
     {
         return SeedPacketSyncPatch.SpawnZombie(zombieType, gridX, gridY, shakeBush, spawnOnNetwork);
+    }
+
+    internal static void SetSeedPackets(int playerIndex, SeedType[] seedTypes)
+    {
+        Instances.GameplayActivity.Board.SetSeedPackets(seedTypes);
+    }
+
+    internal static void SetSeedPacketCooldown(int playerIndex, SeedType seedType)
+    {
+        Instances.GameplayActivity.Board.SeedBanks[playerIndex].mSeedPackets
+            .FirstOrDefault(seedPacket => seedPacket.mPacketType == seedType)?.WasPlanted(playerIndex);
     }
 }

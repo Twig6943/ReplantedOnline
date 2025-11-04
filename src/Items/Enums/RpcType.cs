@@ -19,5 +19,15 @@ internal enum RpcType
     /// <summary>
     /// Sync when a player chooses their seed/plant selection.
     /// </summary>
-    ChooseSeed
+    ChooseSeed,
+
+    /// <summary>
+    /// Sync when a packet gose on cooldown.
+    /// </summary>
+    SetSeedPacketCooldown,
+
+    /// <summary>
+    /// Sync when all seedpackets on a players side.
+    /// </summary>
+    SetSeedPackets
 }
