@@ -28,6 +28,32 @@ internal static class VersusModePatch
         VersusManager.OnStart();
     }
 
+    // Stop game from placing initial sunflower in vs
+    [HarmonyPatch(typeof(Board), nameof(Board.AddPlant))]
+    [HarmonyPrefix]
+    internal static bool AddPlant_Prefix()
+    {
+        if (NetLobby.AmInLobby() && Instances.GameplayActivity.VersusMode.m_versusTime < 1f)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    // Stop game from placing initial gravestones in vs
+    [HarmonyPatch(typeof(Challenge), nameof(Challenge.IZombiePlaceZombie))]
+    [HarmonyPrefix]
+    internal static bool IZombiePlaceZombie_Prefix(ZombieType theZombieType)
+    {
+        if (NetLobby.AmInLobby() && Instances.GameplayActivity.VersusMode.m_versusTime < 1f)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     [HarmonyPatch(typeof(VersusPlayerModel), nameof(VersusPlayerModel.Confirm))]
     [HarmonyPostfix]
     internal static void Confirm_Postfix(VersusPlayerModel __instance)
