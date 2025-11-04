@@ -29,5 +29,10 @@ internal enum RpcType
     /// <summary>
     /// Sync when all seedpackets on a players side.
     /// </summary>
-    SetSeedPackets
+    SetSeedPackets,
+
+    /// <summary>
+    /// Sync starting a mower
+    /// </summary>
+    StartMower
 }
