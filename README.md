@@ -1,6 +1,16 @@
 # Replanted Online
 
 <img width="2560" height="1440" alt="PVZR-Online-Promo" src="https://github.com/user-attachments/assets/845582ea-a818-476d-8aff-497618866585" />
+
+</p>
+<p align="center">
+
+<div style="text-align: center;">
+    <a href="https://discord.gg/9PN4gxHC4B" target="_blank">
+        <img src="https://img.shields.io/badge/Discord%20-%231DA1F2.svg?&style=for-the-badge&logo=discord&logoColor=white&color=5662f6" width="200" height="50"/>
+    </a>
+</div>
+
 A peer-to-peer (P2P) online multiplayer mod for **Plants vs. Zombies: Replanted** on Steam.
 
 ## 🚧 Project Status: **In Development**
