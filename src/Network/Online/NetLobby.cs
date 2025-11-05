@@ -1,9 +1,9 @@
-﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Il2CppSteamworks;
+﻿using Il2CppSteamworks;
 using Il2CppSteamworks.Data;
 using MelonLoader;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Items.Enums;
+using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Packet;
 using ReplantedOnline.Network.RPC.Handlers;
@@ -88,81 +88,6 @@ internal static class NetLobby
         Transitions.ToLoading();
     }
 
-    // THIS IS NOT WORKING, needs to be fixed!, Result is null
-    internal static void SearchLobbyByGameCode(string gameCode)
-    {
-        Transitions.ToLoading();
-        MelonLogger.Msg($"[NetLobby] Searching for lobby with code: {gameCode}");
-
-        try
-        {
-            // Facepunch uses a different approach - create a lobby query
-            var lobbyQuery = SteamMatchmaking.LobbyList;
-
-            lobbyQuery.maxResults = new Il2CppSystem.Nullable<int>(100);
-            lobbyQuery.FilterDistanceWorldwide();
-            lobbyQuery.slotsAvailable = new Il2CppSystem.Nullable<int>(1);
-            lobbyQuery.WithKeyValue(ReplantedOnlineMod.Constants.GAME_CODE_KEY, gameCode);
-            lobbyQuery.WithKeyValue(ReplantedOnlineMod.Constants.MOD_VERSION_KEY, ModInfo.ModVersion);
-            lobbyQuery.ApplyFilters();
-
-            lobbyQuery?.RequestAsync()?.ContinueWith((Action<Il2CppSystem.Threading.Tasks.Task<Il2CppStructArray<Lobby>>>)((task) =>
-            {
-                if (task.IsFaulted)
-                {
-                    MelonLogger.Error($"[NetLobby] Lobby search failed: {task.Exception}");
-                    Transitions.ToMainMenu();
-                    return;
-                }
-
-                var lobbies = task.Result;
-
-                if (lobbies == null)
-                {
-                    MelonLogger.Msg("[NetLobby] task.Result is NULL - this is normal when no lobbies exist");
-                    Transitions.ToMainMenu();
-                    return;
-                }
-
-                MelonLogger.Msg($"[NetLobby] Found {lobbies.Length} lobbies matching filters");
-
-                if (lobbies.Length > 0)
-                {
-                    var lobby = lobbies[0];
-
-                    // Double-check the game code
-                    string foundGameCode = lobby.GetData(ReplantedOnlineMod.Constants.GAME_CODE_KEY);
-
-                    if (foundGameCode == gameCode)
-                    {
-                        // Verify mod version
-                        string modVersion = lobby.GetData(ReplantedOnlineMod.Constants.MOD_VERSION_KEY);
-
-                        if (modVersion != ModInfo.ModVersion)
-                        {
-                            MelonLogger.Warning($"[NetLobby] Mod version mismatch. Expected: {ModInfo.ModVersion}, Found: {modVersion}");
-                            Transitions.ToMainMenu();
-                            return;
-                        }
-
-                        MelonLogger.Msg($"[NetLobby] Found matching lobby: {lobby.Id} with code {gameCode}");
-                        JoinLobby(lobby.Id);
-                    }
-                    else
-                    {
-                        MelonLogger.Warning($"[NetLobby] Game code mismatch. Expected: {gameCode}, Found: {foundGameCode}");
-                        Transitions.ToMainMenu();
-                    }
-                }
-            }));
-        }
-        catch (Exception ex)
-        {
-            MelonLogger.Error($"[NetLobby] Error starting lobby search: {ex.Message}");
-            Transitions.ToMainMenu();
-        }
-    }
-
     /// <summary>
     /// Joins an existing lobby by its Steam ID.
     /// </summary>
@@ -243,22 +168,14 @@ internal static class NetLobby
             MelonLogger.Msg($"[NetLobby] Lobby created successfully: {LobbyData.LobbyId}");
 
             SteamMatchmaking.Internal.SetLobbyData(LobbyData.LobbyId, ReplantedOnlineMod.Constants.MOD_VERSION_KEY, ModInfo.ModVersion);
-            CreateGameCode(data.Id);
+            var gameCode = MatchmakingManager.GenerateGameCode(data.Id);
+            SteamMatchmaking.Internal.SetLobbyData(LobbyData.LobbyId, ReplantedOnlineMod.Constants.GAME_CODE_KEY, gameCode);
             SteamMatchmaking.Internal.SetLobbyType(LobbyData.LobbyId, LobbyType.Public);
         }
         else
         {
             MelonLogger.Error($"[NetLobby] Lobby creation failed with result: {result}");
         }
-    }
-
-    /// <summary>
-    /// Gets or creates a game code for a specific lobby
-    /// </summary>
-    internal static void CreateGameCode(SteamId lobbyId)
-    {
-        string newCode = LobbyData.GenerateGameCode(lobbyId);
-        SteamMatchmaking.Internal.SetLobbyData(lobbyId, ReplantedOnlineMod.Constants.GAME_CODE_KEY, newCode);
     }
 
     /// <summary>

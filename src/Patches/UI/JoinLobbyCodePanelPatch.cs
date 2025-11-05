@@ -5,7 +5,7 @@ using Il2CppTekly.PanelViews;
 using Il2CppTMPro;
 using MelonLoader;
 using ReplantedOnline.Helper;
-using ReplantedOnline.Network.Online;
+using ReplantedOnline.Managers;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -59,7 +59,7 @@ internal static class JoinLobbyCodePanelPatch
         _reloadedInputField.onValueChanged.AddListener((Action<string>)((newValue) =>
         {
             // Filter input to only allow valid lobby code characters
-            string cleanValue = new([.. newValue.Where(c => NetLobbyData.CODE_CHARS.Contains(char.ToUpper(c))).Select(char.ToUpper)]);
+            string cleanValue = new([.. newValue.Where(c => MatchmakingManager.CODE_CHARS.Contains(char.ToUpper(c))).Select(char.ToUpper)]);
             _reloadedInputField.m_Text = string.Empty;
             // Use coroutine to update text after current frame
             MelonCoroutines.Start(CoSetTextDelay(newValue, cleanValue));
@@ -73,10 +73,10 @@ internal static class JoinLobbyCodePanelPatch
         // Set up OK button to search for lobby with entered code
         SetButton("Canvas/Layout/Center/Rename/Buttons/P_BacicButton_OK", () =>
         {
-            if (_reloadedInputField.m_Text.Length == 6)
+            if (_reloadedInputField.m_Text.Length == MatchmakingManager.CODE_LENGTH)
             {
                 lobbyCodePanel.gameObject.SetActive(false);
-                NetLobby.SearchLobbyByGameCode(_reloadedInputField.m_Text);
+                MatchmakingManager.SearchLobbyByGameCode(_reloadedInputField.m_Text);
             }
         });
 

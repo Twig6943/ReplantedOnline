@@ -1,10 +1,8 @@
 ﻿using Il2CppSteamworks;
-using MelonLoader;
 using ReplantedOnline.Items.Enums;
 using ReplantedOnline.Managers;
 using ReplantedOnline.Network.Object;
 using ReplantedOnline.Network.RPC.Handlers;
-using System.Text;
 
 namespace ReplantedOnline.Network.Online;
 
@@ -14,9 +12,6 @@ namespace ReplantedOnline.Network.Online;
 /// </summary>
 internal class NetLobbyData
 {
-    internal static readonly char[] CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789".ToCharArray();
-    private static readonly int CODE_LENGTH = 6;
-
     /// <summary>
     /// Initializes a new instance of the NetLobbyData class with the specified Steam ID.
     /// </summary>
@@ -62,26 +57,6 @@ internal class NetLobbyData
     /// Gets or sets the last known game state of the lobby for synchronization purposes.
     /// </summary>
     internal GameState LastGameState = GameState.Lobby;
-
-    /// <summary>
-    /// Generates a consistent game code based on the lobby Steam ID
-    /// </summary>
-    internal string GenerateGameCode(SteamId lobbyId)
-    {
-        // Use the lobby ID as a seed for consistent code generation
-        ulong seed = lobbyId;
-        var random = new Random((int)(seed & 0xFFFFFFFF));
-
-        StringBuilder codeBuilder = new StringBuilder();
-        for (int i = 0; i < CODE_LENGTH; i++)
-        {
-            codeBuilder.Append(CODE_CHARS[random.Next(CODE_CHARS.Length)]);
-        }
-
-        string gameCode = codeBuilder.ToString();
-        MelonLogger.Msg($"[NetLobby] Generated game code: {gameCode} for lobby {lobbyId}");
-        return gameCode;
-    }
 
     /// <summary>
     /// Processes the current list of lobby members, adding new clients and removing disconnected ones.
