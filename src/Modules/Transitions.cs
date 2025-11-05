@@ -1,5 +1,5 @@
 ﻿using Il2CppSource.Utils;
-using UnityEngine;
+using ReplantedOnline.Helper;
 
 namespace ReplantedOnline.Modules;
 
@@ -45,6 +45,6 @@ internal class Transitions
     /// </summary>
     internal static void ToLoading()
     {
-        GameObject.Find("FrontendPanels")?.SetActive(false);
+        Instances.GlobalPanels.GetPanel("loadingScrim")?.gameObject?.SetActive(true);
     }
 }

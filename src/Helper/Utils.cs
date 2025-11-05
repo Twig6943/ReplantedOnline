@@ -1,4 +1,5 @@
 ﻿using Il2CppReloaded.Gameplay;
+using Il2CppTekly.PanelViews;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Patches.Versus.NetworkSync;
 
@@ -6,6 +7,22 @@ namespace ReplantedOnline.Helper;
 
 internal static class Utils
 {
+    internal static void ShowPopup(string Header, string text)
+    {
+
+    }
+
+    internal static PanelView GetPanel(this PanelViewContainer panelViewContainer, string panelId)
+    {
+        foreach (var panel in panelViewContainer.m_panels)
+        {
+            if (panel.Id != panelId) continue;
+            return panel;
+        }
+
+        return null;
+    }
+
     /// <summary>
     /// Places a seed (plant or zombie) at the specified grid position with network synchronization support
     /// </summary>
