@@ -47,6 +47,7 @@ internal static class VersusManager
     private static TextMeshProUGUI zombiePlayer2;
     private static TextMeshProUGUI plantPlayer1;
     private static TextMeshProUGUI plantPlayer2;
+    private static TextMeshProUGUI pickSides;
 
     /// <summary>
     /// Initializes the text components for versus mode UI by finding them in the panel hierarchy.
@@ -71,6 +72,8 @@ internal static class VersusManager
         plantPlayer2 = vsPanelView.transform.Find($"Canvas/Layout/Center/Panel/SidePlants/Selected/PlayerNumber2")?.GetComponentInChildren<TextMeshProUGUI>(true);
         plantPlayer2.enableAutoSizing = false;
         plantPlayer2.fontSize = 100f;
+
+        pickSides = vsPanelView.transform.Find($"Canvas/Layout/Center/Panel/Header/HeaderLabel")?.GetComponentInChildren<TextMeshProUGUI>(true);
     }
 
     /// <summary>
@@ -151,6 +154,8 @@ internal static class VersusManager
     {
         // Safety check for null components
         if (zombiePlayer1 == null || zombiePlayer2 == null || plantPlayer1 == null || plantPlayer2 == null) return;
+
+        pickSides?.SetText($"Lobby Code: {NetLobby.LobbyData.LobbyCode}");
 
         // Ensure all text elements are visible
         zombiePlayer1.gameObject.SetActive(true);

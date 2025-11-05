@@ -14,7 +14,7 @@ namespace ReplantedOnline.Network.Online;
 /// </summary>
 internal class NetLobbyData
 {
-    private static readonly char[] CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();
+    internal static readonly char[] CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789".ToCharArray();
     private static readonly int CODE_LENGTH = 6;
 
     /// <summary>
@@ -27,6 +27,11 @@ internal class NetLobbyData
         LobbyId = steamId;
         HostId = hostId;
     }
+
+    /// <summary>
+    /// Gets the Code of this lobby.
+    /// </summary>
+    internal string LobbyCode;
 
     /// <summary>
     /// Gets the Steam ID of this lobby.

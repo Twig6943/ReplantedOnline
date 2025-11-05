@@ -2,6 +2,7 @@
 using Il2CppReloaded.Gameplay;
 using Il2CppTekly.PanelViews;
 using MelonLoader;
+using ReplantedOnline.Helper;
 using ReplantedOnline.Managers;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.RPC.Handlers;
@@ -28,6 +29,8 @@ internal static class VsSideChoosererPatch
         VsSideChooser = __instance.m_panels.FirstOrDefault(pan => pan.gameObject.name == "P_VsSideChooser");
         if (VsSideChooser != null)
         {
+            VsSideChooser.DestroyAllTextLocalizers();
+
             InteractableBlocker = VsSideChooser.transform.Find($"Canvas/Layout/Center/Panel/SelectionSets/DisableInteraction")?.gameObject ?? null;
 
             if (NetLobby.AmLobbyHost())
