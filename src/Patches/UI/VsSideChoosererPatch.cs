@@ -1,12 +1,10 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.Gameplay;
 using Il2CppTekly.PanelViews;
-using MelonLoader;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Managers;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.RPC.Handlers;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +14,7 @@ namespace ReplantedOnline.Patches.UI;
 internal static class VsSideChoosererPatch
 {
     private static GameObject InteractableBlocker;
+    private static GameObject InteractableGamePad;
     internal static PanelView VsSideChooser;
 
     [HarmonyPatch(typeof(PanelViewContainer), nameof(PanelViewContainer.Awake))]
@@ -32,6 +31,7 @@ internal static class VsSideChoosererPatch
             VsSideChooser.DestroyAllTextLocalizers();
 
             InteractableBlocker = VsSideChooser.transform.Find($"Canvas/Layout/Center/Panel/SelectionSets/DisableInteraction")?.gameObject ?? null;
+            InteractableGamePad = VsSideChooser.transform.Find($"Canvas/Layout/Center/Panel/SelectionSets/SelectionSets_SidesChosenNavLayer")?.gameObject ?? null;
 
             if (NetLobby.AmLobbyHost())
             {
@@ -70,14 +70,7 @@ internal static class VsSideChoosererPatch
 
     private static void SetVSButton(this PanelView panelView, string name, Action callback)
     {
-        // Wait for UI to initialize then set up button
-        MelonCoroutines.Start(CoSetVSButton(panelView, name, callback));
-    }
-
-    private static IEnumerator CoSetVSButton(this PanelView panelView, string name, Action callback)
-    {
-        yield return new WaitForSeconds(1f); // Wait for UI to load
-        var button = panelView.transform.Find($"Canvas/Layout/Center/Panel/SelectionSets/{name}")?.GetComponentInChildren<Button>();
+        var button = panelView.transform.Find($"Canvas/Layout/Center/Panel/SelectionSets/{name}")?.GetComponentInChildren<Button>(true);
         if (button != null)
         {
             button.onClick = new();
@@ -108,5 +101,6 @@ internal static class VsSideChoosererPatch
     internal static void SetButtonsInteractable(bool interactable)
     {
         InteractableBlocker?.SetActive(!interactable);
+        InteractableGamePad?.SetActive(interactable);
     }
 }

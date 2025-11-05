@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.Gameplay;
 using Il2CppReloaded.TreeStateActivities;
+using Il2CppSource.Controllers;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object;
 using ReplantedOnline.Network.Object.Game;
@@ -13,6 +14,57 @@ namespace ReplantedOnline.Patches.Versus.NetworkSync;
 [HarmonyPatch]
 internal static class SeedPacketSyncPatch
 {
+    [HarmonyPatch(typeof(GamepadCursorController), nameof(GamepadCursorController._onCursorConfirmed))]
+    [HarmonyPrefix]
+    internal static bool _onCursorConfirmed_Prefix(GamepadCursorController __instance)
+    {
+        if (NetLobby.AmInLobby())
+        {
+            // Get the type of seed being planted
+            var seedType = __instance.Board.GetSeedTypeInCursor(ReplantedOnlineMod.Constants.LOCAL_PLAYER_INDEX);
+
+            // Check if the player is currently holding a plant in their cursor
+            if (seedType != SeedType.None)
+            {
+                // Get the cursor position and convert it to grid coordinates
+                var gridX = __instance.m_cursor.m_gridX;
+                var gridY = __instance.m_cursor.m_gridY;
+
+                // Check if planting at this position is valid
+                if (CanPlace(seedType, gridX, gridY))
+                {
+                    // Find the seed packet from the seed bank that matches the seed type
+                    var packet = __instance.Board.mSeedBank.SeedPackets.FirstOrDefault(packet => packet.mPacketType == seedType);
+
+                    // Get the cost of the seed and check if player has enough sun
+                    var cost = packet.GetCost();
+                    if (__instance.Board.CanTakeSunMoney(cost, ReplantedOnlineMod.Constants.LOCAL_PLAYER_INDEX))
+                    {
+                        // Mark the packet as used and deduct the sun cost
+                        packet.WasPlanted(ReplantedOnlineMod.Constants.LOCAL_PLAYER_INDEX);
+                        __instance.Board.TakeSunMoney(cost, ReplantedOnlineMod.Constants.LOCAL_PLAYER_INDEX);
+                        __instance.Board.ClearCursor();
+                        PlaceSeed(seedType, packet.mImitaterType, gridX, gridY, true);
+                        SetSeedPacketCooldownHandler.Send(seedType);
+                        Instances.GameplayActivity.m_audioService.PlaySample(Sound.SOUND_PLANT);
+                    }
+
+                    // Return false to skip the original method since we've handled planting
+                    return false;
+                }
+
+                // If planting is not valid, play buzzer sound
+                Instances.GameplayActivity.m_audioService.PlaySample(Sound.SOUND_BUZZER);
+
+                // Return false to skip original method (invalid placement)
+                return false;
+            }
+        }
+
+        // Return true to execute original method (no plant in cursor, normal behavior)
+        return true;
+    }
+
     // Rework planting seeds to support RPCs
     // This actually took hours to find out what's doing what :(
     [HarmonyPatch(typeof(GameplayActivity), nameof(GameplayActivity.OnMouseDownBG))]
