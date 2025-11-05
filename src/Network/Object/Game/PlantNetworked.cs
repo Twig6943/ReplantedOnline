@@ -11,7 +11,7 @@ namespace ReplantedOnline.Network.Object.Game;
 /// Represents a networked plant entity in the game world, handling synchronization of plant state
 /// across connected clients including plant type, position, and imitater type.
 /// </summary>
-internal class PlantNetworked : NetworkClass
+internal sealed class PlantNetworked : NetworkClass
 {
     /// <summary>
     /// Dictionary mapping plant instances to their networked counterparts for easy lookup.
@@ -22,11 +22,6 @@ internal class PlantNetworked : NetworkClass
     /// The underlying plant instance that this networked object represents.
     /// </summary>
     internal Plant _Plant;
-
-    /// <summary>
-    /// The unique identifier for this plant instance when spawning.
-    /// </summary>
-    internal PlantID PlantID;
 
     /// <summary>
     /// The type of seed used to plant this plant when spawning.
@@ -59,6 +54,13 @@ internal class PlantNetworked : NetworkClass
             else if (!IsDespawning)
             {
                 DespawnAndDestroyWithDelay(3f);
+            }
+        }
+        else
+        {
+            if (!dead)
+            {
+                _Plant?.mDead = false;
             }
         }
     }
@@ -96,9 +98,12 @@ internal class PlantNetworked : NetworkClass
         this.SendRpc(0, false);
     }
 
+
+    private bool dead;
     [HideFromIl2Cpp]
     private void HandleDieRpc()
     {
+        dead = true;
         _Plant.DieOriginal();
     }
 
@@ -115,7 +120,6 @@ internal class PlantNetworked : NetworkClass
             // Set spawn info
             packetWriter.WriteInt(GridX);
             packetWriter.WriteInt(GridY);
-            packetWriter.WriteInt(PlantID);
             packetWriter.WriteInt((int)SeedType);
             packetWriter.WriteInt((int)ImitaterType);
         }
@@ -134,12 +138,10 @@ internal class PlantNetworked : NetworkClass
             // Read spawn info
             GridX = packetReader.ReadInt();
             GridY = packetReader.ReadInt();
-            PlantID = packetReader.ReadInt();
             SeedType = (SeedType)packetReader.ReadInt();
             ImitaterType = (SeedType)packetReader.ReadInt();
 
             _Plant = Utils.SpawnPlant(SeedType, ImitaterType, GridX, GridY, false);
-            _Plant.DataID = PlantID;
 
             NetworkedPlants[_Plant] = this;
         }

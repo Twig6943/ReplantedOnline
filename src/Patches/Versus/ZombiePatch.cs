@@ -75,25 +75,8 @@ internal static class ZombiePatch
             // Only zombie side can spawn backup dancers
             if (VersusState.PlantSide) return false;
 
-            // Find first available slot in the follower array
-            int nextIndex = 0;
-            for (int i = 0; i < __instance.mFollowerZombieID.Length; i++)
-            {
-                if (__instance.mFollowerZombieID[i] == ZombieID.Null)
-                {
-                    nextIndex = i;
-                    break;
-                }
-            }
-
-            // Spawn the backup dancer with network synchronization
             var zombie = SeedPacketSyncPatch.SpawnZombie(ZombieType.BackupDancer, thePosX, theRow, false, true);
-
-            // Set the return value to the new zombie's ID
             __result = zombie.DataID;
-
-            // Send network RPC to sync the follower relationship with other players
-            __instance.GetNetworkedZombie().SendSetFollowerZombieIdRpc(nextIndex, zombie.DataID);
 
             return false;
         }

@@ -12,7 +12,7 @@ namespace ReplantedOnline.Network.Object.Game;
 /// Represents a networked coin controller that manages synchronization of coin entities
 /// across connected clients, including coin collection, despawning, and state management.
 /// </summary>
-internal class CoinControllerNetworked : NetworkClass
+internal sealed class CoinControllerNetworked : NetworkClass
 {
     /// <summary>
     /// Global dictionary tracking all active coins and their associated network controllers.

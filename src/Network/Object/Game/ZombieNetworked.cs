@@ -7,6 +7,7 @@ using ReplantedOnline.Network.Packet;
 using ReplantedOnline.Patches.Versus.NetworkSync;
 using System.Collections;
 using UnityEngine;
+using Zombie = Il2CppReloaded.Gameplay.Zombie;
 
 namespace ReplantedOnline.Network.Object.Game;
 
@@ -14,7 +15,7 @@ namespace ReplantedOnline.Network.Object.Game;
 /// Represents a networked zombie entity in the game world, handling synchronization of zombie state
 /// across connected clients including health, position, and follower relationships.
 /// </summary>
-internal class ZombieNetworked : NetworkClass
+internal sealed class ZombieNetworked : NetworkClass
 {
     /// <summary>
     /// Dictionary mapping zombie instances to their networked counterparts for easy lookup.
@@ -30,11 +31,6 @@ internal class ZombieNetworked : NetworkClass
     /// The type of zombie this networked object represents when spawning.
     /// </summary>
     internal ZombieType ZombieType;
-
-    /// <summary>
-    /// The unique identifier for this zombie instance when spawning.
-    /// </summary>
-    internal ZombieID ZombieID;
 
     /// <summary>
     /// The speed of the zombie
@@ -100,6 +96,11 @@ internal class ZombieNetworked : NetworkClass
         }
         else
         {
+            if (!dead)
+            {
+                _Zombie?.mDead = false;
+            }
+
             if (!EnteringHouse)
             {
                 if (_Zombie?.mPosX <= -30f)
@@ -129,11 +130,13 @@ internal class ZombieNetworked : NetworkClass
         }
     }
 
-    internal void SendSetFollowerZombieIdRpc(int index, ZombieID zombieID)
+
+    [HideFromIl2Cpp]
+    internal void SendSetFollowerZombieIdRpc(int index, ZombieNetworked zombie)
     {
         var writer = PacketWriter.Get();
         writer.WriteInt(index);
-        writer.WriteInt((int)zombieID);
+        writer.WriteNetworkClass(zombie);
         this.SendRpc(0, writer, false);
     }
 
@@ -141,8 +144,8 @@ internal class ZombieNetworked : NetworkClass
     private void HandleSetFollowerZombieIdRpc(PacketReader packetReader)
     {
         var index = packetReader.ReadInt();
-        var zombieId = (ZombieID)packetReader.ReadInt();
-        _Zombie?.mFollowerZombieID[index] = zombieId;
+        var zombie = (ZombieNetworked)packetReader.ReadNetworkClass();
+        _Zombie?.mFollowerZombieID[index] = zombie._Zombie.DataID;
     }
 
     internal void SendDeathRpc(DamageFlags damageFlags)
@@ -152,9 +155,11 @@ internal class ZombieNetworked : NetworkClass
         this.SendRpc(1, writer, false);
     }
 
+    private bool dead;
     [HideFromIl2Cpp]
     private void HandleDeathRpc(PacketReader packetReader)
     {
+        dead = true;
         var damageFlags = (DamageFlags)packetReader.ReadByte();
         _Zombie.PlayDeathAnimOriginal(damageFlags);
     }
@@ -182,7 +187,6 @@ internal class ZombieNetworked : NetworkClass
             packetWriter.WriteInt(GridY);
             packetWriter.WriteBool(ShakeBush);
             packetWriter.WriteFloat(ZombieSpeed);
-            packetWriter.WriteInt((int)ZombieID);
             packetWriter.WriteInt((int)ZombieType);
             return;
         }
@@ -206,11 +210,9 @@ internal class ZombieNetworked : NetworkClass
             GridY = packetReader.ReadInt();
             ShakeBush = packetReader.ReadBool();
             ZombieSpeed = packetReader.ReadFloat();
-            ZombieID = (ZombieID)packetReader.ReadInt();
             ZombieType = (ZombieType)packetReader.ReadInt();
 
             _Zombie = Utils.SpawnZombie(ZombieType, GridX, GridY, ShakeBush, false);
-            _Zombie.DataID = ZombieID;
             _Zombie.mVelX = ZombieSpeed;
             _Zombie.UpdateAnimSpeed();
 
@@ -239,7 +241,7 @@ internal class ZombieNetworked : NetworkClass
     /// <param name="posX">The target X position to interpolate to</param>
     private void LarpPos(float posX)
     {
-        if (_Zombie == null || EnteringHouse) return;
+        if (_Zombie == null || EnteringHouse || posX < 0f) return;
 
         float currentX = _Zombie.mPosX;
         float distance = Mathf.Abs(currentX - posX);

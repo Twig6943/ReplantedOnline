@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.Gameplay;
 using ReplantedOnline.Helper;
+using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object;
 using ReplantedOnline.Network.Object.Game;
 using ReplantedOnline.Network.Online;
@@ -24,21 +25,40 @@ internal static class CoinSyncPatch
             // Only the host should create coins - clients wait for network spawn
             if (!NetLobby.AmLobbyHost()) return false;
 
+            var doSpawn = theCoinType != CoinType.Sun && theCoinType != CoinType.Brain;
+
             // Call the original method to create the actual coin
-            var coin = __instance.AddCoinOriginal(theX, theY, theCoinType, theCoinMotion);
-            __result = coin;
 
-            // Spawn a networked controller for this coin to sync across clients
-            var netClass = NetworkClass.SpawnNew<CoinControllerNetworked>(net =>
+
+            if (doSpawn)
             {
-                net._Coin = coin;
-                net.BoardGridPos = new Vector2(theX, theY);
-                net.TheCoinType = theCoinType;
-                net.TheCoinMotion = theCoinMotion;
-            });
+                var coin = __instance.AddCoinOriginal(theX, theY, theCoinType, theCoinMotion);
+                __result = coin;
 
-            // Track the relationship between coin and its network controller
-            CoinControllerNetworked.NetworkedCoinControllers[coin] = netClass;
+                var netClass = NetworkClass.SpawnNew<CoinControllerNetworked>(net =>
+                {
+                    net._Coin = coin;
+                    net.BoardGridPos = new Vector2(theX, theY);
+                    net.TheCoinType = theCoinType;
+                    net.TheCoinMotion = theCoinMotion;
+                });
+
+                // Track the relationship between coin and its network controller
+                CoinControllerNetworked.NetworkedCoinControllers[coin] = netClass;
+            }
+            else
+            {
+                if (theCoinType == CoinType.Sun && VersusState.PlantSide)
+                {
+                    var coin = __instance.AddCoinOriginal(theX, theY, theCoinType, theCoinMotion);
+                    __result = coin;
+                }
+                else if (theCoinType == CoinType.Brain && VersusState.ZombieSide)
+                {
+                    var coin = __instance.AddCoinOriginal(theX, theY, theCoinType, theCoinMotion);
+                    __result = coin;
+                }
+            }
 
             // Skip the original method since we already called it manually
             return false;

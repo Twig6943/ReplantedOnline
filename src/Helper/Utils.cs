@@ -1,6 +1,5 @@
 ﻿using Il2CppReloaded.Gameplay;
 using Il2CppTekly.PanelViews;
-using ReplantedOnline.Modules;
 using ReplantedOnline.Patches.Versus.NetworkSync;
 
 namespace ReplantedOnline.Helper;
@@ -63,26 +62,5 @@ internal static class Utils
     internal static Zombie SpawnZombie(ZombieType zombieType, int gridX, int gridY, bool shakeBush, bool spawnOnNetwork)
     {
         return SeedPacketSyncPatch.SpawnZombie(zombieType, gridX, gridY, shakeBush, spawnOnNetwork);
-    }
-
-    /// <summary>
-    /// Sets the seed packets for the specified player.
-    /// </summary>
-    /// <param name="playerIndex">The index of the player to update seed packets for.</param>
-    /// <param name="seedTypes">Array of seed types to set for the player.</param>
-    internal static void SetSeedPackets(int playerIndex, SeedType[] seedTypes)
-    {
-        Instances.GameplayActivity.Board.SetSeedPackets(seedTypes);
-    }
-
-    /// <summary>
-    /// Sets the cooldown for a specific seed packet for the specified player.
-    /// </summary>
-    /// <param name="playerIndex">The index of the player to update seed cooldown for.</param>
-    /// <param name="seedType">The type of seed to set cooldown for.</param>
-    internal static void SetSeedPacketCooldown(int playerIndex, SeedType seedType)
-    {
-        Instances.GameplayActivity.Board.SeedBanks[playerIndex].mSeedPackets
-            .FirstOrDefault(seedPacket => seedPacket.mPacketType == seedType)?.WasPlanted(playerIndex);
     }
 }

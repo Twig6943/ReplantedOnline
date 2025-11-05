@@ -25,6 +25,10 @@ internal class SteamNetClient
         {
             LocalClient = this;
         }
+        else
+        {
+            OpponentClient = this;
+        }
         HasEstablishedP2P = AmLocal;
         MelonLogger.Msg($"[SteamNetClient] P2P connections initialized with {Name} ({SteamId})");
     }
@@ -33,6 +37,11 @@ internal class SteamNetClient
     /// Get the local SteamNetClient
     /// </summary>
     internal static SteamNetClient LocalClient { get; private set; }
+
+    /// <summary>
+    /// Get the opponent SteamNetClient
+    /// </summary>
+    internal static SteamNetClient OpponentClient { get; private set; }
 
     /// <summary>
     /// The Steam ID of this client.
@@ -66,13 +75,13 @@ internal class SteamNetClient
 
     internal bool AmZombieSide()
     {
-        if (AmHost)
+        if (AmLocal)
         {
-            return Instances.GameplayActivity.VersusMode.ZombiePlayerIndex == 0;
+            return Instances.GameplayActivity.VersusMode.ZombiePlayerIndex == ReplantedOnlineMod.Constants.LOCAL_PLAYER_INDEX;
         }
         else
         {
-            return Instances.GameplayActivity.VersusMode.ZombiePlayerIndex == 0;
+            return Instances.GameplayActivity.VersusMode.ZombiePlayerIndex == ReplantedOnlineMod.Constants.OPPONENT_PLAYER_INDEX;
         }
     }
 }

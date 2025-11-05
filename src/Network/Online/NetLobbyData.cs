@@ -108,7 +108,7 @@ internal class NetLobbyData
     /// </returns>
     internal uint GetNextNetworkId()
     {
-        uint nextId = NetLobby.AmLobbyHost() ? 0U : 100000U;
+        uint nextId = NetLobby.AmLobbyHost() ? 0U : 10000U;
         while (NetworkClassSpawned.ContainsKey(nextId))
         {
             nextId++;

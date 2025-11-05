@@ -22,22 +22,7 @@ internal enum RpcType
     ChooseSeed,
 
     /// <summary>
-    /// Sync when a packet gose on cooldown.
-    /// </summary>
-    SetSeedPacketCooldown,
-
-    /// <summary>
-    /// Sync when all seedpackets on a players side.
-    /// </summary>
-    SetSeedPackets,
-
-    /// <summary>
     /// Sync starting a mower
     /// </summary>
     MowZombie,
-
-    /// <summary>
-    /// Add or remove an amount of money from the opposite player
-    /// </summary>
-    SetMoney
 }

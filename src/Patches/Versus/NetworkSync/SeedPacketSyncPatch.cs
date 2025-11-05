@@ -3,10 +3,10 @@ using Il2CppReloaded.Gameplay;
 using Il2CppReloaded.TreeStateActivities;
 using Il2CppSource.Controllers;
 using ReplantedOnline.Modules;
+using ReplantedOnline.Network;
 using ReplantedOnline.Network.Object;
 using ReplantedOnline.Network.Object.Game;
 using ReplantedOnline.Network.Online;
-using ReplantedOnline.Network.RPC.Handlers;
 using static Il2CppReloaded.Constants;
 
 namespace ReplantedOnline.Patches.Versus.NetworkSync;
@@ -45,7 +45,6 @@ internal static class SeedPacketSyncPatch
                         __instance.Board.TakeSunMoney(cost, ReplantedOnlineMod.Constants.LOCAL_PLAYER_INDEX);
                         __instance.Board.ClearCursor();
                         PlaceSeed(seedType, packet.mImitaterType, gridX, gridY, true);
-                        SetSeedPacketCooldownHandler.Send(seedType);
                         Instances.GameplayActivity.m_audioService.PlaySample(Sound.SOUND_PLANT);
                     }
 
@@ -99,7 +98,6 @@ internal static class SeedPacketSyncPatch
                         __instance.Board.TakeSunMoney(cost, ReplantedOnlineMod.Constants.LOCAL_PLAYER_INDEX);
                         __instance.Board.ClearCursor();
                         PlaceSeed(seedType, packet.mImitaterType, gridX, gridY, true);
-                        SetSeedPacketCooldownHandler.Send(seedType);
                         Instances.GameplayActivity.m_audioService.PlaySample(Sound.SOUND_PLANT);
                     }
 
@@ -164,13 +162,11 @@ internal static class SeedPacketSyncPatch
             var netClass = NetworkClass.SpawnNew<PlantNetworked>(net =>
             {
                 net._Plant = plant;
-                net.PlantID = plant.DataID;
                 net.SeedType = seedType;
                 net.ImitaterType = imitaterType;
                 net.GridX = gridX;
                 net.GridY = gridY;
-            });
-
+            }, SteamNetClient.OpponentClient.SteamId); // Zombie side has priority over everything
             PlantNetworked.NetworkedPlants[plant] = netClass;
         }
 
@@ -232,9 +228,9 @@ internal static class SeedPacketSyncPatch
             var netClass = NetworkClass.SpawnNew<ZombieNetworked>(net =>
             {
                 net._Zombie = zombie;
-                net.ZombieID = zombie.DataID;
                 net.ZombieType = zombieType;
                 net.ZombieSpeed = zombie.mVelX;
+                net.ShakeBush = shakeBush;
                 net.GridX = gridX;
                 net.GridY = gridY;
             });

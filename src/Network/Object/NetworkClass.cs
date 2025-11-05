@@ -212,9 +212,15 @@ internal class NetworkClass : MonoBehaviour, INetworkClass
     /// </summary>
     /// <typeparam name="T">The type of NetworkClass to spawn, must derive from NetworkClass.</typeparam>
     /// <param name="callback">Optional callback to configure the object before spawning.</param>
+    /// <param name="owner">The Steam ID of the owner who controls this network object.</param>
     /// <returns>The newly spawned NetworkClass instance.</returns>
-    public static T SpawnNew<T>(Action<T> callback = default) where T : NetworkClass
+    public static T SpawnNew<T>(Action<T> callback = default, SteamId owner = default) where T : NetworkClass
     {
+        if (owner == default)
+        {
+            owner = SteamUser.Internal.GetSteamID();
+        }
+
         if (PrefabIdTypeLookup.TryGetValue(typeof(T), out var prefabId))
         {
             if (NetworkPrefabs.TryGetValue(prefabId, out var netClass))
@@ -223,7 +229,7 @@ internal class NetworkClass : MonoBehaviour, INetworkClass
                 networkClass.gameObject.SetActive(true);
                 networkClass.transform.SetParent(NetworkClassesObj.transform);
                 callback?.Invoke(networkClass);
-                NetworkDispatcher.Spawn(networkClass, SteamUser.Internal.GetSteamID());
+                NetworkDispatcher.Spawn(networkClass, owner);
                 networkClass.gameObject.name = $"{typeof(T).Name}({networkClass.NetworkId})";
                 return networkClass;
             }
@@ -235,7 +241,7 @@ internal class NetworkClass : MonoBehaviour, INetworkClass
             T networkClass = new GameObject($"{typeof(T)}(???)").AddComponent<T>();
             networkClass.transform.SetParent(NetworkClassesObj.transform);
             callback?.Invoke(networkClass);
-            NetworkDispatcher.Spawn(networkClass, SteamUser.Internal.GetSteamID());
+            NetworkDispatcher.Spawn(networkClass, owner);
             networkClass.gameObject.name = $"{typeof(T).Name}({networkClass.NetworkId})";
             return networkClass;
         }

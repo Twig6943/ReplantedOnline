@@ -298,13 +298,13 @@ internal static class NetworkDispatcher
         if (spawnPacket.PrefabId == NetworkClass.NO_PREFAB_ID)
         {
             var networkClass = new GameObject("???").AddComponent<NetworkClass>();
+            networkClass.NetworkId = spawnPacket.NetworkId;
+            NetLobby.LobbyData.NetworkClassSpawned[networkClass.NetworkId] = networkClass;
             networkClass.transform.SetParent(NetworkClass.NetworkClassesObj.transform);
             networkClass.OwnerId = spawnPacket.OwnerId;
-            networkClass.NetworkId = spawnPacket.NetworkId;
             networkClass.Deserialize(packetReader, true);
             networkClass.HasSpawned = true;
             networkClass.name = $"{networkClass.GetType().Name}({networkClass.NetworkId})";
-            NetLobby.LobbyData.NetworkClassSpawned[networkClass.NetworkId] = networkClass;
             MelonLogger.Msg($"[NetworkDispatcher] Spawned custom NetworkClass from {sender.Name}: {spawnPacket.NetworkId}");
         }
         else
@@ -312,14 +312,14 @@ internal static class NetworkDispatcher
             if (NetworkClass.NetworkPrefabs.TryGetValue(spawnPacket.PrefabId, out var prefab))
             {
                 var networkClass = UnityEngine.Object.Instantiate(prefab);
+                networkClass.NetworkId = spawnPacket.NetworkId;
+                NetLobby.LobbyData.NetworkClassSpawned[networkClass.NetworkId] = networkClass;
                 networkClass.transform.SetParent(NetworkClass.NetworkClassesObj.transform);
                 networkClass.OwnerId = spawnPacket.OwnerId;
-                networkClass.NetworkId = spawnPacket.NetworkId;
                 networkClass.Deserialize(packetReader, true);
                 networkClass.gameObject.SetActive(true);
                 networkClass.HasSpawned = true;
                 networkClass.name = $"{networkClass.GetType().Name}({networkClass.NetworkId})";
-                NetLobby.LobbyData.NetworkClassSpawned[networkClass.NetworkId] = networkClass;
                 MelonLogger.Msg($"[NetworkDispatcher] Spawned prefab NetworkClass from {sender.Name}: {spawnPacket.NetworkId}, Prefab: {spawnPacket.PrefabId}");
             }
             else

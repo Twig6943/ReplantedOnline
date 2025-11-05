@@ -20,8 +20,6 @@ internal static class LawnMowerSyncPatch
         // Only handle network synchronization if we're in a multiplayer lobby
         if (NetLobby.AmInLobby())
         {
-            if (__instance.mMowerState != LawnMowerState.Ready) return false;
-
             // If we're on the plant side in versus mode, don't process lawn mowers
             // (Zombie side has priority over lawn mowers)
             if (VersusState.PlantSide) return false;
@@ -29,6 +27,7 @@ internal static class LawnMowerSyncPatch
             // Send network message to sync this action with other players
             var netZombie = theZombie.GetNetworkedZombie();
             MowZombieHandler.Send(__instance.Row, netZombie);
+            netZombie.SendDeathRpc(DamageFlags.HitsShieldAndBody);
 
             // Execute the original method logic locally
             __instance.MowZombieOriginal(theZombie);

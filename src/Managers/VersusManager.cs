@@ -5,7 +5,6 @@ using ReplantedOnline.Helper;
 using ReplantedOnline.Items.Enums;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
-using ReplantedOnline.Network.RPC.Handlers;
 using ReplantedOnline.Patches.UI;
 
 namespace ReplantedOnline.Managers;
@@ -17,7 +16,7 @@ internal static class VersusManager
 {
     internal static void OnStart()
     {
-        SetSeedPacketsHandler.Send([.. Instances.GameplayActivity.Board.mSeedBank.SeedPackets]);
+        VersusHudPatch.SetHuds();
 
         // Despawn real target zombies so they can spawn on the network
         foreach (var kvp in Instances.GameplayActivity.Board.m_zombies.m_itemLookup)

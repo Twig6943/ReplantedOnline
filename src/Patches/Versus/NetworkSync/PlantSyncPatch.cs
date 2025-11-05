@@ -24,8 +24,7 @@ internal static class PlantSyncPatch
         if (NetLobby.AmInLobby())
         {
             // If we're on the zombie side in versus mode, don't process plant deaths
-            // (Plant side has priority over plant death events)
-            if (VersusState.ZombieSide) return false;
+            if (VersusState.PlantSide) return false;
 
             // Get the networked plant representation and send death RPC to other players
             __instance.GetNetworkedPlant()?.SendDieRpc();
