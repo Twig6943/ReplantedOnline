@@ -31,7 +31,7 @@ internal static class VersusManager
             }
         }
 
-        if (VersusState.ZombieSide)
+        if (VersusState.PlantSide)
         {
             Utils.SpawnZombie(ZombieType.Target, 8, 0, false, true);
             Utils.SpawnZombie(ZombieType.Target, 8, 1, false, true);
