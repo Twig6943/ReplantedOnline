@@ -32,10 +32,6 @@ internal static class PlantPatch
 
                 return false;
             }
-            else
-            {
-
-            }
         }
 
         return true;
