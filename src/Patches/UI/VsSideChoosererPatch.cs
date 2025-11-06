@@ -28,7 +28,7 @@ internal static class VsSideChoosererPatch
         VsSideChooser = __instance.m_panels.FirstOrDefault(pan => pan.gameObject.name == "P_VsSideChooser");
         if (VsSideChooser != null)
         {
-            VsSideChooser.DestroyAllTextLocalizers();
+            VsSideChooser.gameObject.DestroyAllTextLocalizers();
 
             InteractableBlocker = VsSideChooser.transform.Find($"Canvas/Layout/Center/Panel/SelectionSets/DisableInteraction")?.gameObject ?? null;
             InteractableGamePad = VsSideChooser.transform.Find($"Canvas/Layout/Center/Panel/SelectionSets/SelectionSets_SidesChosenNavLayer")?.gameObject ?? null;

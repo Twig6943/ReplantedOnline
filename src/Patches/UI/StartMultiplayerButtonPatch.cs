@@ -15,7 +15,7 @@ internal static class StartMultiplayerButtonPatch
     internal static void Awake_Postfix(StartMultiplayerButton __instance)
     {
         // Remove existing text localization components
-        __instance.DestroyAllTextLocalizers();
+        __instance.gameObject.DestroyAllTextLocalizers();
 
         // Get references to button and text components
         var button = __instance.GetComponentInChildren<Button>(true);

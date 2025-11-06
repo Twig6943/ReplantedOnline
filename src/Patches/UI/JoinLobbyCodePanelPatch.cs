@@ -51,7 +51,8 @@ internal static class JoinLobbyCodePanelPatch
     private static void SetUplobbyCodePanel(PanelView lobbyCodePanel)
     {
         // Remove existing text localization components
-        lobbyCodePanel.DestroyAllTextLocalizers();
+        lobbyCodePanel.m_id = "I_LobbyCodePanel";
+        lobbyCodePanel.gameObject.DestroyAllTextLocalizers();
 
         // Get reference to the input field and set up validation
         _reloadedInputField = GetComp<ReloadedInputField>("Canvas/Layout/Center/Rename/NameInputField");

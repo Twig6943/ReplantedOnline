@@ -48,6 +48,7 @@ internal static class InstanceWrapperPatch
         if (__instance.name == "GlobalPanels(Clone)")
         {
             Instances.GlobalPanels = __instance;
+            ReplantedOnlinePopup.Init(__instance);
         }
     }
 }

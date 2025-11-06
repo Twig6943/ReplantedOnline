@@ -6,11 +6,6 @@ namespace ReplantedOnline.Helper;
 
 internal static class Utils
 {
-    internal static void ShowPopup(string Header, string text)
-    {
-
-    }
-
     internal static PanelView GetPanel(this PanelViewContainer panelViewContainer, string panelId)
     {
         foreach (var panel in panelViewContainer.m_panels)
