@@ -14,7 +14,7 @@ internal static class LevelEntries
 
         foreach (var level in AllLevels)
         {
-            LevelNameLookup[level.FullLevelName] = level;
+            LevelNameLookup[level.name] = level;
         }
     }
 
