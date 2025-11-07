@@ -46,7 +46,12 @@ internal static class ZombieSyncPatch
         try
         {
             // Call the original method - this won't trigger our patch due to the flag
-            __instance.PlayDeathAnim(theDamageFlags);
+            if (__instance.mZombieType == ZombieType.Target)
+                Instances.GameplayActivity.VersusMode.ZombieLife++;
+            if (__instance.GetNetworked<ZombieNetworked>()?.CheckTargetDeath() == true)
+            {
+                __instance.PlayDeathAnim(theDamageFlags);
+            }
         }
         finally
         {

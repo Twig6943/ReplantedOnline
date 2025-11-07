@@ -2,6 +2,8 @@
 using Il2CppReloaded.Gameplay;
 using MelonLoader;
 using ReplantedOnline.Helper;
+using ReplantedOnline.Managers;
+using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
 using ReplantedOnline.Patches.Versus.NetworkSync;
@@ -154,11 +156,32 @@ internal sealed class ZombieNetworked : NetworkClass
     }
 
     [HideFromIl2Cpp]
-    private void HandleEnteringHouseRpc()
+    internal void HandleEnteringHouseRpc()
     {
         EnteringHouse = true;
         StopLarpPos();
         _Zombie?.mPosX = -30f;
+        VersusManager.EndGame(_Zombie.mController.gameObject, false);
+    }
+
+    internal bool CheckTargetDeath()
+    {
+        if (_Zombie?.mZombieType == ZombieType.Target)
+        {
+            if (Instances.GameplayActivity.VersusMode.ZombieLife > 0)
+            {
+                Instances.GameplayActivity.VersusMode.ZombieLife--;
+
+                if (Instances.GameplayActivity.VersusMode.ZombieLife == 0)
+                {
+                    VersusManager.EndGame(_Zombie.mController.gameObject, true);
+
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     [HideFromIl2Cpp]

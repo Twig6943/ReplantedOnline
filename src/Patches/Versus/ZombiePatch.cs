@@ -86,10 +86,12 @@ internal static class ZombiePatch
     }
 
     [HarmonyPatch(typeof(Zombie), nameof(Zombie.WalkIntoHouse))]
-    [HarmonyPostfix]
-    private static void WalkIntoHouse_Postfix(Zombie __instance)
+    [HarmonyPrefix]
+    private static bool WalkIntoHouse_Prefix(Zombie __instance)
     {
-        // Notify all clients that this zombie is entering the house
         __instance.GetNetworked<ZombieNetworked>()?.SendEnteringHouseRpc();
+        __instance.GetNetworked<ZombieNetworked>()?.HandleEnteringHouseRpc();
+
+        return false;
     }
 }

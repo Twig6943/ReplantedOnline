@@ -1,12 +1,15 @@
 ﻿using Il2CppReloaded.Gameplay;
 using Il2CppTekly.PanelViews;
 using Il2CppTMPro;
+using MelonLoader;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Items.Enums;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object.Game;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Patches.UI;
+using System.Collections;
+using UnityEngine;
 
 namespace ReplantedOnline.Managers;
 
@@ -39,6 +42,33 @@ internal static class VersusManager
             Utils.SpawnZombie(ZombieType.Target, 8, 2, false, true);
             Utils.SpawnZombie(ZombieType.Target, 8, 3, false, true);
             Utils.SpawnZombie(ZombieType.Target, 8, 4, false, true);
+        }
+    }
+
+    internal static void EndGame(GameObject focus, bool didPlantsWon)
+    {
+        if (focus == null) return;
+
+        if (didPlantsWon)
+        {
+            Instances.GameplayActivity.VersusMode.Phase = VersusPhase.PlantsWin;
+        }
+        else
+        {
+            Instances.GameplayActivity.VersusMode.Phase = VersusPhase.ZombiesWin;
+        }
+
+        Instances.GameplayActivity.VersusMode.SetFocus(focus, Vector3.zero);
+        Instances.GameplayActivity.Board.mCutScene.StartZombiesWon();
+        MelonCoroutines.Start(CoEndGame());
+    }
+
+    private static IEnumerator CoEndGame()
+    {
+        yield return new WaitForSeconds(Instances.GameplayActivity.VersusMode.m_focusCircleController.m_duration + 1f);
+        if (NetLobby.AmInLobby())
+        {
+            NetLobby.ResetLobby();
         }
     }
 
