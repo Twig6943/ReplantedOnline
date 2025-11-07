@@ -77,6 +77,8 @@ internal sealed class PlantNetworked : NetworkClass
     [HideFromIl2Cpp]
     public override void HandleRpc(SteamNetClient sender, byte rpcId, PacketReader packetReader)
     {
+        if (sender.SteamId != OwnerId) return;
+
         switch (rpcId)
         {
             case 0:

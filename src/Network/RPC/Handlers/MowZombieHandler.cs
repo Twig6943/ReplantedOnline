@@ -30,12 +30,15 @@ internal sealed class MowZombieHandler : RPCHandler
     /// <inheritdoc/>
     internal sealed override void Handle(SteamNetClient sender, PacketReader packetReader)
     {
-        var row = packetReader.ReadInt();
-        var netZombie = (ZombieNetworked)packetReader.ReadNetworkClass();
-        var lawnMower = Instances.GameplayActivity.Board.FindLawnMowerInRow(row);
-        if (lawnMower != null && !lawnMower.mDead && lawnMower.mMowerState == LawnMowerState.Ready)
+        if (!sender.AmZombieSide())
         {
-            lawnMower.MowZombieOriginal(netZombie._Zombie);
+            var row = packetReader.ReadInt();
+            var netZombie = (ZombieNetworked)packetReader.ReadNetworkClass();
+            var lawnMower = Instances.GameplayActivity.Board.FindLawnMowerInRow(row);
+            if (lawnMower != null && !lawnMower.mDead && lawnMower.mMowerState == LawnMowerState.Ready)
+            {
+                lawnMower.MowZombieOriginal(netZombie._Zombie);
+            }
         }
     }
 }
