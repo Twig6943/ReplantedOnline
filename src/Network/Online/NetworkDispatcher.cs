@@ -31,7 +31,7 @@ internal static class NetworkDispatcher
                 {
                     var packet = PacketWriter.Get();
                     NetworkSpawnPacket.SerializePacket(networkClass, packet);
-                    SendTo(steamId, packet, PacketTag.NetworkClassSpawn);
+                    SendPacketTo(steamId, packet, PacketTag.NetworkClassSpawn, P2PSend.ReliableWithBuffering);
                 }
             }
         }
@@ -50,70 +50,11 @@ internal static class NetworkDispatcher
         NetLobby.LobbyData.NetworkClassSpawned[networkClass.NetworkId] = networkClass;
         var packet = PacketWriter.Get();
         NetworkSpawnPacket.SerializePacket(networkClass, packet);
-        Send(packet, false, PacketTag.NetworkClassSpawn);
+        SendPacket(packet, false, PacketTag.NetworkClassSpawn, P2PSend.Reliable);
         networkClass.HasSpawned = true;
 
         packet.Recycle();
         MelonLogger.Msg($"[NetworkDispatcher] Spawned NetworkClass with ID: {networkClass.NetworkId}, Owner: {owner}");
-    }
-
-    /// <summary>
-    /// Sends a packet to a specific client in the lobby by their Steam ID.
-    /// Automatically skips sending to the local client to prevent self-processing.
-    /// </summary>
-    /// <param name="steamId">The Steam ID of the target client to receive the packet.</param>
-    /// <param name="packetWriter">The packet writer containing the data to send.</param>
-    /// <param name="tag">The packet tag identifying the packet type.</param>
-    internal static void SendTo(SteamId steamId, PacketWriter packetWriter, PacketTag tag = PacketTag.None)
-    {
-        if (steamId.GetNetClient().AmLocal) return;
-
-        var packet = PacketWriter.Get();
-        packet.AddTag(tag);
-        packet.WritePacket(packetWriter);
-
-        if (NetLobby.IsPlayerInOurLobby(steamId))
-        {
-            SteamNetworking.SendP2PPacket(steamId, packet.GetBytes(), packet.Length);
-        }
-
-        MelonLogger.Msg($"[NetworkDispatcher] Sent {tag} packet to {steamId.GetNetClient().Name} -> Size: {packet.Length} bytes");
-        packet.Recycle();
-    }
-
-    /// <summary>
-    /// Sends a packet to all connected clients in the lobby.
-    /// </summary>
-    /// <param name="packetWriter">The packet writer containing the data to send.</param>
-    /// <param name="receiveLocally">Whether the local client should also process this packet.</param>
-    /// <param name="tag">The packet tag identifying the packet type.</param>
-    internal static void Send(PacketWriter packetWriter, bool receiveLocally, PacketTag tag = PacketTag.None)
-    {
-        var packet = PacketWriter.Get();
-        packet.AddTag(tag);
-        packet.WritePacket(packetWriter);
-
-        int sentCount = 0;
-        foreach (var client in NetLobby.LobbyData.AllClients.Values)
-        {
-            if (client.AmLocal) continue;
-
-            if (NetLobby.IsPlayerInOurLobby(client.SteamId))
-            {
-                bool sent = SteamNetworking.SendP2PPacket(client.SteamId, packet.GetBytes(), packet.Length);
-                if (sent) sentCount++;
-            }
-        }
-
-        if (receiveLocally)
-        {
-            var rePacket = PacketReader.Get(packet.GetBytes());
-            Streamline(SteamNetClient.LocalClient, rePacket);
-            rePacket.Recycle();
-        }
-
-        MelonLogger.Msg($"[NetworkDispatcher] Sent {tag} packet to {sentCount} clients -> Size: {packet.Length} bytes");
-        packet.Recycle();
     }
 
     /// <summary>
@@ -132,7 +73,7 @@ internal static class NetworkDispatcher
             packet.WritePacket(packetWriter);
         }
 
-        Send(packet, receiveLocally, PacketTag.Rpc);
+        SendPacket(packet, receiveLocally, PacketTag.Rpc, P2PSend.Reliable);
 
         packetWriter?.Recycle();
         packet.Recycle();
@@ -159,12 +100,71 @@ internal static class NetworkDispatcher
             packet.WritePacket(packetWriter);
         }
 
-        Send(packet, receiveLocally, PacketTag.NetworkClassRpc);
+        SendPacket(packet, receiveLocally, PacketTag.NetworkClassRpc, P2PSend.Reliable);
 
         packetWriter?.Recycle();
         packet.Recycle();
 
         MelonLogger.Msg($"[NetworkDispatcher] Sent NetworkClass RPC: {rpcId} for NetworkId: {networkClass.NetworkId}");
+    }
+
+    /// <summary>
+    /// Sends a packet to a specific client in the lobby by their Steam ID.
+    /// Automatically skips sending to the local client to prevent self-processing.
+    /// </summary>
+    /// <param name="steamId">The Steam ID of the target client to receive the packet.</param>
+    /// <param name="packetWriter">The packet writer containing the data to send.</param>
+    /// <param name="tag">The packet tag identifying the packet type.</param>
+    internal static void SendPacketTo(SteamId steamId, PacketWriter packetWriter, PacketTag tag, P2PSend sendType)
+    {
+        if (steamId.GetNetClient().AmLocal) return;
+
+        var packet = PacketWriter.Get();
+        packet.AddTag(tag);
+        packet.WritePacket(packetWriter);
+
+        if (NetLobby.IsPlayerInOurLobby(steamId))
+        {
+            SteamNetworking.SendP2PPacket(steamId, packet.GetBytes(), packet.Length, ReplantedOnlineMod.Constants.SEND_CHANNEL, sendType);
+        }
+
+        MelonLogger.Msg($"[NetworkDispatcher] Sent {tag} packet to {steamId.GetNetClient().Name} -> Size: {packet.Length} bytes");
+        packet.Recycle();
+    }
+
+    /// <summary>
+    /// Sends a packet to all connected clients in the lobby.
+    /// </summary>
+    /// <param name="packetWriter">The packet writer containing the data to send.</param>
+    /// <param name="receiveLocally">Whether the local client should also process this packet.</param>
+    /// <param name="tag">The packet tag identifying the packet type.</param>
+    internal static void SendPacket(PacketWriter packetWriter, bool receiveLocally, PacketTag tag, P2PSend sendType)
+    {
+        var packet = PacketWriter.Get();
+        packet.AddTag(tag);
+        packet.WritePacket(packetWriter);
+
+        int sentCount = 0;
+        foreach (var client in NetLobby.LobbyData.AllClients.Values)
+        {
+            if (client.AmLocal) continue;
+
+            if (NetLobby.IsPlayerInOurLobby(client.SteamId))
+            {
+                bool sent = SteamNetworking.SendP2PPacket(client.SteamId, packet.GetBytes(), packet.Length, ReplantedOnlineMod.Constants.SEND_CHANNEL, sendType);
+                if (sent) sentCount++;
+            }
+        }
+
+        if (receiveLocally)
+        {
+            var rePacket = PacketReader.Get(packet.GetBytes());
+            Streamline(SteamNetClient.LocalClient, rePacket);
+            rePacket.Recycle();
+        }
+
+        MelonLogger.Msg($"[NetworkDispatcher] Sent {tag} packet to {sentCount} clients -> Size: {packet.Length} bytes");
+        packet.Recycle();
     }
 
     /// <summary>
@@ -182,10 +182,10 @@ internal static class NetworkDispatcher
             packet.WriteUInt(networkClass.NetworkId);
             packet.WriteUInt(networkClass.DirtyBits);
             networkClass.Serialize(packet, false);
-            Send(packet, false, PacketTag.NetworkClassSync);
+            SendPacket(packet, false, PacketTag.NetworkClassSync, P2PSend.ReliableWithBuffering);
         }
 
-        while (SteamNetworking.IsP2PPacketAvailable(out uint messageSize))
+        while (SteamNetworking.IsP2PPacketAvailable(out uint messageSize, ReplantedOnlineMod.Constants.SEND_CHANNEL))
         {
             var buffer = P2PPacketBuffer.Get();
 

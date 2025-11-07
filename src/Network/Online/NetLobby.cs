@@ -446,7 +446,7 @@ internal static class NetLobby
 
         var packetWriter = PacketWriter.Get();
         packetWriter.WriteByte((byte)reason);
-        NetworkDispatcher.SendTo(steamId, packetWriter, PacketTag.P2PClose);
+        NetworkDispatcher.SendPacketTo(steamId, packetWriter, PacketTag.P2PClose, P2PSend.Reliable);
 
         TerminateP2PSession(steamId);
     }

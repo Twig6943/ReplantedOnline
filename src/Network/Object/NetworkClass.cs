@@ -258,7 +258,7 @@ internal class NetworkClass : MonoBehaviour, INetworkClass
             NetLobby.LobbyData.NetworkClassSpawned.Remove(NetworkId);
             var packet = PacketWriter.Get();
             packet.WriteUInt(NetworkId);
-            NetworkDispatcher.Send(packet, false, PacketTag.NetworkClassDespawn);
+            NetworkDispatcher.SendPacket(packet, false, PacketTag.NetworkClassDespawn, P2PSend.Reliable);
 
             OwnerId = default;
             NetworkId = 0;
