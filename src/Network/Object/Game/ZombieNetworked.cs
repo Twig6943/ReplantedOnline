@@ -161,9 +161,10 @@ internal sealed class ZombieNetworked : NetworkClass
         EnteringHouse = true;
         StopLarpPos();
         _Zombie?.mPosX = -30f;
-        VersusManager.EndGame(_Zombie.mController.gameObject, false);
+        VersusManager.EndGame(_Zombie?.mController?.gameObject, false);
     }
 
+    // Target zombie death logic
     internal bool CheckTargetDeath()
     {
         if (_Zombie?.mZombieType == ZombieType.Target)
@@ -174,7 +175,7 @@ internal sealed class ZombieNetworked : NetworkClass
 
                 if (Instances.GameplayActivity.VersusMode.ZombieLife == 0)
                 {
-                    VersusManager.EndGame(_Zombie.mController.gameObject, true);
+                    VersusManager.EndGame(_Zombie?.mController?.gameObject, true);
 
                     return false;
                 }

@@ -13,6 +13,7 @@ internal class ReplantedOnlineMod : MelonMod
 {
     public override void OnInitializeMelon()
     {
+        File.WriteAllText("steam_appid.txt", "3654560");
         HarmonyInstance.PatchAll();
         InstanceAttribute.RegisterAll();
         RegisterAllMonoBehavioursInAssembly();
