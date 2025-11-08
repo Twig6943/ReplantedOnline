@@ -49,6 +49,16 @@ internal class NetLobbyData
     internal Dictionary<uint, NetworkClass> NetworkClassSpawned = [];
 
     /// <summary>
+    /// Network class Id pool for the host client
+    /// </summary>
+    internal NetworkIdPool NetworkIdPoolHost = new(0, 9999);
+
+    /// <summary>
+    /// Network class Id pool for the non host client
+    /// </summary>
+    internal NetworkIdPool NetworkIdPoolNonHost = new(10000, 19999);
+
+    /// <summary>
     /// Gets a HashSet of all banned players.
     /// </summary>
     internal readonly HashSet<SteamId> Banned = [];
@@ -106,15 +116,7 @@ internal class NetLobbyData
     /// The next available network ID, starting from 0 for hosts and 100000 for clients
     /// to ensure ID separation between host and client spawned objects
     /// </returns>
-    internal uint GetNextNetworkId()
-    {
-        uint nextId = NetLobby.AmLobbyHost() ? 0U : 10000U;
-        while (NetworkClassSpawned.ContainsKey(nextId))
-        {
-            nextId++;
-        }
-        return nextId;
-    }
+    internal uint GetNextNetworkId() => NetLobby.AmLobbyHost() ? NetworkIdPoolHost.GetUnusedId() : NetworkIdPoolNonHost.GetUnusedId();
 
     /// <summary>
     /// Locally despawns all network objects and clears the spawned objects dictionary
@@ -132,6 +134,8 @@ internal class NetLobbyData
                 UnityEngine.Object.Destroy(kvp.Value.gameObject);
             }
             NetworkClassSpawned.Remove(kvp.Key);
+            NetworkIdPoolHost.ReleaseId(kvp.Key);
+            NetworkIdPoolNonHost.ReleaseId(kvp.Key);
         }
     }
 }

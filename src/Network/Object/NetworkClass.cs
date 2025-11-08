@@ -255,6 +255,8 @@ internal class NetworkClass : MonoBehaviour, INetworkClass
         if (HasSpawned)
         {
             NetLobby.LobbyData.NetworkClassSpawned.Remove(NetworkId);
+            NetLobby.LobbyData.NetworkIdPoolHost.ReleaseId(NetworkId);
+            NetLobby.LobbyData.NetworkIdPoolNonHost.ReleaseId(NetworkId);
             var packet = PacketWriter.Get();
             packet.WriteUInt(NetworkId);
             NetworkDispatcher.SendPacket(packet, false, PacketTag.NetworkClassDespawn, P2PSend.Reliable);

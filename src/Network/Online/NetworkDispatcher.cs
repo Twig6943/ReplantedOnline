@@ -374,6 +374,8 @@ internal static class NetworkDispatcher
             if (networkClass.OwnerId == sender.SteamId)
             {
                 NetLobby.LobbyData.NetworkClassSpawned.Remove(networkId);
+                NetLobby.LobbyData.NetworkIdPoolHost.ReleaseId(networkId);
+                NetLobby.LobbyData.NetworkIdPoolNonHost.ReleaseId(networkId);
                 UnityEngine.Object.Destroy(networkClass.gameObject);
                 MelonLogger.Msg($"[NetworkDispatcher] Despawned NetworkClass from {sender.Name}: {networkId}");
             }
