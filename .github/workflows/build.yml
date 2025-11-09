@@ -1,0 +1,26 @@
+name: Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install .NET 6 SDK
+        run: choco install dotnet-6.0-sdk -y
+
+      - name: Download DepotDownloader
+        run: |
+          curl -L -o DepotDownloader-windows-x64.zip https://github.com/SteamRE/DepotDownloader/releases/latest/download/DepotDownloader-windows-x64.zip
+
+      - name: Extract DepotDownloader
+        run: |
+          Expand-Archive DepotDownloader-windows-x64.zip -DestinationPath DepotDownloader -Force
+
+      - name: List extracted files
+        run: dir depotdownloader
