@@ -121,7 +121,7 @@ internal sealed class ZombieNetworked : NetworkClass
         var writer = PacketWriter.Get();
         writer.WriteInt(theDamage);
         writer.WriteByte((byte)theDamageFlags);
-        this.SendRpc(0, writer, false);
+        this.SendRpc(0, writer);
     }
 
     [HideFromIl2Cpp]
@@ -137,11 +137,16 @@ internal sealed class ZombieNetworked : NetworkClass
         }
     }
 
+    private bool dead;
     internal void SendDeathRpc(DamageFlags damageFlags)
     {
-        var writer = PacketWriter.Get();
-        writer.WriteByte((byte)damageFlags);
-        this.SendRpc(1, writer, false);
+        if (!dead)
+        {
+            dead = true;
+            var writer = PacketWriter.Get();
+            writer.WriteByte((byte)damageFlags);
+            this.SendRpc(1, writer);
+        }
     }
 
     [HideFromIl2Cpp]
@@ -153,7 +158,7 @@ internal sealed class ZombieNetworked : NetworkClass
 
     internal void SendEnteringHouseRpc()
     {
-        this.SendRpc(2, null, false);
+        this.SendRpc(2, null);
     }
 
     [HideFromIl2Cpp]

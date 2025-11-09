@@ -89,7 +89,11 @@ internal sealed class PlantNetworked : NetworkClass
 
     internal void SendDieRpc()
     {
-        this.SendRpc(0, false);
+        if (!dead)
+        {
+            dead = true;
+            this.SendRpc(0, null);
+        }
     }
 
 
