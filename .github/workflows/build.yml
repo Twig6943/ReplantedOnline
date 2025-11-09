@@ -11,7 +11,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install .NET 6 SDK
+      - name: Install .NET 6 SDK + .NET 8 runtime
         run: choco install dotnet-6.0-sdk dotnet-8.0-runtime -y
 
       - name: Download DepotDownloader
@@ -23,4 +23,19 @@ jobs:
           Expand-Archive DepotDownloader-windows-x64.zip -DestinationPath DepotDownloader -Force
 
       - name: List extracted files
-        run: dir depotdownloader
+        run: dir DepotDownloader
+
+      - name: Run DepotDownloader
+        env:
+          STEAM_USER: ${{ secrets.STEAM_USER }}
+          STEAM_PW: ${{ secrets.STEAM_PW }}
+        run: |
+          cd DepotDownloader
+          ./DepotDownloader.exe `
+            -app 3654560 `
+            -depot 3654561 `
+            -manifest 6734528405556237176 `
+            -username "$env:STEAM_USER" `
+            -password "$env:STEAM_PW"
+
+# I dont know how to generate melonloader assemblies so thats for tmrw
