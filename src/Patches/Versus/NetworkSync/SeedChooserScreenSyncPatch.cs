@@ -1,8 +1,7 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.Gameplay;
-using ReplantedOnline.Items.Enums;
 using ReplantedOnline.Network.Online;
-using ReplantedOnline.Network.Packet;
+using ReplantedOnline.Network.RPC.Handlers;
 
 namespace ReplantedOnline.Patches.Versus.NetworkSync;
 
@@ -19,9 +18,7 @@ internal static class SeedChooserScreenSyncPatch
         if (NetLobby.AmInLobby())
         {
             __instance.ClickedSeedInChooserOriginal(theChosenSeed, playerIndex);
-            var packetWriter = PacketWriter.Get();
-            packetWriter.WriteByte((byte)theChosenSeed.mSeedType);
-            NetworkDispatcher.SendRpc(RpcType.ChooseSeed, packetWriter, true);
+            ChooseSeedHandler.Send(theChosenSeed);
 
             return false;
         }
