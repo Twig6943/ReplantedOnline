@@ -16,11 +16,18 @@ internal static class GameplayOptionsMenuPatch
         // Only modify the menu if we're in an online lobby
         if (NetLobby.AmInLobby())
         {
-            // Remove restart button during online matches (can't restart mid-game)
-            var restartLevel = __instance.transform.Find("P_OptionsPanel_Canvas/Layout/Center/Panel/Bottom/Buttons/Hlayout/P_BasicButton_RestartLevel")?.gameObject;
-            if (restartLevel != null)
+            var restartLevelButton = __instance.transform.Find("P_OptionsPanel_Canvas/Layout/Center/Panel/Bottom/Buttons/Hlayout/P_BasicButton_RestartLevel")?.GetComponentInChildren<Button>(true);
+            if (NetLobby.AmLobbyHost())
             {
-                UnityEngine.Object.Destroy(restartLevel);
+                restartLevelButton.onClick = new();
+                restartLevelButton.onClick.AddListener(() =>
+                {
+                    NetLobby.LobbyData?.Networked?.ResetLobby();
+                });
+            }
+            else
+            {
+                UnityEngine.Object.Destroy(restartLevelButton.gameObject);
             }
 
             // Replace main menu button with lobby leave functionality

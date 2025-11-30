@@ -6,7 +6,6 @@ using ReplantedOnline.Items.Enums;
 using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Packet;
-using ReplantedOnline.Network.RPC.Handlers;
 
 namespace ReplantedOnline.Network.Online;
 
@@ -73,7 +72,7 @@ internal static class NetLobby
     internal static void ResetLobby()
     {
         MelonLogger.Msg("[NetLobby] Restarting the lobby");
-        LobbyData.LastGameState = GameState.Lobby;
+        NetLobby.LobbyData.Networked = new();
         LobbyData.LocalDespawnAll();
         Transitions.ToVersus();
         Transitions.ToGameplay();
@@ -251,7 +250,7 @@ internal static class NetLobby
     /// <param name="user">The friend who left the lobby.</param>
     private static void OnLobbyMemberLeave(Lobby lobby, Friend user)
     {
-        if (LobbyData.LastGameState == GameState.Gameplay)
+        if (!NetLobby.LobbyData.Networked.HasStarted)
         {
             ResetLobby();
         }
@@ -351,7 +350,7 @@ internal static class NetLobby
             var sent = SteamNetworking.SendP2PPacket(steamId, packetWriter.GetBytes(), packetWriter.Length);
             packetWriter.Recycle();
 
-            UpdateGameStateHandler.Send(LobbyData.LastGameState, false);
+            NetLobbyData.NetworkedData.SendAllData();
 
             if (sent)
             {

@@ -3,7 +3,6 @@ using Il2CppTekly.PanelViews;
 using Il2CppTMPro;
 using MelonLoader;
 using ReplantedOnline.Helper;
-using ReplantedOnline.Items.Enums;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object.Game;
 using ReplantedOnline.Network.Online;
@@ -129,7 +128,7 @@ internal static class VersusManager
         ResetAllText();
 
         // Handle different game states for team assignment
-        if (NetLobby.LobbyData.LastGameState == GameState.HostChooseZombie)
+        if (!NetLobby.LobbyData.Networked.PickingSides && !NetLobby.LobbyData.Networked.HostIsOnPlantSide)
         {
             // When host chooses zombies, assign host to zombie team and client to plant team
             foreach (var client in NetLobby.LobbyData.AllClients.Values)
@@ -148,7 +147,7 @@ internal static class VersusManager
 
             playerList?.SetText(string.Empty);
         }
-        else if (NetLobby.LobbyData.LastGameState == GameState.HostChoosePlants)
+        else if (!NetLobby.LobbyData.Networked.PickingSides && NetLobby.LobbyData.Networked.HostIsOnPlantSide)
         {
             // When host chooses plants, assign both players to plant team
             foreach (var client in NetLobby.LobbyData.AllClients.Values)
@@ -190,7 +189,7 @@ internal static class VersusManager
 #endif
 
             // Enable buttons only when game is in progress (not in lobby) and there are at least 2 players
-            if (NetLobby.LobbyData.LastGameState != GameState.Lobby && NetLobby.LobbyData.AllClients.Values.Count > 1)
+            if (NetLobby.LobbyData.Networked.PickingSides && NetLobby.LobbyData.AllClients.Values.Count > 1)
             {
                 // Allow host to interact with side selection buttons when conditions are met
                 VsSideChoosererPatch.SetButtonsInteractable(true);

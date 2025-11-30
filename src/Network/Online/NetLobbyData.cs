@@ -1,8 +1,10 @@
 ﻿using Il2CppSteamworks;
+using ReplantedOnline.Items.Attributes;
 using ReplantedOnline.Items.Enums;
 using ReplantedOnline.Managers;
 using ReplantedOnline.Network.Object;
-using ReplantedOnline.Network.RPC.Handlers;
+using ReplantedOnline.Network.Packet;
+using ReplantedOnline.Network.RPC;
 
 namespace ReplantedOnline.Network.Online;
 
@@ -64,11 +66,6 @@ internal class NetLobbyData
     internal readonly HashSet<SteamId> Banned = [];
 
     /// <summary>
-    /// Gets or sets the last known game state of the lobby for synchronization purposes.
-    /// </summary>
-    internal GameState LastGameState = GameState.Lobby;
-
-    /// <summary>
     /// Processes the current list of lobby members, adding new clients and removing disconnected ones.
     /// </summary>
     /// <param name="members">The current list of Steam IDs of members in the lobby.</param>
@@ -91,22 +88,6 @@ internal class NetLobbyData
         }
 
         VersusManager.UpdateSideVisuals();
-    }
-
-    /// <summary>
-    /// Updates the current game state and triggers relevant handlers if the state has changed
-    /// </summary>
-    /// <param name="gameState">The new game state to set</param>
-    internal void UpdateGameState(GameState gameState)
-    {
-        if (!NetLobby.AmLobbyHost()) return;
-
-        if (LastGameState != gameState)
-        {
-            UpdateGameStateHandler.Send(gameState);
-            LastGameState = gameState;
-            VersusManager.UpdateSideVisuals();
-        }
     }
 
     /// <summary>
@@ -136,6 +117,145 @@ internal class NetLobbyData
             NetworkClassSpawned.Remove(kvp.Key);
             NetworkIdPoolHost.ReleaseId(kvp.Key);
             NetworkIdPoolNonHost.ReleaseId(kvp.Key);
+        }
+    }
+
+    internal NetworkedData Networked = new();
+
+    [RegisterRPCHandler]
+    internal class NetworkedData : RPCHandler
+    {
+        private bool _restartingLobby;
+        private bool _hasStarted;
+        private bool _pickingSides = true;
+        private bool _hostIsOnPlantSide;
+
+        internal bool HasStarted
+        {
+            get
+            {
+                return _hasStarted;
+            }
+            set
+            {
+                SendData(1, packetWriter =>
+                {
+                    packetWriter.WriteBool(value);
+                });
+            }
+        }
+        internal bool PickingSides
+        {
+            get
+            {
+                return _pickingSides;
+            }
+            set
+            {
+                if (value is true)
+                {
+                    SendData(2);
+                }
+            }
+        }
+
+        internal bool HostIsOnPlantSide
+        {
+            get
+            {
+                return _hostIsOnPlantSide;
+            }
+            set
+            {
+                SendData(3, packetWriter =>
+                {
+                    packetWriter.WriteBool(value);
+                });
+            }
+        }
+
+        /// <inheritdoc/>
+        internal sealed override RpcType Rpc => RpcType.LobbyData;
+
+        internal void ResetLobby()
+        {
+            if (NetLobby.AmLobbyHost())
+            {
+                SendData(0);
+            }
+        }
+
+        internal static void SendAllData()
+        {
+            SendData(1, packetWriter =>
+            {
+                packetWriter.WriteBool(NetLobby.LobbyData.Networked._hasStarted);
+            });
+            SendData(2, packetWriter =>
+            {
+                packetWriter.WriteBool(NetLobby.LobbyData.Networked._pickingSides);
+            });
+            SendData(3, packetWriter =>
+            {
+                packetWriter.WriteBool(NetLobby.LobbyData.Networked._hostIsOnPlantSide);
+            });
+        }
+
+        private static void SendData(byte dataId, Action<PacketWriter> callback = null)
+        {
+            var packetWriter = PacketWriter.Get();
+            packetWriter.WriteByte(dataId);
+            callback?.Invoke(packetWriter);
+            NetworkDispatcher.SendRpc(RpcType.LobbyData, packetWriter, true);
+        }
+
+        /// <inheritdoc/>
+        internal sealed override void Handle(SteamNetClient sender, PacketReader packetReader)
+        {
+            if (!sender.AmHost) return;
+
+            var dataId = packetReader.ReadByte();
+            var data = NetLobby.LobbyData.Networked;
+
+            switch (dataId)
+            {
+                case 0:
+                    {
+                        if (!data._restartingLobby)
+                        {
+                            data._restartingLobby = true;
+                            NetLobby.ResetLobby();
+                        }
+                    }
+                    break;
+                case 1:
+                    {
+                        data._hasStarted = packetReader.ReadBool();
+                    }
+                    break;
+                case 2:
+                    {
+                        data._pickingSides = true;
+                        VersusManager.ResetPlayerInputs();
+                        VersusManager.UpdateSideVisuals();
+                    }
+                    break;
+                case 3:
+                    {
+                        data._pickingSides = false;
+                        data._hostIsOnPlantSide = packetReader.ReadBool();
+                        if (NetLobby.AmLobbyHost())
+                        {
+                            VersusManager.UpdatePlayerInputs(!data._hostIsOnPlantSide);
+                        }
+                        else
+                        {
+                            VersusManager.UpdatePlayerInputs(data._hostIsOnPlantSide);
+                        }
+                        VersusManager.UpdateSideVisuals();
+                    }
+                    break;
+            }
         }
     }
 }

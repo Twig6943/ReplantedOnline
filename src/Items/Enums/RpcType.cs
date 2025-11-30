@@ -7,6 +7,11 @@
 internal enum RpcType
 {
     /// <summary>
+    /// Updates the lobby base data
+    /// </summary>
+    LobbyData,
+
+    /// <summary>
     /// Initiates the start of a game match with the specified parameters.
     /// </summary>
     StartGame,

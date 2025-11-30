@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.Gameplay;
 using Il2CppSource.DataModels;
-using ReplantedOnline.Items.Enums;
 using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
@@ -62,11 +61,13 @@ internal static class VersusModePatch
 
         if (Instances.GameplayActivity.VersusMode.PlantPlayerIndex == 0)
         {
-            NetLobby.LobbyData.UpdateGameState(GameState.HostChoosePlants);
+            NetLobby.LobbyData.Networked.PickingSides = false;
+            NetLobby.LobbyData.Networked.HostIsOnPlantSide = true;
         }
         else
         {
-            NetLobby.LobbyData.UpdateGameState(GameState.HostChooseZombie);
+            NetLobby.LobbyData.Networked.PickingSides = false;
+            NetLobby.LobbyData.Networked.HostIsOnPlantSide = false;
         }
     }
 
@@ -76,6 +77,6 @@ internal static class VersusModePatch
     {
         if (!NetLobby.AmLobbyHost()) return;
 
-        NetLobby.LobbyData.UpdateGameState(GameState.Lobby);
+        NetLobby.LobbyData.Networked.PickingSides = true;
     }
 }

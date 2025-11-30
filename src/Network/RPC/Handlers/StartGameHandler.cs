@@ -25,6 +25,7 @@ internal sealed class StartGameHandler : RPCHandler
         var packetWriter = PacketWriter.Get();
         packetWriter.WriteByte((byte)selectionSet);
         NetworkDispatcher.SendRpc(RpcType.StartGame, packetWriter, true);
+        NetLobby.LobbyData.Networked.HasStarted = true;
     }
 
     /// <inheritdoc/>
@@ -53,8 +54,6 @@ internal sealed class StartGameHandler : RPCHandler
                     StateTransitionUtils.Transition("InGame");
                     break;
             }
-
-            NetLobby.LobbyData.LastGameState = GameState.Gameplay;
         }
         else
         {
