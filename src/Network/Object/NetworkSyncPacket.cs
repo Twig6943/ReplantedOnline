@@ -3,8 +3,8 @@
 namespace ReplantedOnline.Network.Object;
 
 /// <summary>
-/// Represents a network packet for spawning network objects across clients.
-/// Contains essential information for instantiating and initializing network classes.
+/// Represents a packet used to synchronize the state of a networked object across clients, including its network
+/// identifier, property change flags, and initialization status.
 /// </summary>
 internal class NetworkSyncPacket
 {
@@ -25,12 +25,13 @@ internal class NetworkSyncPacket
     public uint DirtyBits { get; private set; }
 
     /// <summary>
-    /// Serializes a NetworkClass instance into a spawn packet for network transmission.
-    /// Includes ownership, network ID, prefab ID, and initial object state data.
+    /// Serializes the state of the specified network object into the provided packet writer, including its network
+    /// identifier, dirty bits, and initialization status.
     /// </summary>
-    /// <param name="networkClass">The network class instance to serialize.</param>
-    /// <param name="init">If this is to init the network class.</param>
-    /// <param name="packetWriter">The packet writer to write the serialized data to.</param>
+    /// <param name="networkClass">The network object whose state is to be serialized. Cannot be null.</param>
+    /// <param name="init">A value indicating whether the packet represents an initialization state. If <see langword="true"/>, the packet
+    /// will include initialization data.</param>
+    /// <param name="packetWriter">The packet writer to which the serialized data will be written. Cannot be null.</param>
     internal static void SerializePacket(NetworkClass networkClass, bool init, PacketWriter packetWriter)
     {
         packetWriter.WriteUInt(networkClass.NetworkId);
@@ -40,11 +41,11 @@ internal class NetworkSyncPacket
     }
 
     /// <summary>
-    /// Deserializes a NetworkSpawnPacket from incoming network data.
-    /// Extracts ownership, network ID, and prefab information from the packet.
+    /// Deserializes a network synchronization packet from the specified packet reader.
     /// </summary>
-    /// <param name="packetReader">The packet reader containing the spawn packet data.</param>
-    /// <returns>A new NetworkSpawnPacket instance with deserialized data.</returns>
+    /// <param name="packetReader">The packet reader from which to read the network synchronization packet data. Must be positioned at the start of
+    /// a valid packet.</param>
+    /// <returns>A <see cref="NetworkSyncPacket"/> instance containing the deserialized data from the packet reader.</returns>
     internal static NetworkSyncPacket DeserializePacket(PacketReader packetReader)
     {
         NetworkSyncPacket networkSyncPacket = new()
