@@ -1,4 +1,5 @@
 ﻿using Il2CppReloaded.Characters;
+using ReplantedOnline.Helper;
 
 namespace ReplantedOnline.Network.Object.Game;
 
@@ -8,4 +9,9 @@ namespace ReplantedOnline.Network.Object.Game;
 internal class AnimationControllerNetworked : NetworkClass
 {
     internal CharacterAnimationController _AnimationController;
+
+    public void OnDestroy()
+    {
+        _AnimationController?.RemoveNetworkedLookup();
+    }
 }

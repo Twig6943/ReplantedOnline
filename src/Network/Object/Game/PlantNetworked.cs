@@ -70,9 +70,6 @@ internal sealed class PlantNetworked : NetworkClass
         }
     }
 
-    /// <summary>
-    /// Called when the plant is destroyed, cleans up the plant from the networked plants dictionary.
-    /// </summary>
     public void OnDestroy()
     {
         _Plant?.RemoveNetworkedLookup();
@@ -154,6 +151,7 @@ internal sealed class PlantNetworked : NetworkClass
             _Plant.AddNetworkedLookup(this);
 
             AnimationControllerNetworked._AnimationController = _Plant.mController.AnimationController;
+            AnimationControllerNetworked._AnimationController.AddNetworkedLookup(AnimationControllerNetworked);
 
             gameObject.name = $"{Enum.GetName(_Plant.mSeedType)}_Plant ({NetworkId})";
         }

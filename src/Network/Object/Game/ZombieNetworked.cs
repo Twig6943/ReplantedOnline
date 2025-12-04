@@ -249,6 +249,7 @@ internal sealed class ZombieNetworked : NetworkClass
             _Zombie.AddNetworkedLookup(this);
 
             AnimationControllerNetworked._AnimationController = _Zombie.mController.AnimationController;
+            AnimationControllerNetworked._AnimationController.AddNetworkedLookup(AnimationControllerNetworked);
 
             gameObject.name = $"{Enum.GetName(_Zombie.mZombieType)}_Zombie ({NetworkId})";
 

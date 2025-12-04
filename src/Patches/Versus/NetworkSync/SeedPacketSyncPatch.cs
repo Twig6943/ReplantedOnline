@@ -178,6 +178,7 @@ internal static class SeedPacketSyncPatch
                 net.GridY = gridY;
             }, VersusState.PlantSteamId);
             netClass.AnimationControllerNetworked?._AnimationController = plant.mController.AnimationController;
+            netClass.AnimationControllerNetworked?._AnimationController?.AddNetworkedLookup(netClass.AnimationControllerNetworked);
             plant.AddNetworkedLookup(netClass);
             netClass.name = $"{Enum.GetName(plant.mSeedType)}_Plant ({netClass.NetworkId})";
         }
@@ -247,6 +248,7 @@ internal static class SeedPacketSyncPatch
                 net.GridY = gridY;
             }, VersusState.PlantSteamId);
             netClass.AnimationControllerNetworked?._AnimationController = zombie.mController.AnimationController;
+            netClass.AnimationControllerNetworked?._AnimationController?.AddNetworkedLookup(netClass.AnimationControllerNetworked);
             zombie.AddNetworkedLookup(netClass);
             netClass.name = $"{Enum.GetName(zombie.mZombieType)}_Zombie ({netClass.NetworkId})";
         }
