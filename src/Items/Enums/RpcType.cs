@@ -30,4 +30,9 @@ internal enum RpcType
     /// Sync starting a mower
     /// </summary>
     MowZombie,
+
+    /// <summary>
+    /// Signals that the client is loaded and ready.
+    /// </summary>
+    SetClientReady,
 }

@@ -61,12 +61,10 @@ internal static class VersusModePatch
 
         if (Instances.GameplayActivity.VersusMode.PlantPlayerIndex == 0)
         {
-            NetLobby.LobbyData.Networked.PickingSides = false;
             NetLobby.LobbyData.Networked.HostIsOnPlantSide = true;
         }
         else
         {
-            NetLobby.LobbyData.Networked.PickingSides = false;
             NetLobby.LobbyData.Networked.HostIsOnPlantSide = false;
         }
     }

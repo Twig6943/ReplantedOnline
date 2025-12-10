@@ -7,6 +7,7 @@ using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object;
 using ReplantedOnline.Network.Packet;
 using ReplantedOnline.Network.RPC;
+using ReplantedOnline.Network.RPC.Handlers;
 using System.Collections;
 
 namespace ReplantedOnline.Network.Online;
@@ -91,6 +92,23 @@ internal class NetLobbyData
         }
 
         VersusManager.UpdateSideVisuals();
+    }
+
+    /// <summary>
+    /// Determines whether all connected clients are currently marked as ready.
+    /// </summary>
+    /// <returns>true if every client is ready; otherwise, false.</returns>
+    internal bool AllClientsReady() => AllClients.Values.All(c => c.Ready);
+
+    /// <summary>
+    /// Marks all clients as not ready by setting their Ready status to false.
+    /// </summary>
+    internal void UnsetAllClientsReady()
+    {
+        foreach (var client in AllClients.Values)
+        {
+            client.Ready = false;
+        }
     }
 
     /// <summary>
@@ -224,32 +242,36 @@ internal class NetLobbyData
             SendData(1, packetWriter =>
             {
                 packetWriter.WriteBool(NetLobby.LobbyData.Networked._hasStarted);
-            });
+            }, false);
 
             // Send team selection phase status (dataId = 2)
             SendData(2, packetWriter =>
             {
                 packetWriter.WriteBool(NetLobby.LobbyData.Networked._pickingSides);
-            });
+            }, false);
 
             // Send host team assignment (dataId = 3)
             SendData(3, packetWriter =>
             {
                 packetWriter.WriteBool(NetLobby.LobbyData.Networked._hostIsOnPlantSide);
-            });
+            }, false);
         }
 
         /// <summary>
-        /// Helper method to send RPC data with optional payload.
+        /// Sends a lobby data packet to all connected clients, optionally including additional data and controlling
+        /// local receipt.
         /// </summary>
-        /// <param name="dataId">The type of data being sent (0-3).</param>
-        /// <param name="callback">Optional callback to write additional data to the packet.</param>
-        private static void SendData(byte dataId, Action<PacketWriter> callback = null)
+        /// <param name="dataId">The identifier for the type of data to send in the packet.</param>
+        /// <param name="callback">An optional callback that writes additional data to the packet before it is sent. If null, only the data
+        /// identifier is included.</param>
+        /// <param name="receiveLocally">Indicates whether the packet should also be received by the local client. Set to <see langword="true"/> to
+        /// deliver the packet locally; otherwise, <see langword="false"/>.</param>
+        private static void SendData(byte dataId, Action<PacketWriter> callback = null, bool receiveLocally = true)
         {
             var packetWriter = PacketWriter.Get();
             packetWriter.WriteByte(dataId); // Write data type identifier
             callback?.Invoke(packetWriter); // Write additional data if provided
-            NetworkDispatcher.SendRpc(RpcType.LobbyData, packetWriter, true); // Send to all clients
+            NetworkDispatcher.SendRpc(RpcType.LobbyData, packetWriter, receiveLocally); // Send to all clients
         }
 
         /// <inheritdoc/>
@@ -308,6 +330,7 @@ internal class NetLobbyData
                         data._pickingSides = true; // Enable team picking
                         VersusManager.ResetPlayerInputs(); // Clear previous team assignments
                         VersusManager.UpdateSideVisuals(); // Update UI to show team selection
+                        SetReady();
                     }
                     break;
 
@@ -329,11 +352,24 @@ internal class NetLobbyData
                         }
 
                         VersusManager.UpdateSideVisuals(); // Update UI with final team assignments
+
+                        SetReady();
                     }
                     break;
             }
 
             packetReader.Recycle();
+        }
+
+        private static void SetReady()
+        {
+            if (!NetLobby.AmLobbyHost())
+            {
+                if (!SteamNetClient.LocalClient.Ready)
+                {
+                    SetClientReadyHandler.Send(); // Ensure we are marked as ready
+                }
+            }
         }
     }
 }

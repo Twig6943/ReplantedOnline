@@ -1,0 +1,27 @@
+﻿using ReplantedOnline.Items.Attributes;
+using ReplantedOnline.Items.Enums;
+using ReplantedOnline.Managers;
+using ReplantedOnline.Network.Online;
+using ReplantedOnline.Network.Packet;
+
+namespace ReplantedOnline.Network.RPC.Handlers;
+
+[RegisterRPCHandler]
+internal class SetClientReadyHandler : RPCHandler
+{
+    /// <inheritdoc/>
+    internal sealed override RpcType Rpc => RpcType.SetClientReady;
+
+    internal static void Send()
+    {
+        SteamNetClient.LocalClient.Ready = true;
+        NetworkDispatcher.SendRpc(RpcType.SetClientReady, null);
+    }
+
+    /// <inheritdoc/>
+    internal sealed override void Handle(SteamNetClient sender, PacketReader packetReader)
+    {
+        sender.Ready = true;
+        VersusManager.UpdateSideVisuals();
+    }
+}

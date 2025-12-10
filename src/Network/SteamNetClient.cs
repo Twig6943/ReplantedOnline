@@ -33,6 +33,17 @@ internal class SteamNetClient
         MelonLogger.Msg($"[SteamNetClient] P2P connections initialized with {Name} ({SteamId})");
     }
 
+    private bool _ready;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the player is loaded and ready.
+    /// </summary>
+    internal bool Ready
+    {
+        get { if (AmHost) return true; return _ready; }
+        set { _ready = value; }
+    }
+
     /// <summary>
     /// Get the local SteamNetClient
     /// </summary>

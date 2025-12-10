@@ -68,7 +68,10 @@ internal static class VersusManager
 
         Instances.GameplayActivity.VersusMode.SetFocus(focus, Vector3.zero);
         Instances.GameplayActivity.Board.mCutScene.StartZombiesWon();
-        MelonCoroutines.Start(CoEndGame());
+        if (NetLobby.AmLobbyHost())
+        {
+            MelonCoroutines.Start(CoEndGame());
+        }
     }
 
     private static IEnumerator CoEndGame()
@@ -76,7 +79,7 @@ internal static class VersusManager
         yield return new WaitForSeconds(3f);
         if (NetLobby.AmInLobby())
         {
-            NetLobby.ResetLobby();
+            NetLobby.LobbyData.Networked.ResetLobby();
         }
     }
 
@@ -229,8 +232,9 @@ internal static class VersusManager
         var clients = NetLobby.LobbyData?.AllClients.Values;
 
         bool shouldEnableButtons = networked != null
-            && networked.PickingSides
-            && clients?.Count > 1;
+            && !networked.PickingSides
+            && clients?.Count > 1
+            && NetLobby.LobbyData.AllClientsReady();
 
         VsSideChoosererPatch.SetButtonsInteractable(shouldEnableButtons);
     }
