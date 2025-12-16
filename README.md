@@ -6,8 +6,11 @@
 <p align="center">
 
 <div style="text-align: center;">
-    <a href="https://discord.gg/9PN4gxHC4B" target="_blank">
-        <img src="https://img.shields.io/badge/Discord%20-%231DA1F2.svg?&style=for-the-badge&logo=discord&logoColor=white&color=5662f6" width="200" height="50"/>
+    <a href='https://discord.gg/9PN4gxHC4B' target="_blank">
+        <img alt='Discord' src='https://img.shields.io/badge/Discord-100000?style=for-the-badge&logo=Discord&logoColor=white&labelColor=000000&color=5865F2' style="width: 250px; height: 58px;"/>
+    </a>
+    <a href='https://gamebanana.com/wips/96467' target="_blank">
+        <img alt='Gamebanana' src='https://img.shields.io/badge/Game_Banana-100000?style=for-the-badge&logo=Gamebanana&logoColor=FFEE00&labelColor=000000&color=FBFF00' style="width: 300px; height: 58px;"/>
     </a>
 </div>
 
