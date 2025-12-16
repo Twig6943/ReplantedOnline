@@ -18,7 +18,10 @@
   </ItemGroup>
 	
   <ItemGroup>
-    <PackageReference Include="LavaGang.MelonLoader" Version="0.7.1" />
-    <PackageReference Include="Lib.Harmony" Version="2.4.2" />
+    <PackageReference Include="HarmonyX" Version="2.16.0" />
   </ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="copy &quot;$(TargetDir)ReplantedOnline.dll&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\PVZ Replanted\Modded\Mods&quot;" />
+	</Target>
 </Project>
