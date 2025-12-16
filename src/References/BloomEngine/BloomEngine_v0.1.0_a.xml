@@ -1,0 +1,248 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BloomEngine</name>
+    </assembly>
+    <members>
+        <member name="T:BloomEngine.Config.ConfigMenu">
+            <summary>
+            A static class which provides methods for creating input fields for a mod config menu.
+            The supported types are: <c>string, int, float, bool and enum</c>
+            </summary>
+        </member>
+        <member name="M:BloomEngine.Config.ConfigMenu.CreateStringInput(System.String,System.String,System.Action{System.String},System.Action,System.Func{System.String,System.String},System.Func{System.String,System.Boolean})">
+            <summary>
+            Creates a <see cref="T:System.String"/> input field in the form of a textbox in your mod's config menu and returns it.
+            To register your config with the mod menu, make all your input fields publicly accessible in a static config class
+            and call <see cref="M:BloomEngine.Menu.ModEntry.AddConfig(System.Type)"/>, passing in your config class as the type.
+            </summary>
+            <param name="name">The name of this input field, which will be displayed in the config menu.</param>
+            <param name="defaultValue">This default value of this config input field.</param>
+            <param name="onValueChanged">An action to run when the value is updated in the config.</param>
+            <param name="onInputChanged">An action to run every time the input is changed in the config.</param>
+            <param name="transformValue">A transformer function that modifies the new value before it is updated.</param>
+            <param name="validateValue">A function to validate the new value before it is updated.</param>
+            <returns>A <see cref="T:BloomEngine.Config.Inputs.StringInputField"/> instance. You can read and modify the value of this config property using <see cref="P:BloomEngine.Config.Inputs.IInputField`1.Value"/>.</returns>
+        </member>
+        <member name="M:BloomEngine.Config.ConfigMenu.CreateIntInput(System.String,System.Int32,System.Action{System.Int32},System.Action,System.Func{System.Int32,System.Int32},System.Func{System.Int32,System.Boolean})">
+            <summary>
+            Creates an <see cref="T:System.Int32"/> input field in the form of a numeric textbox in your mod's config menu and returns it.
+            To register your config with the mod menu, make all your input fields publicly accessible in a static config class
+            and call <see cref="M:BloomEngine.Menu.ModEntry.AddConfig(System.Type)"/>, passing in your config class as the type.
+            </summary>
+            <param name="name">The name of this input field, which will be displayed in the config menu.</param>
+            <param name="defaultValue">This default value of this config input field.</param>
+            <param name="onValueChanged">An action to run when the value is updated in the config.</param>
+            <param name="onInputChanged">An action to run every time the input is changed in the config.</param>
+            <param name="transformValue">A transformer function that modifies the new value before it is updated.</param>
+            <param name="validateValue">A function to validate the new value before it is updated.</param>
+            <returns>An <see cref="T:BloomEngine.Config.Inputs.IntInputField"/> instance. You can read and modify the value of this config property using <see cref="P:BloomEngine.Config.Inputs.IInputField`1.Value"/>.</returns>
+        </member>
+        <member name="M:BloomEngine.Config.ConfigMenu.CreateFloatInput(System.String,System.Single,System.Single,System.Single,System.Action{System.Single},System.Action,System.Func{System.Single,System.Single},System.Func{System.Single,System.Boolean})">
+            <summary>
+            Creates a <see cref="T:System.Single"/> input field in the form of a slider in your mod's config menu and returns it.
+            To register your config with the mod menu, make all your input fields publicly accessible in a static config class
+            and call <see cref="M:BloomEngine.Menu.ModEntry.AddConfig(System.Type)"/>, passing in your config class as the type.
+            </summary>
+            <param name="name">The name of this input field, which will be displayed in the config menu.</param>
+            <param name="defaultValue">This default value of this config input field.</param>
+            <param name="minValue">The minimum value of this input field.</param>
+            <param name="maxValue">The maximum value of this input field.</param>
+            <param name="onValueChanged">An action to run when the value is updated in the config.</param>
+            <param name="onInputChanged">An action to run every time the input is changed in the config.</param>
+            <param name="transformValue">A transformer function that modifies the new value before it is updated.</param>
+            <param name="validateValue">A function to validate the new value before it is updated.</param>
+            <returns>A <see cref="T:BloomEngine.Config.Inputs.FloatInputField"/> instance. You can read and modify the value of this config property using <see cref="P:BloomEngine.Config.Inputs.IInputField`1.Value"/>.</returns>
+        </member>
+        <member name="M:BloomEngine.Config.ConfigMenu.CreateBoolInput(System.String,System.Boolean,System.Action{System.Boolean},System.Action)">
+            <summary>
+            Creates a <see cref="T:System.Boolean"/> input field in the form of a checkbox in your mod's config menu and returns it.
+            To register your config with the mod menu, make all your input fields publicly accessible in a static config class
+            and call <see cref="M:BloomEngine.Menu.ModEntry.AddConfig(System.Type)"/>, passing in your config class as the type.
+            </summary>
+            <param name="name">The name of this input field, which will be displayed in the config menu.</param>
+            <param name="defaultValue">This default value of this config input field.</param>
+            <param name="onValueChanged">An action to run when the value is updated in the config.</param>
+            <param name="onInputChanged">An action to run every time the input is changed in the config.</param>
+            <returns>A <see cref="T:BloomEngine.Config.Inputs.BoolInputField"/> instance. You can read and modify the value of this config property using <see cref="P:BloomEngine.Config.Inputs.IInputField`1.Value"/>.</returns>
+        </member>
+        <member name="M:BloomEngine.Config.ConfigMenu.CreateEnumInput(System.String,System.Enum,System.Action{System.Enum},System.Action,System.Func{System.Enum,System.Boolean})">
+            <summary>
+            Creates an <see cref="T:System.Enum"/> input field in the form of a dropdown in your mod's config menu and returns it.
+            To register your config with the mod menu, make all your input fields publicly accessible in a static config class
+            and call <see cref="M:BloomEngine.Menu.ModEntry.AddConfig(System.Type)"/>, passing in your config class as the type.
+            </summary>
+            <param name="name">The name of this input field, which will be displayed in the config menu.</param>
+            <param name="defaultValue">This default value of this config input field.</param>
+            <param name="onValueChanged">An action to run when the value is updated in the config.</param>
+            <param name="onInputChanged">An action to run every time the input is changed in the config.</param>
+            <param name="validateValue">A function to validate the new value before it is updated.</param>
+            <returns>An <see cref="T:BloomEngine.Config.Inputs.EnumInputField"/> instance. You can read and modify the value of this config property using <see cref="P:BloomEngine.Config.Inputs.IInputField`1.Value"/>.</returns>
+        </member>
+        <member name="M:BloomEngine.Config.ConfigPanel.ShowPanel">
+            <summary>
+            Displays the panel and populates its input fields with the current values of the associated properties.
+            </summary>
+        </member>
+        <member name="M:BloomEngine.Config.ConfigPanel.HidePanel">
+            <summary>
+            Hides this panel.
+            </summary>
+        </member>
+        <member name="M:BloomEngine.Config.ConfigPanel.SetPageIndex(System.Int32)">
+            <summary>
+            Sets the current page index, updating the displayed page and related UI elements accordingly.
+            </summary>
+            <param name="index">The index of the page to display.</param>
+        </member>
+        <member name="M:BloomEngine.Config.Inputs.IntInputField.SanitiseNumericInput(System.String)">
+            <summary>
+            Performs basic sanitisation of numeric input strings to be used for live input fields. Does not perform clamping, parsing or type conversion.
+            </summary>
+        </member>
+        <member name="M:BloomEngine.Config.Inputs.IntInputField.ValidateNumericInput(System.String,System.Type)">
+            <summary>
+            Performs full validation of a string input for a numeric type, including sanitisation, parsing and clamping to the type's min/max values.
+            </summary>
+        </member>
+        <member name="M:BloomEngine.Config.Inputs.IntInputField.FormatNumericString(System.String)">
+            <summary>
+            Ensures that a given string is a valid numeric representation for the specified numeric type and can be parsed.
+            </summary>
+        </member>
+        <member name="T:BloomEngine.Menu.ModEntry">
+            <summary>
+            A mod entry that shows up in the mod menu if <see cref="M:BloomEngine.Menu.ModEntry.Register"/> is called.
+            </summary>
+        </member>
+        <member name="M:BloomEngine.Menu.ModEntry.AddDisplayName(System.String)">
+            <summary>
+            Adds a custom display name that will replace this entry's mod name in the mod menu.
+            </summary>
+            <param name="displayName">The string containing the custom display name.</param>
+            <returns>This mod entry with the custom display name.</returns>
+        </member>
+        <member name="M:BloomEngine.Menu.ModEntry.AddDescription(System.String)">
+            <summary>
+            Adds a description to this mod entry in the mod menu, displaying it under the mod's name.
+            If no description is provided, it will be replaced by the author and version number of the mod.
+            </summary>
+            <param name="description">A string containing the description of this mod.</param>
+            <returns>This mod entry with the new description.</returns>
+        </member>
+        <member name="M:BloomEngine.Menu.ModEntry.AddConfig(System.Type)">
+            <summary>
+            Adds a config to this mod using a static config class.
+            To add input fields, use the static methods provided by <see cref="T:BloomEngine.Config.ConfigMenu"/> and make the result publicly accessible.
+            </summary>
+            <param name="staticConfig">The static class type containing public input fields to be registered in the config menu.</param>
+            <returns>This mod entry with the config added.</returns>
+        </member>
+        <member name="M:BloomEngine.Menu.ModEntry.Register">
+            <summary>
+            Registers this <see cref="T:BloomEngine.Menu.ModEntry"/>, making it appear in the mod menu with the provided information.
+            </summary>
+            <returns>The registered entry.</returns>
+        </member>
+        <member name="T:BloomEngine.Menu.ModMenu">
+            <summary>
+            A static class responsible for registering mod entries and adding them to the mod menu.
+            </summary>
+        </member>
+        <member name="P:BloomEngine.Menu.ModMenu.Entries">
+            <summary>
+            A read-only dictionary of all registered mod entries in the Mod Menu, indexed by their associated MelonMod.
+            </summary>
+        </member>
+        <member name="E:BloomEngine.Menu.ModMenu.OnModRegistered">
+            <summary>
+            Event invoked when a mod is registered to the Mod Menu
+            </summary>
+        </member>
+        <member name="M:BloomEngine.Menu.ModMenu.CreateEntry(MelonLoader.MelonMod)">
+            <summary>
+            Creates a new mod entry which can be customised and added with <see cref="M:BloomEngine.Menu.ModEntry.Register"/>.
+            </summary>
+            <param name="mod">The mod this entry belongs to.</param>
+            <param name="displayName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BloomEngine.Menu.ModMenu.Register(BloomEngine.Menu.ModEntry)">
+            <summary>
+            Registers a mod entry with the mod menu and invoked the <see cref="E:BloomEngine.Menu.ModMenu.OnModRegistered"/> event.
+            </summary>
+        </member>
+        <member name="M:BloomEngine.Menu.ModMenu.Log(System.String,UnityEngine.LogType)">
+            <summary>
+            Logs a message to the MelonLoader console with the ModMenu prefix.
+            Uses Unity's LogType enum because I can't be bothered to make my own XD.
+            Defaults to Log, can also use Warning or Error.
+            </summary>
+        </member>
+        <member name="M:BloomEngine.Menu.ModMenuManager.SetHeaderText(System.String)">
+            <summary>
+            Sets the title text of the container screen
+            </summary>
+        </member>
+        <member name="M:BloomEngine.Menu.ModMenuManager.ShowModEntries(System.Boolean)">
+            <summary>
+            Replaces the achievement entries with the mod entires, or vice versa.
+            </summary>
+            <param name="show">Whether to show the mod list of the achievement list.</param>
+        </member>
+        <member name="M:BloomEngine.Menu.ModMenuManager.OpenModList">
+            <summary>
+            Opens the mod list and updates the UI.
+            </summary>
+        </member>
+        <member name="M:BloomEngine.Menu.ModMenuManager.PlayTransitionAnim">
+            <summary>
+            Triggers the animation that plays when the camera pans down to the container screen.
+            </summary>
+        </member>
+        <member name="M:BloomEngine.Utilities.AssetHelper.LoadSprite(System.String)">
+            <summary>
+            Loads a sprite from an embedded resource stream using the specified asset path.
+            </summary>
+            <remarks>The method attempts to load the specified asset as an embedded resource from the executing
+            assembly. If the resource is not found, a placeholder texture is used to create the sprite. The sprite's pivot
+            is set to the center of the texture, and the pixels-per-unit value is derived from the texture's
+            width.</remarks>
+            <param name="assetPath">The path to the embedded resource containing the sprite data. This must be a valid resource path within the
+            executing assembly.</param>
+            <returns>A <see cref="T:UnityEngine.Sprite"/> object created from the embedded resource. The sprite is generated with default pivot and
+            pixels-per-unit values. If the resource cannot be found, the sprite will be created from a 1x1 placeholder
+            texture.</returns>
+        </member>
+        <member name="M:BloomEngine.Utilities.AssetHelper.LoadAssetBundle(System.String)">
+            <summary>
+            Loads an embedded AssetBundle resource from the Assets directory.
+            </summary>
+            <param name="bundleName">Filename of the AssetBundle</param>
+            <returns>Loaded AssetBundle</returns>
+        </member>
+        <member name="M:BloomEngine.Utilities.AssetHelper.ReadFully(System.IO.Stream)">
+            <summary>
+            Fully reads a stream into a byte array.
+            </summary>
+            <param name="input">Input stream</param>
+            <returns>Output byte array</returns>
+        </member>
+        <member name="T:BloomEngine.Utilities.Il2CppHelper">
+            <summary>
+            Static class that provides extensions for some Il2Cpp and Unity types.
+            </summary>
+        </member>
+        <member name="M:BloomEngine.Utilities.Il2CppHelper.RegisterAllMonoBehaviours(System.Reflection.Assembly)">
+            <summary>
+            Searches for all <see cref="T:UnityEngine.MonoBehaviour"/> types in the given assembly and registers them in Il2Cpp.
+            </summary>
+            <param name="assembly">Assembly to register types from. Use <see cref="P:MelonLoader.MelonBase.MelonAssembly"/> to get the assembly of your mod.</param>
+        </member>
+        <member name="T:BloomEngine.Utilities.UIHelper">
+            <summary>
+            Static helper class that provides methods for creating UI elements.
+            </summary>
+        </member>
+    </members>
+</doc>

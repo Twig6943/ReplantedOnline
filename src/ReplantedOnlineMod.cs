@@ -2,6 +2,8 @@
 using Il2CppSteamworks;
 using MelonLoader;
 using ReplantedOnline.Items.Attributes;
+using ReplantedOnline.Items.Enums;
+using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object;
 using ReplantedOnline.Network.Online;
@@ -12,14 +14,22 @@ namespace ReplantedOnline;
 
 internal class ReplantedOnlineMod : MelonMod
 {
+    internal static HarmonyLib.Harmony harmony = new(ModInfo.ModGUID);
+
+    [Obsolete]
+    public override void OnApplicationStart()
+    {
+        File.WriteAllText("steam_appid.txt", ((uint)AppIdServers.PVZ_Replanted).ToString());
+        harmony.PatchAll();
+        Application.runInBackground = true;
+    }
+
     public override void OnInitializeMelon()
     {
-        File.WriteAllText("steam_appid.txt", "3654560");
-        HarmonyInstance.PatchAll();
         InstanceAttribute.RegisterAll();
         RegisterAllMonoBehavioursInAssembly();
         NetworkClass.SetupPrefabs();
-        Application.runInBackground = true;
+        BloomEngineManager.InitBloom(this);
     }
 
     public override void OnUpdate()
@@ -39,13 +49,7 @@ internal class ReplantedOnlineMod : MelonMod
         {
             if (loaded) return;
             loaded = true;
-
-            // Must make sure Il2CppSteamworks has initialized!
-            if (!SteamClient.initialized)
-            {
-                SteamClient.Init(3654560);
-            }
-
+            SteamClient.Init(0);
             LevelEntries.Init();
             NetLobby.Initialize();
         }

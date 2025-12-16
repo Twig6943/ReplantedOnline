@@ -266,7 +266,7 @@ internal static class VersusManager
     /// </summary>
     private static void UpdateHeaderEvents()
     {
-        EventTrigger trigger = lobbyCodeHeaderTrigger.GetComponent<EventTrigger>();
+        EventTrigger trigger = lobbyCodeHeaderTrigger?.GetComponent<EventTrigger>();
         if (trigger != null)
         {
             trigger.triggers = new Il2CppSystem.Collections.Generic.List<EventTrigger.Entry>();
