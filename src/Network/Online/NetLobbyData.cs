@@ -65,11 +65,6 @@ internal class NetLobbyData
     internal NetworkIdPool NetworkIdPoolNonHost = new(200000, 300000);
 
     /// <summary>
-    /// Gets a HashSet of all banned players.
-    /// </summary>
-    internal readonly HashSet<SteamId> Banned = [];
-
-    /// <summary>
     /// Processes the current list of lobby members, adding new clients and removing disconnected ones.
     /// </summary>
     /// <param name="members">The current list of Steam IDs of members in the lobby.</param>
@@ -80,14 +75,14 @@ internal class NetLobbyData
         // Add new members that aren't already in our client list
         foreach (var member in members)
         {
-            if (ids.Contains(member) || Banned.Contains(member)) continue;
+            if (ids.Contains(member)) continue;
             AllClients[member] = new(member);
         }
 
         // Remove members that are no longer in the lobby or banned
         foreach (var id in ids)
         {
-            if (members.Contains(id) && !Banned.Contains(id)) continue;
+            if (members.Contains(id)) continue;
             AllClients.Remove(id);
         }
 

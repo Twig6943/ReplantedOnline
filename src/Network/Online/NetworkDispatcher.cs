@@ -219,13 +219,6 @@ internal static class NetworkDispatcher
 
         if (SteamNetworking.ReadP2PPacket(buffer.Data, ref buffer.Size, ref buffer.Steamid, channel))
         {
-            if (buffer.Steamid.Banned())
-            {
-                MelonLogger.Msg($"[NetworkDispatcher] Discarded packet from banned player: {buffer.Steamid}");
-                buffer.Recycle();
-                return;
-            }
-
             var sender = buffer.Steamid.GetNetClient();
             MelonLogger.Msg($"[NetworkDispatcher] Received packet from {sender.Name} ({buffer.Steamid}) -> Size: {buffer.Size} bytes");
 

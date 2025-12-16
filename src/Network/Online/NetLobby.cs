@@ -337,13 +337,6 @@ internal static class NetLobby
     {
         try
         {
-            if (LobbyData?.Banned.Contains(steamId) == true)
-            {
-                MelonLogger.Msg($"[NetLobby] Skipping P2P request to banned player: {steamId}");
-                TryRemoveFromLobby(steamId, BanReasons.Banned);
-                return;
-            }
-
             // Send a small dummy packet to initiate P2P connection
             // This will trigger the remote client's OnP2PSessionRequest
             var packetWriter = PacketWriter.Get();
@@ -365,51 +358,6 @@ internal static class NetLobby
         catch (Exception ex)
         {
             MelonLogger.Error($"[NetLobby] Error requesting P2P session with {steamId}: {ex.Message}");
-        }
-    }
-
-    /// <summary>
-    /// Kicks a player from the current lobby and terminates P2P connections.
-    /// </summary>
-    /// <param name="steamId">The Steam ID of the player to kick.</param>
-    /// <param name="reason">The reason for the bam.</param>
-    internal static void BanPlayer(SteamId steamId, BanReasons reason = BanReasons.ByHost)
-    {
-        if (!AmInLobby())
-        {
-            MelonLogger.Warning("[NetLobby] Cannot kick player - not in a lobby");
-            return;
-        }
-
-        if (!AmLobbyHost())
-        {
-            MelonLogger.Warning("[NetLobby] Only the lobby host can kick players");
-            return;
-        }
-
-        if (steamId == SteamUser.Internal.GetSteamID())
-        {
-            MelonLogger.Warning("[NetLobby] Cannot kick yourself");
-            return;
-        }
-
-        if (!IsPlayerInOurLobby(steamId))
-        {
-            MelonLogger.Warning($"[NetLobby] Player {steamId} is not in the lobby");
-            return;
-        }
-
-        try
-        {
-            LobbyData.Banned.Add(steamId);
-
-            TryRemoveFromLobby(steamId, reason);
-
-            MelonLogger.Msg($"[NetLobby] Kicked and banned player {steamId} (P2P terminated)");
-        }
-        catch (Exception ex)
-        {
-            MelonLogger.Error($"[NetLobby] Error kicking player {steamId}: {ex.Message}");
         }
     }
 
