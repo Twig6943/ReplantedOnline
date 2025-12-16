@@ -68,19 +68,7 @@ internal static class VersusManager
 
         Instances.GameplayActivity.VersusMode.SetFocus(focus, Vector3.zero);
         Instances.GameplayActivity.Board.mCutScene.StartZombiesWon();
-        if (NetLobby.AmLobbyHost())
-        {
-            MelonCoroutines.Start(CoEndGame());
-        }
-    }
-
-    private static IEnumerator CoEndGame()
-    {
-        yield return new WaitForSeconds(3f);
-        if (NetLobby.AmInLobby())
-        {
-            NetLobby.LobbyData.Networked.ResetLobby();
-        }
+        EndGameManager.EndGame(didPlantsWon);
     }
 
     // UI text components for displaying player names on each team

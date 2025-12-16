@@ -264,8 +264,10 @@ internal static class NetworkDispatcher
                 if (sender.AmHost && !NetLobby.AmLobbyHost())
                 {
                     BanReasons reason = (BanReasons)packetReader.ReadByte();
-                    NetLobby.LeaveLobby();
-                    ReplantedOnlinePopup.ShowOnTransition("Disconnected", "You have been disconnected by the Host!");
+                    NetLobby.LeaveLobby(() =>
+                    {
+                        ReplantedOnlinePopup.Show("Disconnected", "You have been disconnected by the Host!");
+                    });
                     MelonLogger.Msg("[NetworkDispatcher] P2P closed by host");
                 }
                 break;

@@ -37,8 +37,10 @@ internal class MatchmakingManager
                 if (task.IsFaulted)
                 {
                     MelonLogger.Error($"[NetLobby] Lobby search failed: {task.Exception}");
-                    Transitions.ToMainMenu();
-                    ReplantedOnlinePopup.ShowOnTransition("Disconnected", $"An critical error occurred!");
+                    Transitions.ToMainMenu(() =>
+                    {
+                        ReplantedOnlinePopup.Show("Disconnected", $"An critical error occurred!");
+                    });
                     return;
                 }
 
@@ -47,8 +49,10 @@ internal class MatchmakingManager
                 if (lobbies == null)
                 {
                     MelonLogger.Msg("[NetLobby] No lobbies found");
-                    Transitions.ToMainMenu();
-                    ReplantedOnlinePopup.ShowOnTransition("Disconnected", $"Unable to find lobby with {gameCode} code!");
+                    Transitions.ToMainMenu(() =>
+                    {
+                        ReplantedOnlinePopup.Show("Disconnected", $"Unable to find lobby with {gameCode} code!");
+                    });
                     return;
                 }
 
@@ -69,8 +73,10 @@ internal class MatchmakingManager
                         if (modVersion != ModInfo.ModVersion)
                         {
                             MelonLogger.Warning($"[NetLobby] Mod version mismatch. Expected: {ModInfo.ModVersion}, Found: {modVersion}");
-                            Transitions.ToMainMenu();
-                            ReplantedOnlinePopup.ShowOnTransition("Disconnected", $"Unable to join due to mod version mismatch\nv{modVersion}");
+                            Transitions.ToMainMenu(() =>
+                            {
+                                ReplantedOnlinePopup.Show("Disconnected", $"Unable to join due to mod version mismatch\nv{modVersion}");
+                            });
                             return;
                         }
 
@@ -80,8 +86,10 @@ internal class MatchmakingManager
                     else
                     {
                         MelonLogger.Warning($"[NetLobby] Game code mismatch. Expected: {gameCode}, Found: {foundGameCode}");
-                        Transitions.ToMainMenu();
-                        ReplantedOnlinePopup.ShowOnTransition("Disconnected", $"Unable to find lobby with {gameCode} code!");
+                        Transitions.ToMainMenu(() =>
+                        {
+                            ReplantedOnlinePopup.Show("Disconnected", $"Unable to find lobby with {gameCode} code!");
+                        });
                     }
                 }
             }));

@@ -101,7 +101,7 @@ internal static class NetLobby
     /// <summary>
     /// Leaves the current lobby and cleans up network connections.
     /// </summary>
-    internal static void LeaveLobby()
+    internal static void LeaveLobby(Action callback = null)
     {
         if (LobbyData == null)
         {
@@ -112,7 +112,7 @@ internal static class NetLobby
         MelonLogger.Msg($"[NetLobby] Leaving lobby {LobbyData.LobbyId}");
         SteamMatchmaking.Internal.LeaveLobby(LobbyData.LobbyId);
         LobbyData.LocalDespawnAll();
-        Transitions.ToMainMenu();
+        Transitions.ToMainMenu(callback);
         LobbyData = null;
         MelonLogger.Msg("[NetLobby] Successfully left lobby");
     }
@@ -212,8 +212,10 @@ internal static class NetLobby
     {
         if (lobby.Owner.Id != LobbyData?.HostId)
         {
-            LeaveLobby();
-            ReplantedOnlinePopup.ShowOnTransition("Disconnected", "Host has left the game!");
+            LeaveLobby(() =>
+            {
+                ReplantedOnlinePopup.Show("Disconnected", "Host has left the game!");
+            });
             MelonLogger.Warning("[NetLobby] Lobby host left the game");
         }
     }

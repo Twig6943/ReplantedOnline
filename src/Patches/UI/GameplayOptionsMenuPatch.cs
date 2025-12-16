@@ -33,7 +33,7 @@ internal static class GameplayOptionsMenuPatch
             // Replace main menu button with lobby leave functionality
             var mainMneuButton = __instance.transform.Find("P_OptionsPanel_Canvas/Layout/Center/Panel/Bottom/Buttons/Hlayout/P_BasicButton_MainMenu")?.GetComponentInChildren<Button>(true);
             mainMneuButton.onClick = new();
-            mainMneuButton.onClick.AddListener(NetLobby.LeaveLobby);
+            mainMneuButton.onClick.AddListener(() => NetLobby.LeaveLobby());
         }
     }
 }
