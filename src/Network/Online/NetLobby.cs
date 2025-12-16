@@ -29,37 +29,37 @@ internal static class NetLobby
     {
         SteamMatchmaking.OnLobbyCreated += (Action<Result, Lobby>)((result, data) =>
         {
-            OnLobbyCreatedCompleted(result, data);
+            _OnLobbyCreatedCompleted(result, data);
         });
 
         SteamMatchmaking.OnLobbyEntered += (Action<Lobby>)(data =>
         {
-            OnLobbyEnteredCompleted(data);
+            _OnLobbyEnteredCompleted(data);
         });
 
         SteamMatchmaking.OnLobbyDataChanged += (Action<Lobby>)((lobby) =>
         {
-            OnLobbyDataChanged(lobby);
+            _OnLobbyDataChanged(lobby);
         });
 
         SteamMatchmaking.OnLobbyMemberJoined += (Action<Lobby, Friend>)((lobby, friend) =>
         {
-            OnLobbyMemberJoined(lobby, friend);
+            _OnLobbyMemberJoined(lobby, friend);
         });
 
         SteamMatchmaking.OnLobbyMemberLeave += (Action<Lobby, Friend>)((data, user) =>
         {
-            OnLobbyMemberLeave(data, user);
+            _OnLobbyMemberLeave(data, user);
         });
 
         SteamNetworking.OnP2PSessionRequest += (Action<SteamId>)(steamId =>
         {
-            OnP2PSessionRequest(steamId);
+            _OnP2PSessionRequest(steamId);
         });
 
         SteamNetworking.OnP2PConnectionFailed += (Action<SteamId, P2PSessionError>)((steamId, error) =>
         {
-            OnP2PSessionConnectFail(steamId, error);
+            _OnP2PSessionConnectFail(steamId, error);
         });
 
 
@@ -160,7 +160,7 @@ internal static class NetLobby
     /// </summary>
     /// <param name="result">The result of the lobby creation attempt.</param>
     /// <param name="data">The lobby data if creation was successful.</param>
-    private static void OnLobbyCreatedCompleted(Result result, Lobby data)
+    private static void _OnLobbyCreatedCompleted(Result result, Lobby data)
     {
         if (result == Result.OK)
         {
@@ -183,14 +183,14 @@ internal static class NetLobby
     /// Callback handler for when a player successfully enters a lobby.
     /// </summary>
     /// <param name="data">The lobby data that was entered.</param>
-    private static void OnLobbyEnteredCompleted(Lobby data)
+    private static void _OnLobbyEnteredCompleted(Lobby data)
     {
         LobbyData ??= new(data.Id, data.Owner.Id);
         LobbyData.LobbyCode = GetLobbyData(ReplantedOnlineMod.Constants.GAME_CODE_KEY);
 
         Transitions.ToVersus();
 
-        TryProcessMembers();
+        ProcessMemberList();
 
         int memberCount = GetLobbyMemberCount();
 
@@ -208,7 +208,7 @@ internal static class NetLobby
     /// Callback handler for when a lobby's data changes.
     /// </summary>
     /// <param name="lobby">The lobby dara.</param>
-    private static void OnLobbyDataChanged(Lobby lobby)
+    private static void _OnLobbyDataChanged(Lobby lobby)
     {
         if (lobby.Owner.Id != LobbyData?.HostId)
         {
@@ -223,7 +223,7 @@ internal static class NetLobby
     /// </summary>
     /// <param name="lobby">The lobby that was joined.</param>
     /// <param name="user">The friend who joined the lobby.</param>
-    private static void OnLobbyMemberJoined(Lobby lobby, Friend user)
+    private static void _OnLobbyMemberJoined(Lobby lobby, Friend user)
     {
         if (lobby.Id != LobbyData.LobbyId)
         {
@@ -233,7 +233,7 @@ internal static class NetLobby
 
         SteamId joinedPlayerId = user.Id;
         MelonLogger.Msg($"[NetLobby] Player {joinedPlayerId} ({user.Name}) joined the lobby");
-        TryProcessMembers();
+        ProcessMemberList();
 
         // If we're the host, request P2P session with the new player
         if (AmLobbyHost())
@@ -249,21 +249,21 @@ internal static class NetLobby
     /// </summary>
     /// <param name="lobby">The lobby that was left.</param>
     /// <param name="user">The friend who left the lobby.</param>
-    private static void OnLobbyMemberLeave(Lobby lobby, Friend user)
+    private static void _OnLobbyMemberLeave(Lobby lobby, Friend user)
     {
         if (!NetLobby.LobbyData.Networked.HasStarted)
         {
             ResetLobby();
         }
 
-        TryProcessMembers();
+        ProcessMemberList();
     }
 
     /// <summary>
     /// Callback handler for when a P2P session request is received from another player.
     /// </summary>
     /// <param name="steamId">The Steam ID of the player requesting the session.</param>
-    private static void OnP2PSessionRequest(SteamId steamId)
+    private static void _OnP2PSessionRequest(SteamId steamId)
     {
         if (IsPlayerInOurLobby(steamId))
         {
@@ -282,7 +282,7 @@ internal static class NetLobby
     /// </summary>
     /// <param name="steamId">The Steam ID of the player the connection failed with.</param>
     /// <param name="error">The error that occurred during connection.</param>
-    private static void OnP2PSessionConnectFail(SteamId steamId, P2PSessionError error)
+    private static void _OnP2PSessionConnectFail(SteamId steamId, P2PSessionError error)
     {
         MelonLogger.Warning($"[NetLobby] P2P session connection failed with {steamId}: {error}");
 
@@ -297,9 +297,8 @@ internal static class NetLobby
     /// Synchronizes the internal client list with the current lobby members from Steamworks.
     /// Clears the existing client list and repopulates it with current lobby members.
     /// </summary>
-    internal static void TryProcessMembers()
+    internal static void ProcessMemberList()
     {
-        LobbyData.AllClients.Clear();
         List<SteamId> members = [];
         var num = SteamMatchmaking.Internal.GetNumLobbyMembers(LobbyData.LobbyId);
         for (int i = 0; i < num; i++)
@@ -337,7 +336,6 @@ internal static class NetLobby
     {
         try
         {
-            // Send a small dummy packet to initiate P2P connection
             // This will trigger the remote client's OnP2PSessionRequest
             var packetWriter = PacketWriter.Get();
             packetWriter.AddTag(PacketTag.P2P);
