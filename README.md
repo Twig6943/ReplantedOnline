@@ -1,6 +1,6 @@
 # Replanted Online
 
-<img width="2560" height="1440" alt="PVZR-Online-Promo" src="https://github.com/user-attachments/assets/845582ea-a818-476d-8aff-497618866585" />
+<img width="2560" height="1440" alt="PVZR-Online-Promo" src="/assets/PVZR-Online-Promo.png" />
 
 </p>
 <p align="center">
