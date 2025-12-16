@@ -5,4 +5,4 @@
 /src/.editorconfig
 /src/.vscode
 /src/References/Il2cppGame/**.dll
-/src/References/Unity/**.dll
+/src/References/UnityEngine/**.dll
