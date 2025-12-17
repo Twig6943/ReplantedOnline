@@ -1,6 +1,6 @@
 ﻿using Il2CppReloaded.Gameplay;
+using ReplantedOnline.Attributes;
 using ReplantedOnline.Enums;
-using ReplantedOnline.Items.Attributes;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
