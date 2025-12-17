@@ -332,10 +332,10 @@ internal static class VersusManager
         var versusData = Instances.VersusDataModel;
         if (versusData != null)
         {
-            Instances.GameplayActivity.VersusMode.ZombiePlayerIndex = -1;
-            Instances.GameplayActivity.VersusMode.PlantPlayerIndex = -1;
-            versusData.UpdateZombiesPlayer("default", "input1", -1);
-            versusData.UpdatePlantsPlayer("default", "input1", -1);
+            Instances.GameplayActivity.VersusMode.ZombiePlayerIndex = ReplantedOnlineMod.Constants.SPECTATOR_PLAYER_INDEX;
+            Instances.GameplayActivity.VersusMode.PlantPlayerIndex = ReplantedOnlineMod.Constants.SPECTATOR_PLAYER_INDEX;
+            versusData.UpdateZombiesPlayer("default", "input1", ReplantedOnlineMod.Constants.SPECTATOR_PLAYER_INDEX);
+            versusData.UpdatePlantsPlayer("default", "input1", ReplantedOnlineMod.Constants.SPECTATOR_PLAYER_INDEX);
         }
     }
 }
