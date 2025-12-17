@@ -1,4 +1,4 @@
-﻿using ReplantedOnline.Items.Enums;
+﻿using ReplantedOnline.Enums;
 using ReplantedOnline.Network.Object;
 using ReplantedOnline.Network.Online;
 using System.Text;

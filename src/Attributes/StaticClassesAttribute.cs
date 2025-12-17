@@ -1,7 +1,7 @@
 ﻿using ReplantedOnline.Network.RPC;
 using System.Reflection;
 
-namespace ReplantedOnline.Items.Attributes;
+namespace ReplantedOnline.Attributes;
 
 /// <summary>
 /// Base attribute class for automatically discovering and registering instances of specific types through reflection.

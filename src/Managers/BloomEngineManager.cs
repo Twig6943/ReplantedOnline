@@ -2,7 +2,7 @@
 using BloomEngine.Config.Inputs;
 using BloomEngine.Menu;
 using MelonLoader;
-using ReplantedOnline.Items.Enums;
+using ReplantedOnline.Enums;
 
 namespace ReplantedOnline.Managers;
 

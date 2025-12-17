@@ -1,8 +1,8 @@
 ﻿using Il2CppSteamworks;
 using MelonLoader;
+using ReplantedOnline.Enums;
 using ReplantedOnline.Helper;
-using ReplantedOnline.Items.Enums;
-using ReplantedOnline.Items.Interfaces;
+using ReplantedOnline.Interfaces;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object;
 using ReplantedOnline.Network.Packet;

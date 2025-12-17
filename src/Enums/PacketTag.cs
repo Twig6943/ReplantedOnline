@@ -1,4 +1,4 @@
-﻿namespace ReplantedOnline.Items.Enums;
+﻿namespace ReplantedOnline.Enums;
 
 /// <summary>
 /// Identifies the type of network packet for proper routing and handling.

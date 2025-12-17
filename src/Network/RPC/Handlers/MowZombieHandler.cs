@@ -1,5 +1,5 @@
-﻿using ReplantedOnline.Items.Attributes;
-using ReplantedOnline.Items.Enums;
+﻿using ReplantedOnline.Enums;
+using ReplantedOnline.Items.Attributes;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object.Game;
 using ReplantedOnline.Network.Online;

@@ -1,4 +1,4 @@
-﻿namespace ReplantedOnline.Items.Enums;
+﻿namespace ReplantedOnline.Enums;
 
 internal enum AppIdServers : uint
 {

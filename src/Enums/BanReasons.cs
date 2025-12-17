@@ -1,4 +1,4 @@
-﻿namespace ReplantedOnline.Items.Enums;
+﻿namespace ReplantedOnline.Enums;
 
 /// <summary>
 /// Specifies the reasons for banning a player from a ReplantedOnline lobby.

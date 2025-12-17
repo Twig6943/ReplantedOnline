@@ -1,4 +1,4 @@
-﻿namespace ReplantedOnline.Items.Enums;
+﻿namespace ReplantedOnline.Enums;
 
 /// <summary>
 /// Defines the types of Remote Procedure Calls (RPCs) available in ReplantedOnline.

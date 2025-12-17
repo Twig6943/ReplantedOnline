@@ -1,8 +1,8 @@
 ﻿using Il2CppInterop.Runtime.Attributes;
 using Il2CppSteamworks;
 using MelonLoader;
-using ReplantedOnline.Items.Enums;
-using ReplantedOnline.Items.Interfaces;
+using ReplantedOnline.Enums;
+using ReplantedOnline.Interfaces;
 using ReplantedOnline.Monos;
 using ReplantedOnline.Network.Object.Game;
 using ReplantedOnline.Network.Online;
