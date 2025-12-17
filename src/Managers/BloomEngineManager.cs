@@ -1,8 +1,5 @@
-﻿using BloomEngine.Config;
-using BloomEngine.Config.Inputs;
-using BloomEngine.Menu;
+﻿using BloomEngine.Menu;
 using MelonLoader;
-using ReplantedOnline.Enums;
 
 namespace ReplantedOnline.Managers;
 
@@ -13,7 +10,6 @@ namespace ReplantedOnline.Managers;
 internal static class BloomEngineManager
 {
     private static MelonPreferences_Category m_configCategory;
-    internal static MelonPreferences_Entry<uint> m_gameServer;
 
     /// <summary>
     /// Ensures MelonPreferences are only initialized once.
@@ -33,19 +29,6 @@ internal static class BloomEngineManager
             ModInfo.ModName.Replace(" ", ""),
             "configs"
         );
-
-        m_gameServer = m_configCategory.CreateEntry(
-            "GameServerId",
-            (uint)AppIdServers.PVZ_Replanted,
-            "Steam Game ID Server",
-            "The Steam App ID to connect to for P2P"
-        );
-
-        // Reset to default if an invalid enum value was stored
-        if (!Enum.GetValues<AppIdServers>().Contains((AppIdServers)m_gameServer.Value))
-        {
-            m_gameServer.Value = (uint)AppIdServers.PVZ_Replanted;
-        }
     }
 
     /// <summary>
@@ -70,33 +53,12 @@ internal static class BloomEngineManager
     /// </summary>
     internal static class BloomConfigs
     {
-        internal static EnumInputField GameServer;
-
         /// <summary>
         /// Initializes BloomEngine config fields and syncs values
         /// with MelonPreferences.
         /// </summary>
         internal static void Init()
         {
-            MelonPreferences.Save();
-
-            GameServer = ConfigMenu.CreateEnumInput(
-                "Game Server (Restart Required)",
-                (AppIdServers)m_gameServer.Value,
-                value =>
-                {
-                    if (value is AppIdServers appIdServer)
-                    {
-                        m_gameServer.Value = (uint)appIdServer;
-                        MelonPreferences.Save();
-                    }
-                },
-                validateValue: value =>
-                {
-                    return Enum.GetValues<AppIdServers>()
-                        .Contains((AppIdServers)value);
-                }
-            );
         }
     }
 }

@@ -19,7 +19,7 @@ internal class ReplantedOnlineMod : MelonMod
     [Obsolete]
     public override void OnApplicationStart()
     {
-        File.WriteAllText("steam_appid.txt", ((uint)AppIdServers.PVZ_Replanted).ToString());
+        File.WriteAllText("steam_appid.txt", ((uint)AppType.PVZ_Replanted).ToString());
         harmony.PatchAll();
         Application.runInBackground = true;
     }

@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 using Il2CppSteamworks;
-using ReplantedOnline.Managers;
+using ReplantedOnline.Enums;
 
 namespace ReplantedOnline.Patches.Steam;
 
@@ -11,7 +11,6 @@ internal class SteamClientPatch
     [HarmonyPrefix]
     private static void SteamClient_Init_Prefix(ref uint appid)
     {
-        BloomEngineManager.InitMelon();
-        appid = BloomEngineManager.m_gameServer.Value;
+        appid = (uint)AppType.Space_War; // User Space War P2P servers
     }
 }
