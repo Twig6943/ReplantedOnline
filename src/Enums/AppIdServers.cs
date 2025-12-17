@@ -1,6 +1,6 @@
 ﻿namespace ReplantedOnline.Enums;
 
-internal enum AppType : uint
+internal enum AppIdServers : uint
 {
     PVZ_Replanted = 3654560,
     Space_War = 480
