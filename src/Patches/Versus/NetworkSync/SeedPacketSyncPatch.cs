@@ -246,7 +246,6 @@ internal static class SeedPacketSyncPatch
                 net.GridX = gridX;
                 net.GridY = gridY;
             }, VersusState.PlantSteamId);
-            netClass.AnimationControllerNetworked.Init(zombie.mController.AnimationController);
             zombie.AddNetworkedLookup(netClass);
             netClass.name = $"{Enum.GetName(zombie.mZombieType)}_Zombie ({netClass.NetworkId})";
         }

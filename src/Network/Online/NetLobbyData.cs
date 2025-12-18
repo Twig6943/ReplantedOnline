@@ -352,12 +352,10 @@ internal class NetLobbyData
                         // Assign player inputs based on host's team
                         if (NetLobby.AmLobbyHost())
                         {
-                            // If we're the host, assign opposite team to clients
                             VersusManager.UpdatePlayerInputs(!data._hostIsOnPlantSide);
                         }
                         else
                         {
-                            // If we're a client, assign same team as host
                             VersusManager.UpdatePlayerInputs(data._hostIsOnPlantSide);
                         }
 
