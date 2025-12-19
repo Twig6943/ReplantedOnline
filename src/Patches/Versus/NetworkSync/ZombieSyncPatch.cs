@@ -24,10 +24,10 @@ internal static class ZombieSyncPatch
 
             // Get the networked zombie representation and send death RPC to other players
             // Includes damage flags to communicate how the zombie died
-            __instance.GetNetworked<ZombieNetworked>()?.SendDeathRpc(theDamageFlags);
+            __instance.GetNetworked<ZombieNetworked>().SendDeathRpc(theDamageFlags);
 
             // Execute the original death animation logic locally
-            __instance.GetNetworked<ZombieNetworked>()?.CheckTargetDeath(() =>
+            __instance.GetNetworked<ZombieNetworked>().CheckDeath(() =>
             {
                 __instance.PlayDeathAnimOriginal(theDamageFlags);
             });
@@ -71,7 +71,7 @@ internal static class ZombieSyncPatch
             if (VersusState.AmZombieSide) return false;
 
             __instance.TakeDamageOriginal(theDamage, theDamageFlags);
-            __instance.GetNetworked<ZombieNetworked>()?.SendTakeDamageRpc(theDamage, theDamageFlags);
+            __instance.GetNetworked<ZombieNetworked>().SendTakeDamageRpc(theDamage, theDamageFlags);
 
             return false;
         }

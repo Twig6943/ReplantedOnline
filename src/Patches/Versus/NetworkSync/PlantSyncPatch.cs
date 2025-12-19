@@ -27,7 +27,7 @@ internal static class PlantSyncPatch
             if (VersusState.AmZombieSide) return false;
 
             // Get the networked plant representation and send death RPC to other players
-            __instance.GetNetworked<PlantNetworked>()?.SendDieRpc();
+            __instance.GetNetworked<PlantNetworked>().SendDieRpc();
 
             // Execute the original die method logic locally
             __instance.DieOriginal();

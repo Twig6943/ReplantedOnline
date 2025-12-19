@@ -53,6 +53,10 @@ internal sealed class ZombieNetworked : NetworkClass
     public void OnDestroy()
     {
         _Zombie?.RemoveNetworkedLookup();
+        if (_Zombie?.mDead == false)
+        {
+            _Zombie?.DieDeserialize();
+        }
     }
 
     internal bool EnteringHouse;
@@ -61,21 +65,25 @@ internal sealed class ZombieNetworked : NetworkClass
 
     public void Update()
     {
+        if (!IsOnNetwork) return;
+
         if (AmOwner)
         {
-            if (_Zombie?.mDead != true)
+            if (_Zombie != null)
             {
-                if (_syncCooldown <= 0f && _lastPos != _Zombie.mPosX)
+                if (!_Zombie.mDead)
                 {
-                    MarkDirty();
-                    _syncCooldown = 2f;
-                    _lastPos = _Zombie.mPosX;
+                    if (_Zombie.mZombieType is not (ZombieType.Gravestone or ZombieType.Bungee))
+                    {
+                        if (_syncCooldown <= 0f && _lastPos != _Zombie.mPosX)
+                        {
+                            MarkDirty();
+                            _syncCooldown = 2f;
+                            _lastPos = _Zombie.mPosX;
+                        }
+                        _syncCooldown -= Time.deltaTime;
+                    }
                 }
-                _syncCooldown -= Time.deltaTime;
-            }
-            else if (!IsDespawning)
-            {
-                DespawnAndDestroyWithDelay(10f);
             }
         }
         else
@@ -146,6 +154,8 @@ internal sealed class ZombieNetworked : NetworkClass
             var writer = PacketWriter.Get();
             writer.WriteByte((byte)damageFlags);
             this.SendRpc(1, writer);
+            Despawn();
+            Destroy(gameObject);
         }
     }
 
@@ -155,7 +165,7 @@ internal sealed class ZombieNetworked : NetworkClass
         if (!dead)
         {
             dead = true;
-            CheckTargetDeath(() =>
+            CheckDeath(() =>
             {
                 _Zombie.PlayDeathAnimOriginal(damageFlags);
             }, true);
@@ -179,11 +189,17 @@ internal sealed class ZombieNetworked : NetworkClass
         VersusManager.EndGame(_Zombie?.mController?.gameObject, PlayerTeam.Zombies);
     }
 
-    // Target zombie death logic
     [HideFromIl2Cpp]
-    internal void CheckTargetDeath(Action callback, bool isRpc = false)
+    internal void CheckDeath(Action callback, bool isRpc = false)
     {
-        if (_Zombie.mZombieType is ZombieType.Target)
+        if (_Zombie.mZombieType is ZombieType.Gravestone)
+        {
+            Instances.GameplayActivity.Board.m_vsGravestones.Remove(_Zombie);
+            _Zombie.mGraveX = 0;
+            _Zombie.mGraveY = 0;
+            callback();
+        }
+        else if (_Zombie.mZombieType is ZombieType.Target)
         {
             if (isRpc)
             {
@@ -192,17 +208,17 @@ internal sealed class ZombieNetworked : NetworkClass
 
             if (Instances.GameplayActivity.VersusMode.ZombieLife > 0)
             {
-                callback?.Invoke();
+                callback();
             }
             else
             {
                 VersusManager.EndGame(_Zombie?.mController?.gameObject, PlayerTeam.Plants);
-                callback?.Invoke();
+                callback();
             }
         }
         else
         {
-            callback?.Invoke();
+            callback();
         }
     }
 

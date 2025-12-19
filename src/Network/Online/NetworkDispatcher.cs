@@ -327,11 +327,10 @@ internal static class NetworkDispatcher
                 var networkClass = prefab.Clone<NetworkClass>();
                 networkClass.OwnerId = spawnPacket.OwnerId;
                 networkClass.NetworkId = spawnPacket.NetworkId;
-                NetLobby.LobbyData.NetworkClassSpawned[networkClass.NetworkId] = networkClass;
                 networkClass.transform.SetParent(NetworkClass.NetworkClassesObj.transform);
-                networkClass.gameObject.SetActive(true);
+                NetLobby.LobbyData.OnNetworkClassSpawn(networkClass);
                 NetworkSpawnPacket.DeserializeNetworkClass(networkClass, packetReader);
-                networkClass.IsOnNetwork = true;
+                networkClass.gameObject.SetActive(true);
                 networkClass.name = $"{networkClass.GetType().Name}({networkClass.NetworkId})";
                 MelonLogger.Msg($"[NetworkDispatcher] Spawned prefab NetworkClass from {sender.Name}: {spawnPacket.NetworkId}, Prefab: {spawnPacket.PrefabId}");
             }

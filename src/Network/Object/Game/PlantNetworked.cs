@@ -53,22 +53,17 @@ internal sealed class PlantNetworked : NetworkClass
 
     public void Update()
     {
-        if (AmOwner)
-        {
-            if (_Plant?.mDead != true)
-            {
+        if (!IsOnNetwork) return;
 
-            }
-            else if (!IsDespawning)
-            {
-                DespawnAndDestroyWithDelay(6f);
-            }
-        }
-        else
+        if (!AmOwner)
         {
-            if (!dead)
+            if (!dead && _Plant != null)
             {
-                _Plant?.mDead = false;
+                _Plant.mDead = false;
+                if (_Plant.mPlantHealth < 25)
+                {
+                    _Plant.mPlantHealth = 25;
+                }
             }
         }
     }
@@ -76,6 +71,11 @@ internal sealed class PlantNetworked : NetworkClass
     public void OnDestroy()
     {
         _Plant?.RemoveNetworkedLookup();
+        if (!dead)
+        {
+            dead = true;
+            _Plant?.DieOriginal();
+        }
     }
 
     [HideFromIl2Cpp]
@@ -99,6 +99,8 @@ internal sealed class PlantNetworked : NetworkClass
         {
             dead = true;
             this.SendRpc(0, null);
+            Despawn();
+            Destroy(gameObject);
         }
     }
 

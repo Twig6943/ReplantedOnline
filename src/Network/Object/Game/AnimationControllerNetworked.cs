@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Attributes;
 using Il2CppReloaded.Characters;
 using ReplantedOnline.Helper;
+using ReplantedOnline.Monos;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
 using ReplantedOnline.Patches.Versus.NetworkSync;
@@ -18,11 +19,13 @@ internal sealed class AnimationControllerNetworked : NetworkClass
     {
         _AnimationController = animationController;
         _AnimationController.AddNetworkedLookup(this);
+        var observable = _AnimationController.gameObject.AddComponent<ObservableGameObject>();
+        observable.OnGameObjectDestroy += Observable_OnGameObjectDestroy;
     }
 
-    public void OnDestroy()
+    private void Observable_OnGameObjectDestroy(UnityEngine.GameObject obj)
     {
-        _AnimationController?.RemoveNetworkedLookup();
+        _AnimationController.RemoveNetworkedLookup();
     }
 
     [HideFromIl2Cpp]

@@ -162,8 +162,6 @@ internal static class SeedPacketSyncPatch
         // Create the actual plant object in the game world using the original game method
         var plant = Instances.GameplayActivity.Board.AddPlant(gridX, gridY, seedType, imitaterType);
 
-        Instances.GameplayActivity.Board.m_plants.NewArrayItem(plant, plant.DataID);
-
         // Only create network controller if network synchronization is requested
         // This prevents creating network objects in single-player mode
         if (spawnOnNetwork)
@@ -177,10 +175,12 @@ internal static class SeedPacketSyncPatch
                 net.GridX = gridX;
                 net.GridY = gridY;
             }, VersusState.PlantSteamId);
-            netClass.AnimationControllerNetworked.Init(plant.mController.AnimationController);
             plant.AddNetworkedLookup(netClass);
+            netClass.AnimationControllerNetworked.Init(plant.mController.AnimationController);
             netClass.name = $"{Enum.GetName(plant.mSeedType)}_Plant ({netClass.NetworkId})";
         }
+
+        Instances.GameplayActivity.Board.m_plants.NewArrayItem(plant, plant.DataID);
 
         return plant;
     }
@@ -197,8 +197,6 @@ internal static class SeedPacketSyncPatch
         // Add zombie to the board at the specified position
         // Use forced X position (9) for certain zombies, otherwise use the provided gridX
         var zombie = Instances.GameplayActivity.Board.AddZombieAtCell(zombieType, forceXPos ? 9 : gridX, gridY);
-
-        Instances.GameplayActivity.Board.m_zombies.NewArrayItem(zombie, zombie.DataID);
 
         // If this zombie rises from ground, trigger the rising animation
         // This makes the zombie emerge from the ground rather than just appearing
@@ -259,6 +257,8 @@ internal static class SeedPacketSyncPatch
         {
             zombie.RenderOrder -= 200 + (10 * (gridY + 1));
         }
+
+        Instances.GameplayActivity.Board.m_zombies.NewArrayItem(zombie, zombie.DataID);
 
         return zombie;
     }
