@@ -1,4 +1,5 @@
-﻿using Il2CppTekly.DataModels.Binders;
+﻿using Il2CppSource.UI;
+using Il2CppTekly.DataModels.Binders;
 using Il2CppTekly.Localizations;
 using UnityEngine;
 
@@ -17,6 +18,19 @@ internal static class ObjectHelper
     internal static void DestroyAllTextLocalizers(this GameObject go)
     {
         foreach (var comp in go.GetComponentsInChildren<TextLocalizer>(true))
+        {
+            UnityEngine.Object.Destroy(comp);
+        }
+    }
+
+    /// <summary>
+    /// Destroys all ImageLocalizer components on the GameObject and its children.
+    /// This is useful when replacing UI images that have localization bindings that need to be cleaned up.
+    /// </summary>
+    /// <param name="go">The GameObject to search for TextLocalizer components.</param>
+    internal static void DestroyAllImageLocalizers(this GameObject go)
+    {
+        foreach (var comp in go.GetComponentsInChildren<ImageLocalizer>(true))
         {
             UnityEngine.Object.Destroy(comp);
         }

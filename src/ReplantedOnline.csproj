@@ -27,6 +27,11 @@
 		<Message Text="Mod was NOT copied to game folder!" Importance="high" />
 	</Target>
 
+	<!-- Resources -->
+	<ItemGroup>
+		<EmbeddedResource Include="Resources\**\*" />
+	</ItemGroup>
+
 	<!-- Packages -->
 	<ItemGroup>
 		<PackageReference Include="HarmonyX" Version="2.16.0" />
@@ -62,6 +67,9 @@
 		</Reference>
 		<Reference Include="UnityEngine.IMGUIModule">
 			<HintPath>References\UnityEngine\UnityEngine.IMGUIModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.ImageConversionModule">
+			<HintPath>References\UnityEngine\UnityEngine.ImageConversionModule.dll</HintPath>
 		</Reference>
 
 		<!-- Replanted -->
