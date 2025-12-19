@@ -2,9 +2,9 @@
 using Il2CppTekly.PanelViews;
 using Il2CppTMPro;
 using MelonLoader;
+using ReplantedOnline.Enums;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Modules;
-using ReplantedOnline.Network;
 using ReplantedOnline.Network.Object.Game;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Patches.UI;
@@ -39,7 +39,7 @@ internal static class VersusManager
             }
         }
 
-        if (VersusState.PlantSide)
+        if (VersusState.AmPlantSide)
         {
             Utils.SpawnZombie(ZombieType.Target, 8, 0, false, true);
             Utils.SpawnZombie(ZombieType.Target, 8, 1, false, true);
@@ -49,7 +49,7 @@ internal static class VersusManager
         }
     }
 
-    internal static void EndGame(GameObject focus, bool didPlantsWon)
+    internal static void EndGame(GameObject focus, PlayerTeam winningTeam)
     {
         if (focus == null)
         {
@@ -57,7 +57,7 @@ internal static class VersusManager
             return;
         }
 
-        if (didPlantsWon)
+        if (winningTeam is PlayerTeam.Plants)
         {
             Instances.GameplayActivity.VersusMode.Phase = VersusPhase.PlantsWin;
         }
@@ -68,7 +68,7 @@ internal static class VersusManager
 
         Instances.GameplayActivity.VersusMode.SetFocus(focus, Vector3.zero);
         Instances.GameplayActivity.Board.mCutScene.StartZombiesWon();
-        EndGameManager.EndGame(didPlantsWon);
+        EndGameManager.EndGame(winningTeam);
     }
 
     // UI text components for displaying player names on each team
@@ -136,66 +136,57 @@ internal static class VersusManager
         ResetAllText();
 
         var networked = NetLobby.LobbyData.Networked;
-        var clients = NetLobby.LobbyData.AllClients.Values;
-        bool isPickingSides = networked.PickingSides;
-        bool isHostOnPlants = networked.HostIsOnPlantSide;
 
-        // Handle team assignment based on game state
-        if (!isPickingSides)
-        {
-            AssignTeamsForGameplay(clients, isHostOnPlants);
-            playerList?.SetText(string.Empty);
-        }
-        else
-        {
-            DisplayPlayerList(clients);
-        }
-
-        // Update button interactability for host
+        SetNamesFromTeams();
         UpdateButtonInteractability();
     }
 
     /// <summary>
-    /// Assigns players to teams when not picking sides.
+    /// Assigns player names to teams and player list.
     /// </summary>
-    private static void AssignTeamsForGameplay(IEnumerable<SteamNetClient> clients, bool hostOnPlants)
+    private static void SetNamesFromTeams()
     {
-        foreach (var client in clients)
+        foreach (var client in NetLobby.LobbyData.AllClients.Values)
         {
-            if (client.AmHost)
+            if (client.Team is PlayerTeam.Plants)
             {
-                // Host assignment based on chosen side
-                if (hostOnPlants)
+                if (client.AmHost)
+                {
                     plantPlayer1?.SetText(client.Name);
+                }
                 else
-                    zombiePlayer1?.SetText(client.Name);
-            }
-            else
-            {
-                // Client gets opposite side of host
-                if (hostOnPlants)
-                    zombiePlayer2?.SetText(client.Name);
-                else
+                {
                     plantPlayer2?.SetText(client.Name);
+                }
+            }
+            else if (client.Team is PlayerTeam.Zombies)
+            {
+                if (client.AmHost)
+                {
+                    zombiePlayer1?.SetText(client.Name);
+                }
+                else
+                {
+                    zombiePlayer2?.SetText(client.Name);
+                }
             }
         }
-    }
 
-    /// <summary>
-    /// Displays the player list when picking sides.
-    /// </summary>
-    private static void DisplayPlayerList(IEnumerable<SteamNetClient> clients)
-    {
+        // Player list
+        playerList?.SetText(string.Empty);
+        var notPlaying = NetLobby.LobbyData.AllClients.Values.Where(client => client.Team is (PlayerTeam.None or PlayerTeam.Spectators));
+        if (!notPlaying.Any()) return;
+
         const int MAX_NAME_LENGTH = 10;
         const string ELLIPSIS = "...";
 
         var listBuilder = new StringBuilder("-----------\n");
 
-        foreach (var player in clients)
+        foreach (var client in notPlaying)
         {
-            string displayName = player.Name.Length > MAX_NAME_LENGTH
-                ? string.Concat(player.Name.AsSpan(0, MAX_NAME_LENGTH), ELLIPSIS)
-                : player.Name;
+            string displayName = client.Name.Length > MAX_NAME_LENGTH
+                ? string.Concat(client.Name.AsSpan(0, MAX_NAME_LENGTH), ELLIPSIS)
+                : client.Name;
 
             listBuilder.Append(displayName).AppendLine();
         }
@@ -299,26 +290,25 @@ internal static class VersusManager
     }
 
     /// <summary>
-    /// Update player input mappings based on their assigned side (zombie or plant).
+    /// Set player input mappings based on their assigned side (zombie or plant).
     /// </summary>
-    /// <param name="amZombieSide">If to update to zombie side</param>
-    internal static void UpdatePlayerInputs(bool amZombieSide)
+    internal static void SetPlayerInput(PlayerTeam team)
     {
-        ResetPlayerInputs();
+        ResetPlayerInput();
 
         var versusData = Instances.VersusDataModel;
         var gameplayActivity = Instances.GameplayActivity;
         if (versusData != null && gameplayActivity != null)
         {
-            if (amZombieSide)
+            if (team is PlayerTeam.Zombies)
             {
+                Instances.VersusDataModel.m_player1Model.m_isZombiesModel.Value = true;
                 gameplayActivity.VersusMode.ZombiePlayerIndex = ReplantedOnlineMod.Constants.LOCAL_PLAYER_INDEX;
-                gameplayActivity.VersusMode.PlantPlayerIndex = ReplantedOnlineMod.Constants.OPPONENT_PLAYER_INDEX;
                 versusData.UpdateZombiesPlayer("input1", "input1", 0);
             }
-            else
+            else if (team is PlayerTeam.Plants)
             {
-                gameplayActivity.VersusMode.ZombiePlayerIndex = ReplantedOnlineMod.Constants.OPPONENT_PLAYER_INDEX;
+                Instances.VersusDataModel.m_player1Model.m_isPlantsModel.Value = true;
                 gameplayActivity.VersusMode.PlantPlayerIndex = ReplantedOnlineMod.Constants.LOCAL_PLAYER_INDEX;
                 versusData.UpdatePlantsPlayer("input1", "input1", 0);
             }
@@ -328,16 +318,18 @@ internal static class VersusManager
     /// <summary>
     /// reset player input mappings to default values.
     /// </summary>
-    internal static void ResetPlayerInputs()
+    internal static void ResetPlayerInput()
     {
         var versusData = Instances.VersusDataModel;
         var gameplayActivity = Instances.GameplayActivity;
         if (versusData != null && gameplayActivity != null)
         {
-            gameplayActivity.VersusMode.ZombiePlayerIndex = ReplantedOnlineMod.Constants.SPECTATOR_PLAYER_INDEX;
-            gameplayActivity.VersusMode.PlantPlayerIndex = ReplantedOnlineMod.Constants.SPECTATOR_PLAYER_INDEX;
-            versusData.UpdateZombiesPlayer("default", "input1", ReplantedOnlineMod.Constants.SPECTATOR_PLAYER_INDEX);
-            versusData.UpdatePlantsPlayer("default", "input1", ReplantedOnlineMod.Constants.SPECTATOR_PLAYER_INDEX);
+            Instances.VersusDataModel.m_player1Model.m_isZombiesModel.Value = false;
+            Instances.VersusDataModel.m_player1Model.m_isPlantsModel.Value = false;
+            gameplayActivity.VersusMode.ZombiePlayerIndex = ReplantedOnlineMod.Constants.DEFAULT_PLAYER_INDEX;
+            gameplayActivity.VersusMode.PlantPlayerIndex = ReplantedOnlineMod.Constants.DEFAULT_PLAYER_INDEX;
+            versusData.UpdateZombiesPlayer("default", "input1", ReplantedOnlineMod.Constants.DEFAULT_PLAYER_INDEX);
+            versusData.UpdatePlantsPlayer("default", "input1", ReplantedOnlineMod.Constants.DEFAULT_PLAYER_INDEX);
         }
     }
 }

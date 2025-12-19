@@ -20,11 +20,11 @@ internal static class CoinPatch
                 return false;
             }
 
-            if (theCoinType == CoinType.Sun && VersusState.ZombieSide)
+            if (theCoinType == CoinType.Sun && VersusState.AmZombieSide)
             {
                 return false;
             }
-            else if (theCoinType == CoinType.Brain && VersusState.PlantSide)
+            else if (theCoinType == CoinType.Brain && VersusState.AmPlantSide)
             {
                 return false;
             }

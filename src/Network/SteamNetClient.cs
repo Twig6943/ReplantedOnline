@@ -1,6 +1,6 @@
 ﻿using Il2CppSteamworks;
 using MelonLoader;
-using ReplantedOnline.Modules;
+using ReplantedOnline.Enums;
 using ReplantedOnline.Network.Online;
 
 namespace ReplantedOnline.Network;
@@ -85,31 +85,9 @@ internal sealed class SteamNetClient
     internal bool HasEstablishedP2P { get; set; }
 
     /// <summary>
-    /// Gets the playerindex of the client
+    /// The team that the player is on.
     /// </summary>
-    internal int PlayerIndex
-    {
-        get
-        {
-            return AmLocal ? ReplantedOnlineMod.Constants.LOCAL_PLAYER_INDEX : ReplantedOnlineMod.Constants.OPPONENT_PLAYER_INDEX;
-        }
-    }
-
-    /// <summary>
-    /// Gets if the player is on the zombies side
-    /// </summary>
-    internal bool AmZombieSide()
-    {
-        return Instances.GameplayActivity.VersusMode.ZombiePlayerIndex == PlayerIndex;
-    }
-
-    /// <summary>
-    /// Gets if the player is on the plants side
-    /// </summary>
-    internal bool AmPlantSide()
-    {
-        return Instances.GameplayActivity.VersusMode.PlantPlayerIndex == PlayerIndex;
-    }
+    internal PlayerTeam Team;
 
     /// <summary>
     /// Gets the plants SteamNetClient
@@ -118,7 +96,7 @@ internal sealed class SteamNetClient
     {
         foreach (var client in NetLobby.LobbyData.AllClients.Values)
         {
-            if (client.AmPlantSide())
+            if (client.Team is PlayerTeam.Plants)
             {
                 return client;
             }
@@ -134,7 +112,7 @@ internal sealed class SteamNetClient
     {
         foreach (var client in NetLobby.LobbyData.AllClients.Values)
         {
-            if (client.AmZombieSide())
+            if (client.Team is PlayerTeam.Zombies)
             {
                 return client;
             }

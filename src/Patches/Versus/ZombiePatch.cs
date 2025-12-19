@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.Gameplay;
+using ReplantedOnline.Enums;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
@@ -36,7 +37,7 @@ internal static class ZombiePatch
     {
         if (NetLobby.AmInLobby())
         {
-            if (VersusState.PlantSide)
+            if (VersusState.AmPlantSide)
             {
                 // Force false result for plant side to prevent them from triggering dancer logic
                 __result = false;
@@ -75,7 +76,7 @@ internal static class ZombiePatch
         if (NetLobby.AmInLobby())
         {
             // Only zombie side can spawn backup dancers
-            if (VersusState.PlantSide) return false;
+            if (VersusState.AmPlantSide) return false;
 
             var zombie = SeedPacketSyncPatch.SpawnZombie(ZombieType.BackupDancer, thePosX, theRow, false, true);
             __result = zombie.DataID;
@@ -90,10 +91,14 @@ internal static class ZombiePatch
     [HarmonyPrefix]
     private static bool WalkIntoHouse_Prefix(Zombie __instance)
     {
-        if (VersusState.PlantSide)
+        if (VersusState.AmPlantSide)
         {
-            __instance.GetNetworked<ZombieNetworked>()?.SendEnteringHouseRpc(__instance.mPosX);
-            VersusManager.EndGame(__instance.mController?.gameObject, false);
+            var netZombie = __instance.GetNetworked<ZombieNetworked>();
+            if (netZombie != null && !netZombie.EnteringHouse)
+            {
+                netZombie.SendEnteringHouseRpc(__instance.mPosX);
+                VersusManager.EndGame(__instance.mController?.gameObject, PlayerTeam.Zombies);
+            }
         }
 
         return false;

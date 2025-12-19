@@ -77,7 +77,7 @@ internal class ReplantedOnlineMod : MelonMod
 
     internal class Constants
     {
-        internal const int SPECTATOR_PLAYER_INDEX = -1;
+        internal const int DEFAULT_PLAYER_INDEX = -1;
         internal const int LOCAL_PLAYER_INDEX = 0;
         internal const int OPPONENT_PLAYER_INDEX = 1;
         internal const string MOD_VERSION_KEY = "mod_version";

@@ -75,6 +75,7 @@ internal static class NetLobby
         LobbyData.UnsetAllClientsReady();
         LobbyData.LocalDespawnAll();
         LobbyData.Networked = new();
+        VersusManager.ResetPlayerInput();
         Transitions.ToVersus();
         Transitions.ToGameplay();
 

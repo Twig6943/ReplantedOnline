@@ -33,7 +33,7 @@ internal static class VersusHudPatch
     // Hide opponents hud
     internal static void SetHuds()
     {
-        if (VersusState.ZombieSide)
+        if (VersusState.AmZombieSide)
         {
             plantHud?.gameObject?.SetActive(false);
         }

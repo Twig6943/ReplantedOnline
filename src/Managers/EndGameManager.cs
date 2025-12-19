@@ -1,5 +1,7 @@
 ﻿using Il2CppTMPro;
 using MelonLoader;
+using ReplantedOnline.Enums;
+using ReplantedOnline.Helper;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
 using System.Collections;
@@ -15,28 +17,26 @@ internal static class EndGameManager
     /// <summary>
     /// Ends the current game and initiates the end-game sequence.
     /// </summary>
-    /// <param name="didPlantsWon">True if the plant team won, false if the zombie team won.</param>
-    internal static void EndGame(bool didPlantsWon)
+    internal static void EndGame(PlayerTeam winningTeam)
     {
         // Might add win streaks later on, for now set to 0
-        Instances.GameplayDataProvider.m_gameplayDataModel.m_versusDataModel.m_player1Model.m_plantWinsModel.m_value = 0;
-        Instances.GameplayDataProvider.m_gameplayDataModel.m_versusDataModel.m_player1Model.m_zombieWinsModel.m_value = 0;
-        Instances.GameplayDataProvider.m_gameplayDataModel.m_versusDataModel.m_player2Model.m_plantWinsModel.m_value = 0;
-        Instances.GameplayDataProvider.m_gameplayDataModel.m_versusDataModel.m_player2Model.m_zombieWinsModel.m_value = 0;
+        Instances.VersusDataModel.m_player1Model.m_winStreakModel.Value = 0;
+        Instances.VersusDataModel.m_player2Model.m_winStreakModel.Value = 0;
+        Instances.VersusDataModel.m_player1Model.m_hasWinStreakModel.Value = false;
+        Instances.VersusDataModel.m_player2Model.m_hasWinStreakModel.Value = false;
         Instances.GameplayActivity.GameplayService.Player1VersusWinData = new();
         Instances.GameplayActivity.GameplayService.Player2VersusWinData = new();
         Instances.GameplayActivity.Player1VersusWinData = new();
         Instances.GameplayActivity.Player2VersusWinData = new();
 
-        MelonCoroutines.Start(CoEndGame(didPlantsWon));
+        MelonCoroutines.Start(CoEndGame(winningTeam));
     }
 
     /// <summary>
     /// Coroutine that handles the delayed end-game transition.
     /// </summary>
-    /// <param name="didPlantsWon">True if the plant team won, false if the zombie team won.</param>
     /// <returns>IEnumerator for coroutine execution.</returns>
-    private static IEnumerator CoEndGame(bool didPlantsWon)
+    private static IEnumerator CoEndGame(PlayerTeam winningTeam)
     {
         yield return new WaitForSeconds(3f);
 
@@ -48,19 +48,18 @@ internal static class EndGameManager
         Instances.GameplayActivity.VersusMode.m_focusCircleController.gameObject.SetActive(false);
         Transitions.ToGameEnd(() =>
         {
-            OnWinScreen(didPlantsWon);
+            OnWinScreen(winningTeam);
         });
     }
 
     /// <summary>
     /// Sets up and displays the win screen with winner/loser information.
     /// </summary>
-    /// <param name="didPlantsWon">True if the plant team won, false if the zombie team won.</param>
-    private static void OnWinScreen(bool didPlantsWon)
+    private static void OnWinScreen(PlayerTeam winningTeam)
     {
         GameObject.Find("Panels/VersusPanels/P_VsWin/Canvas/Layout/Center/Buttons")?.SetActive(false);
 
-        SetWinnerPanel(didPlantsWon);
+        SetWinnerPanel(winningTeam);
 
         var winner = new NamePlate(1);
         var loser = new NamePlate(2);
@@ -69,30 +68,17 @@ internal static class EndGameManager
 
         foreach (var netClient in NetLobby.LobbyData.AllClients.Values)
         {
-            if (didPlantsWon)
+            if (netClient.Team is not PlayerTeam.Spectators)
             {
-                if (netClient.AmPlantSide())
+                if (netClient.Team == winningTeam)
                 {
-                    winner.SetPlant();
+                    winner.SetPortrait(netClient.Team);
                     winner.SetName(netClient.Name);
                 }
                 else
                 {
-                    loser.SetZombie();
+                    loser.SetPortrait(Utils.GetOppositeTeam(winningTeam));
                     loser.SetName(netClient.Name);
-                }
-            }
-            else
-            {
-                if (netClient.AmPlantSide())
-                {
-                    loser.SetPlant();
-                    loser.SetName(netClient.Name);
-                }
-                else
-                {
-                    winner.SetZombie();
-                    winner.SetName(netClient.Name);
                 }
             }
         }
@@ -126,23 +112,14 @@ internal static class EndGameManager
     /// <summary>
     /// Sets the active winner panel based on which team won.
     /// </summary>
-    /// <param name="didPlantsWon">True to show plant winner panel, false to show zombie winner panel.</param>
-    private static void SetWinnerPanel(bool didPlantsWon)
+    private static void SetWinnerPanel(PlayerTeam winningTeam)
     {
         var Plants = GameObject.Find("Panels/VersusPanels/P_VsWin/Canvas/Layout/Center/Winner").transform.Find("Plants");
         var Zombies = GameObject.Find("Panels/VersusPanels/P_VsWin/Canvas/Layout/Center/Winner").transform.Find("Zombies");
         if (Plants != null && Zombies != null)
         {
-            if (didPlantsWon)
-            {
-                Plants.gameObject.SetActive(true);
-                Zombies.gameObject.SetActive(false);
-            }
-            else
-            {
-                Zombies.gameObject.SetActive(true);
-                Plants.gameObject.SetActive(false);
-            }
+            Plants.gameObject.SetActive(winningTeam is PlayerTeam.Plants);
+            Zombies.gameObject.SetActive(winningTeam is PlayerTeam.Zombies);
         }
     }
 
@@ -211,25 +188,31 @@ internal static class EndGameManager
         }
 
         /// <summary>
-        /// Configures the nameplate to display plant team visuals.
+        /// Configures the Portrait visuals base of team.
         /// </summary>
-        internal void SetPlant()
+        internal void SetPortrait(PlayerTeam team)
         {
-            PlantFrame.SetActive(true);
-            PlantAvatar.SetActive(true);
-            ZombieFrame.SetActive(false);
-            ZombieAvatar.SetActive(false);
-        }
-
-        /// <summary>
-        /// Configures the nameplate to display zombie team visuals.
-        /// </summary>
-        internal void SetZombie()
-        {
-            ZombieFrame.SetActive(true);
-            ZombieAvatar.SetActive(true);
-            PlantFrame.SetActive(false);
-            PlantAvatar.SetActive(false);
+            switch (team)
+            {
+                case PlayerTeam.Plants:
+                    PlantFrame.SetActive(true);
+                    PlantAvatar.SetActive(true);
+                    ZombieFrame.SetActive(false);
+                    ZombieAvatar.SetActive(false);
+                    break;
+                case PlayerTeam.Zombies:
+                    ZombieFrame.SetActive(true);
+                    ZombieAvatar.SetActive(true);
+                    PlantFrame.SetActive(false);
+                    PlantAvatar.SetActive(false);
+                    break;
+                default:
+                    PlantFrame.SetActive(false);
+                    PlantAvatar.SetActive(false);
+                    ZombieFrame.SetActive(false);
+                    ZombieAvatar.SetActive(false);
+                    break;
+            }
         }
 
         /// <summary>

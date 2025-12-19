@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.Gameplay;
-using Il2CppSource.DataModels;
 using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
@@ -43,7 +42,7 @@ internal static class VersusModePatch
     // Stop game from placing initial gravestones in vs
     [HarmonyPatch(typeof(Challenge), nameof(Challenge.IZombiePlaceZombie))]
     [HarmonyPrefix]
-    private static bool IZombiePlaceZombie_Prefix(ZombieType theZombieType)
+    private static bool IZombiePlaceZombie_Prefix()
     {
         if (NetLobby.AmInLobby() && Instances.GameplayActivity.VersusMode.m_versusTime < 1f)
         {
@@ -51,30 +50,5 @@ internal static class VersusModePatch
         }
 
         return true;
-    }
-
-    [HarmonyPatch(typeof(VersusPlayerModel), nameof(VersusPlayerModel.Confirm))]
-    [HarmonyPostfix]
-    private static void Confirm_Postfix(VersusPlayerModel __instance)
-    {
-        if (!NetLobby.AmLobbyHost()) return;
-
-        if (Instances.GameplayActivity.VersusMode.PlantPlayerIndex == 0)
-        {
-            NetLobby.LobbyData.Networked.HostIsOnPlantSide = true;
-        }
-        else
-        {
-            NetLobby.LobbyData.Networked.HostIsOnPlantSide = false;
-        }
-    }
-
-    [HarmonyPatch(typeof(VersusPlayerModel), nameof(VersusPlayerModel.Cancel))]
-    [HarmonyPostfix]
-    private static void Cancel_Postfix(VersusPlayerModel __instance)
-    {
-        if (!NetLobby.AmLobbyHost()) return;
-
-        NetLobby.LobbyData.Networked.PickingSides = true;
     }
 }

@@ -15,7 +15,7 @@ internal static class PlantPatch
     {
         if (NetLobby.AmInLobby())
         {
-            if (VersusState.ZombieSide)
+            if (VersusState.AmZombieSide)
             {
                 if (__instance.mSeedType is (SeedType.Potatomine or SeedType.Chomper or SeedType.Squash))
                 {

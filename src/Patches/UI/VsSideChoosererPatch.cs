@@ -1,8 +1,10 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.Gameplay;
+using Il2CppSource.DataModels;
 using Il2CppTekly.PanelViews;
 using Il2CppTMPro;
 using MelonLoader;
+using ReplantedOnline.Enums;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
@@ -127,5 +129,30 @@ internal static class VsSideChoosererPatch
     {
         InteractableBlocker?.SetActive(!interactable);
         InteractableGamePad?.SetActive(interactable);
+    }
+
+    [HarmonyPatch(typeof(VersusPlayerModel), nameof(VersusPlayerModel.Confirm))]
+    [HarmonyPostfix]
+    private static void Confirm_Prefix(VersusPlayerModel __instance)
+    {
+        if (!NetLobby.AmLobbyHost()) return;
+
+        if (Instances.GameplayActivity.VersusMode.PlantPlayerIndex == 0)
+        {
+            NetLobby.LobbyData.Networked.HostTeam = PlayerTeam.Plants;
+        }
+        else
+        {
+            NetLobby.LobbyData.Networked.HostTeam = PlayerTeam.Zombies;
+        }
+    }
+
+    [HarmonyPatch(typeof(VersusPlayerModel), nameof(VersusPlayerModel.Cancel))]
+    [HarmonyPostfix]
+    private static void Cancel_Prefix(VersusPlayerModel __instance)
+    {
+        if (!NetLobby.AmLobbyHost()) return;
+
+        NetLobby.LobbyData.Networked.HostTeam = PlayerTeam.None;
     }
 }

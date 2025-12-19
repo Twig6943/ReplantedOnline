@@ -1,5 +1,6 @@
 ﻿using Il2CppReloaded.Gameplay;
 using Il2CppSteamworks;
+using ReplantedOnline.Enums;
 using ReplantedOnline.Network;
 
 namespace ReplantedOnline.Modules;
@@ -23,12 +24,17 @@ internal static class VersusState
     /// <summary>
     /// Determines if the local player is currently on the zombie team.
     /// </summary>
-    internal static bool ZombieSide => SteamNetClient.LocalClient?.AmZombieSide() == true;
+    internal static bool AmZombieSide => SteamNetClient.LocalClient?.Team == PlayerTeam.Zombies;
 
     /// <summary>
     /// Determines if the local player is currently on the plant team.
     /// </summary>
-    internal static bool PlantSide => SteamNetClient.LocalClient?.AmPlantSide() == true;
+    internal static bool AmPlantSide => SteamNetClient.LocalClient?.Team == PlayerTeam.Plants;
+
+    /// <summary>
+    /// Determines if the local player is currently spectating..
+    /// </summary>
+    internal static bool AmSpectator => SteamNetClient.LocalClient?.Team == PlayerTeam.Spectators;
 
     /// <summary>
     /// Gets the Steam ID of the player currently assigned to the plant team.

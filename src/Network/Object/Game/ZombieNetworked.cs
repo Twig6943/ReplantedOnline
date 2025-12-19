@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Attributes;
 using Il2CppReloaded.Gameplay;
 using MelonLoader;
+using ReplantedOnline.Enums;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
@@ -54,9 +55,9 @@ internal sealed class ZombieNetworked : NetworkClass
         _Zombie?.RemoveNetworkedLookup();
     }
 
-    private bool EnteringHouse;
-    private float syncCooldown = 2f;
-    private float lastPos;
+    internal bool EnteringHouse;
+    private float _syncCooldown = 2f;
+    private float _lastPos;
 
     public void Update()
     {
@@ -64,13 +65,13 @@ internal sealed class ZombieNetworked : NetworkClass
         {
             if (_Zombie?.mDead != true)
             {
-                if (syncCooldown <= 0f && lastPos != _Zombie.mPosX)
+                if (_syncCooldown <= 0f && _lastPos != _Zombie.mPosX)
                 {
                     MarkDirty();
-                    syncCooldown = 2f;
-                    lastPos = _Zombie.mPosX;
+                    _syncCooldown = 2f;
+                    _lastPos = _Zombie.mPosX;
                 }
-                syncCooldown -= Time.deltaTime;
+                _syncCooldown -= Time.deltaTime;
             }
             else if (!IsDespawning)
             {
@@ -163,6 +164,7 @@ internal sealed class ZombieNetworked : NetworkClass
 
     internal void SendEnteringHouseRpc(float xPos)
     {
+        EnteringHouse = true;
         var writer = PacketWriter.Get();
         writer.WriteFloat(xPos);
         this.SendRpc(2, writer);
@@ -174,7 +176,7 @@ internal sealed class ZombieNetworked : NetworkClass
         EnteringHouse = true;
         StopLarpPos();
         _Zombie?.mPosX = xPos;
-        VersusManager.EndGame(_Zombie?.mController?.gameObject, false);
+        VersusManager.EndGame(_Zombie?.mController?.gameObject, PlayerTeam.Zombies);
     }
 
     // Target zombie death logic
@@ -194,7 +196,7 @@ internal sealed class ZombieNetworked : NetworkClass
             }
             else
             {
-                VersusManager.EndGame(_Zombie?.mController?.gameObject, true);
+                VersusManager.EndGame(_Zombie?.mController?.gameObject, PlayerTeam.Plants);
                 callback?.Invoke();
             }
         }

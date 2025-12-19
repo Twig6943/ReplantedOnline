@@ -1,6 +1,7 @@
 ﻿using Il2CppReloaded.Gameplay;
 using Il2CppTekly.PanelViews;
 using MelonLoader;
+using ReplantedOnline.Enums;
 using ReplantedOnline.Patches.Versus.NetworkSync;
 using System.Reflection;
 using UnityEngine;
@@ -60,6 +61,31 @@ internal static class Utils
     internal static Zombie SpawnZombie(ZombieType zombieType, int gridX, int gridY, bool shakeBush, bool spawnOnNetwork)
     {
         return SeedPacketSyncPatch.SpawnZombie(zombieType, gridX, gridY, shakeBush, spawnOnNetwork);
+    }
+
+    /// <summary>
+    /// Gets the opposite team for a given player team.
+    /// </summary>
+    /// <param name="team">The player team to get the opposite of.</param>
+    /// <returns>
+    /// The opposite team:
+    /// <list type="bullet">
+    /// <item><description>Plants → Zombies</description></item>
+    /// <item><description>Zombies → Plants</description></item>
+    /// <item><description>Any other value → None</description></item>
+    /// </list>
+    /// </returns>
+    internal static PlayerTeam GetOppositeTeam(PlayerTeam team)
+    {
+        switch (team)
+        {
+            case PlayerTeam.Plants:
+                return PlayerTeam.Zombies;
+            case PlayerTeam.Zombies:
+                return PlayerTeam.Plants;
+            default:
+                return PlayerTeam.None;
+        }
     }
 
     /// <summary>

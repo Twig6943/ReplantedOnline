@@ -2,6 +2,7 @@
 using MelonLoader;
 using ReplantedOnline.Attributes;
 using ReplantedOnline.Enums;
+using ReplantedOnline.Helper;
 using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object;
@@ -107,6 +108,17 @@ internal sealed class NetLobbyData
     }
 
     /// <summary>
+    /// Sets all clients team to None.
+    /// </summary>
+    internal void UnsetAllTeams()
+    {
+        foreach (var client in AllClients.Values)
+        {
+            client.Team = PlayerTeam.None;
+        }
+    }
+
+    /// <summary>
     /// Gets the next available network ID for spawning network objects
     /// </summary>
     /// <returns>
@@ -161,12 +173,16 @@ internal sealed class NetLobbyData
     /// Handles networked lobby data synchronization between clients.
     /// </summary>
     [RegisterRPCHandler]
-    internal class NetworkedData : RPCHandler
+    internal sealed class NetworkedData : RPCHandler
     {
         private bool _restartingLobby;
         private bool _hasStarted;
-        private bool _pickingSides = true;
-        private bool _hostIsOnPlantSide;
+        private PlayerTeam _hostTeam;
+
+        /// <summary>
+        /// Gets if the host is picking sides.
+        /// </summary>
+        internal bool PickingSides => _hostTeam is PlayerTeam.None;
 
         /// <summary>
         /// Gets or sets whether the versus match has started.
@@ -189,40 +205,20 @@ internal sealed class NetLobbyData
         }
 
         /// <summary>
-        /// Gets or sets whether host is currently picking teams.
-        /// Setting to true resets all players to the team selection phase.
-        /// </summary>
-        internal bool PickingSides
-        {
-            get
-            {
-                return _pickingSides;
-            }
-            set
-            {
-                // Only need to send when entering picking sides mode
-                if (value is true)
-                {
-                    SendData(2);
-                }
-            }
-        }
-
-        /// <summary>
         /// Gets or sets which team the host is on.
         /// Setting this property automatically synchronizes the team assignment across all clients.
         /// </summary>
-        internal bool HostIsOnPlantSide
+        internal PlayerTeam HostTeam
         {
             get
             {
-                return _hostIsOnPlantSide;
+                return _hostTeam;
             }
             set
             {
-                SendData(3, packetWriter =>
+                SendData(2, packetWriter =>
                 {
-                    packetWriter.WriteBool(value);
+                    packetWriter.WriteByte((byte)value);
                 });
             }
         }
@@ -254,17 +250,11 @@ internal sealed class NetLobbyData
                 packetWriter.WriteBool(NetLobby.LobbyData.Networked._hasStarted);
             }, false);
 
-            // Send team selection phase status (dataId = 2)
+            // Send host team assignment (dataId = 3)
             SendData(2, packetWriter =>
             {
-                packetWriter.WriteBool(NetLobby.LobbyData.Networked._pickingSides);
-            }, false);
-
-            // Send host team assignment (dataId = 3)
-            SendData(3, packetWriter =>
-            {
-                packetWriter.WriteBool(NetLobby.LobbyData.Networked._hostIsOnPlantSide);
-            }, false);
+                packetWriter.WriteByte((byte)NetLobby.LobbyData.Networked._hostTeam);
+            }, true);
         }
 
         /// <summary>
@@ -337,29 +327,32 @@ internal sealed class NetLobbyData
 
                 case 2: // Enter Team Selection Phase
                     {
-                        data._pickingSides = true; // Enable team picking
-                        VersusManager.ResetPlayerInputs(); // Clear previous team assignments
-                        VersusManager.UpdateSideVisuals(); // Update UI to show team selection
-                        SetReady();
-                    }
-                    break;
+                        data._hostTeam = (PlayerTeam)packetReader.ReadByte();
 
-                case 3: // Lock Teams
-                    {
-                        data._pickingSides = false; // Disable team picking
-                        data._hostIsOnPlantSide = packetReader.ReadBool(); // Get host's team
-
-                        // Assign player inputs based on host's team
-                        if (NetLobby.AmLobbyHost())
+                        if (data._hostTeam is PlayerTeam.None) // unset teams
                         {
-                            VersusManager.UpdatePlayerInputs(!data._hostIsOnPlantSide);
+                            VersusManager.ResetPlayerInput();
+                            NetLobby.LobbyData.UnsetAllTeams();
+                            VersusManager.UpdateSideVisuals();
                         }
                         else
                         {
-                            VersusManager.UpdatePlayerInputs(data._hostIsOnPlantSide);
-                        }
+                            var otherTeam = Utils.GetOppositeTeam(data._hostTeam);
+                            if (NetLobby.AmLobbyHost())
+                            {
+                                SteamNetClient.LocalClient.Team = data._hostTeam;
+                                SteamNetClient.OpponentClient?.Team = otherTeam;
+                                VersusManager.SetPlayerInput(data._hostTeam);
+                            }
+                            else
+                            {
+                                SteamNetClient.LocalClient.Team = otherTeam;
+                                SteamNetClient.OpponentClient?.Team = data._hostTeam;
+                                VersusManager.SetPlayerInput(otherTeam);
+                            }
 
-                        VersusManager.UpdateSideVisuals(); // Update UI with final team assignments
+                            VersusManager.UpdateSideVisuals();
+                        }
 
                         SetReady();
                     }
