@@ -4,5 +4,6 @@
 /src/obj
 /src/.editorconfig
 /src/.vscode
-/src/References/Il2cppGame/**.dll
+/src/References/Il2Cpp/**.dll
+/src/References/Replanted/**.dll
 /src/References/UnityEngine/**.dll

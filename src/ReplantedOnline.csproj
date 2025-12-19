@@ -1,22 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>disable</Nullable>
-    <OutputType>Library</OutputType>
-    <langVersion>preview</langVersion>
-	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-	<GenerateDocumentationFile>True</GenerateDocumentationFile>
-  </PropertyGroup>
+	<!-- Base Info -->
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+		<OutputType>Library</OutputType>
+		<langVersion>preview</langVersion>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-	  <Reference Include="References\*\*.dll" />
-  </ItemGroup>
-	
-  <ItemGroup>
-    <PackageReference Include="HarmonyX" Version="2.16.0" />
-  </ItemGroup>
-
+	<!-- Build Events -->
 	<PropertyGroup>
 		<ModPathFile>build\mod_folder_path</ModPathFile>
 		<GamePath Condition="Exists('$(ModPathFile)')">$([System.IO.File]::ReadAllText('$(ModPathFile)').Trim())</GamePath>
@@ -32,4 +26,85 @@
 		<Warning Text="Game path not found. Set game path in mod_folder_path." />
 		<Message Text="Mod was NOT copied to game folder!" Importance="high" />
 	</Target>
+
+	<!-- Packages -->
+	<ItemGroup>
+		<PackageReference Include="HarmonyX" Version="2.16.0" />
+	</ItemGroup>
+
+	<!-- References -->
+	<ItemGroup>
+		<!-- Melon Loader -->
+		<Reference Include="MelonLoader">
+			<HintPath>References\MelonLoader\MelonLoader_v0.7.1.dll</HintPath>
+		</Reference>
+
+		<!-- Dependencies -->
+		<Reference Include="BloomEngine">
+			<HintPath>References\Dependencies\BloomEngine_v0.1.0_a.dll</HintPath>
+		</Reference>
+
+		<!-- Unity Engine -->
+		<Reference Include="UnityEngine">
+			<HintPath>References\UnityEngine\UnityEngine.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+			<HintPath>References\UnityEngine\UnityEngine.CoreModule.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.TextMeshPro">
+			<HintPath>References\UnityEngine\Unity.TextMeshPro.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UI">
+			<HintPath>References\UnityEngine\UnityEngine.UI.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.Mathematics">
+			<HintPath>References\UnityEngine\Unity.Mathematics.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.IMGUIModule">
+			<HintPath>References\UnityEngine\UnityEngine.IMGUIModule.dll</HintPath>
+		</Reference>
+
+		<!-- Replanted -->
+		<Reference Include="Assembly-CSharp">
+			<HintPath>References\Replanted\Assembly-CSharp.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppFacepunch.Steamworks.Win64">
+			<HintPath>References\Replanted\Il2CppFacepunch.Steamworks.Win64.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppReloaded.Input.Components">
+			<HintPath>References\Replanted\Il2CppReloaded.Input.Components.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppTekly.Common.Runtime">
+			<HintPath>References\Replanted\Il2CppTekly.Common.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppTekly.Content.Runtime">
+			<HintPath>References\Replanted\Il2CppTekly.Content.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppTekly.DataModels.Runtime">
+			<HintPath>References\Replanted\Il2CppTekly.DataModels.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppTekly.Extensions.Runtime">
+			<HintPath>References\Replanted\Il2CppTekly.Extensions.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppTekly.Injectors.Runtime">
+			<HintPath>References\Replanted\Il2CppTekly.Injectors.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppTekly.Localizations.Runtime">
+			<HintPath>References\Replanted\Il2CppTekly.Localizations.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppTekly.PanelViews.Runtime">
+			<HintPath>References\Replanted\Il2CppTekly.PanelViews.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppTekly.TreeState.Runtime">
+			<HintPath>References\Replanted\Il2CppTekly.TreeState.Runtime.dll</HintPath>
+		</Reference>
+
+		<!-- Il2Cpp -->
+		<Reference Include="Il2Cppmscorlib">
+			<HintPath>References\Il2Cpp\Il2Cppmscorlib.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppInterop.Runtime">
+			<HintPath>References\Il2Cpp\Il2CppInterop.Runtime.dll</HintPath>
+		</Reference>
+	</ItemGroup>
 </Project>
