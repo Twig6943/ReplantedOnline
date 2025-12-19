@@ -43,12 +43,12 @@ public static class ModInfo
         /// <summary>
         /// The name of the company that developed the game.
         /// </summary>
-        public const string COMPANY_NAME = "PopCap Games";
+        public const string COMPANY = "PopCap Games";
 
         /// <summary>
         /// The official name of the game.
         /// </summary>
-        public const string GAME_NAME = "Plants vs. Zombies™: Replanted";
+        public const string GAME = "PvZ Replanted";
     }
 
     /// <summary>
