@@ -1,8 +1,8 @@
-﻿using HarmonyLib;          // Harmony library for patching game methods
-using Il2CppReloaded.Gameplay;  // Game-specific classes (Board, Plant, Zombie)
+﻿using HarmonyLib;
+using Il2CppReloaded.Gameplay;
 using ReplantedOnline.Managers;
-using ReplantedOnline.Modules;   // Custom module for VersusState
-using ReplantedOnline.Network.Online;  // Online functionality for NetLobby
+using ReplantedOnline.Modules;
+using ReplantedOnline.Network.Online;
 
 namespace ReplantedOnline.Patches.Versus;
 
