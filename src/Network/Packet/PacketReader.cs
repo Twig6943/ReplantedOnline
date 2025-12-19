@@ -32,7 +32,7 @@ internal sealed class PacketReader
     {
         AmountInUse++;
         var reader = _pool.Count > 0 ? _pool.Dequeue() : new PacketReader();
-        reader._data = data.ToArray();
+        reader._data = data;
         reader._position = 0;
         return reader;
     }
