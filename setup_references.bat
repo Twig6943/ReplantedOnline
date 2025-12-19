@@ -2,11 +2,6 @@
 setlocal enabledelayedexpansion
 chcp 65001 >nul
 
-echo ============================================
-echo  Reference Setup for ReplantedOnline.csproj
-echo ============================================
-echo.
-
 REM Define list of subdirectories to search in the MelonLoader folder
 set "SEARCH_DIRS=Il2CppAssemblies net6"
 
