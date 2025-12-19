@@ -28,6 +28,11 @@ internal sealed class AnimationControllerNetworked : NetworkClass
         _AnimationController.RemoveNetworkedLookup();
     }
 
+    public void OnDestroy()
+    {
+        _AnimationController.RemoveNetworkedLookup();
+    }
+
     [HideFromIl2Cpp]
     public override void HandleRpc(SteamNetClient sender, byte rpcId, PacketReader packetReader)
     {
