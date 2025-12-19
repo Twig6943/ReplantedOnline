@@ -263,8 +263,6 @@ internal sealed class ZombieNetworked : NetworkClass
             var posX = packetReader.ReadFloat();
             LarpPos(posX);
         }
-
-        ClearDirtyBits();
     }
 
     /// <summary>
