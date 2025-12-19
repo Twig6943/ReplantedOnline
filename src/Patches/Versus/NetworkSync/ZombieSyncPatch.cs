@@ -27,7 +27,7 @@ internal static class ZombieSyncPatch
             __instance.GetNetworked<ZombieNetworked>()?.SendDeathRpc(theDamageFlags);
 
             // Execute the original death animation logic locally
-            __instance.GetNetworked<ZombieNetworked>().CheckTargetDeath(() =>
+            __instance.GetNetworked<ZombieNetworked>()?.CheckTargetDeath(() =>
             {
                 __instance.PlayDeathAnimOriginal(theDamageFlags);
             });

@@ -2,10 +2,8 @@
 
 /// <summary>
 /// Provides constant metadata and identification information for the Replanted Online mod.
-/// This class contains static read-only properties that define the mod's basic information
-/// used by MelonLoader for registration, display, and dependency management.
 /// </summary>
-public class ModInfo
+public static class ModInfo
 {
     /// <summary>
     /// The display name of the mod as shown to users in mod managers and in-game menus.
@@ -22,4 +20,19 @@ public class ModInfo
     /// This GUID is used for dependency resolution and mod identification.
     /// </summary>
     public const string ModGUID = "com.d1gq.replantedonline";
+
+    /// <summary>
+    /// The link for the github page.
+    /// </summary>
+    public const string Github = "https://github.com/D1GQ/ReplantedOnline";
+
+    /// <summary>
+    /// That's ME!
+    /// </summary>
+    public const string Creator = "D1GQ";
+
+    /// <summary>
+    /// List of all contributors, separate by ","
+    /// </summary>
+    public const string Contributors = "PalmForest";
 }

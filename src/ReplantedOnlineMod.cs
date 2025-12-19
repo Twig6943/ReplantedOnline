@@ -16,20 +16,15 @@ internal class ReplantedOnlineMod : MelonMod
 {
     internal static HarmonyLib.Harmony harmony = new(ModInfo.ModGUID);
 
-    [Obsolete]
-    public override void OnApplicationStart()
+    public override void OnInitializeMelon()
     {
         File.WriteAllText("steam_appid.txt", ((uint)AppIdServers.PVZ_Replanted).ToString());
         harmony.PatchAll();
-        Application.runInBackground = true;
-    }
-
-    public override void OnInitializeMelon()
-    {
         InstanceAttribute.RegisterAll();
         RegisterAllMonoBehavioursInAssembly();
         NetworkClass.SetupPrefabs();
         BloomEngineManager.InitBloom(this);
+        Application.runInBackground = true;
     }
 
     public override void OnUpdate()
