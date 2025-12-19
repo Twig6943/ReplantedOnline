@@ -36,12 +36,12 @@
 	<ItemGroup>
 		<!-- Melon Loader -->
 		<Reference Include="MelonLoader">
-			<HintPath>References\MelonLoader\MelonLoader_v0.7.1.dll</HintPath>
+			<HintPath>References\MelonLoader\MelonLoader.dll</HintPath>
 		</Reference>
 
 		<!-- Dependencies -->
 		<Reference Include="BloomEngine">
-			<HintPath>References\Dependencies\BloomEngine_v0.1.0_a.dll</HintPath>
+			<HintPath>References\Dependencies\BloomEngine.dll</HintPath>
 		</Reference>
 
 		<!-- Unity Engine -->
