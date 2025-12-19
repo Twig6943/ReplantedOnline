@@ -26,7 +26,7 @@ internal sealed class StartGameHandler : RPCHandler
         var packetWriter = PacketWriter.Get();
         packetWriter.WriteByte((byte)selectionSet);
         NetworkDispatcher.SendRpc(RpcType.StartGame, packetWriter, true);
-        NetLobby.LobbyData.Networked.HasStarted = true;
+        NetLobby.LobbyData.Networked.SetHasStarted(true);
         MatchmakingManager.SetJoinable(false);
     }
 

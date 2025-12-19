@@ -80,7 +80,7 @@ internal static class VersusManager
     private static TextMeshProUGUI pickSides;
 
     private static EventTrigger lobbyCodeHeaderTrigger;
-    private static string DefaultHeaderText => $"Lobby Code: {NetLobby.LobbyData.LobbyCode}";
+    private static string DefaultHeaderText => $"Lobby Code: {NetLobby.LobbyData?.LobbyCode ?? "???"}";
     private static bool copyingLobbyCode = false;
 
     /// <summary>
@@ -88,7 +88,9 @@ internal static class VersusManager
     /// </summary>
     internal static bool IsUIReady()
     {
-        return zombiePlayer1 != null && zombiePlayer2 != null && plantPlayer1 != null && plantPlayer2 != null && playerList != null && pickSides != null;
+        return zombiePlayer1 != null && zombiePlayer2 != null &&
+               plantPlayer1 != null && plantPlayer2 != null &&
+               playerList != null && pickSides != null;
     }
 
     /// <summary>

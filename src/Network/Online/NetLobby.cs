@@ -346,7 +346,7 @@ internal static class NetLobby
             var sent = SteamNetworking.SendP2PPacket(steamId, packetWriter.GetBytes(), packetWriter.Length);
             packetWriter.Recycle();
 
-            NetLobbyData.NetworkedData.SendAllData();
+            LobbyData.Networked.SendAllData();
 
             if (sent)
             {

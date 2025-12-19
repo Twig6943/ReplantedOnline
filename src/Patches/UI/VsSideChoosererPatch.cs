@@ -139,11 +139,11 @@ internal static class VsSideChoosererPatch
 
         if (Instances.GameplayActivity.VersusMode.PlantPlayerIndex == 0)
         {
-            NetLobby.LobbyData.Networked.HostTeam = PlayerTeam.Plants;
+            NetLobby.LobbyData.Networked.SetHostTeam(PlayerTeam.Plants);
         }
         else
         {
-            NetLobby.LobbyData.Networked.HostTeam = PlayerTeam.Zombies;
+            NetLobby.LobbyData.Networked.SetHostTeam(PlayerTeam.Zombies);
         }
     }
 
@@ -153,6 +153,6 @@ internal static class VsSideChoosererPatch
     {
         if (!NetLobby.AmLobbyHost()) return;
 
-        NetLobby.LobbyData.Networked.HostTeam = PlayerTeam.None;
+        NetLobby.LobbyData.Networked.SetHostTeam(PlayerTeam.None);
     }
 }

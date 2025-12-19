@@ -4,7 +4,6 @@ using ReplantedOnline.Attributes;
 using ReplantedOnline.Enums;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Managers;
-using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object;
 using ReplantedOnline.Network.Packet;
 using ReplantedOnline.Network.RPC;
@@ -185,46 +184,43 @@ internal sealed class NetLobbyData
         internal bool PickingSides => _hostTeam is PlayerTeam.None;
 
         /// <summary>
-        /// Gets or sets whether the versus match has started.
-        /// Setting this property automatically synchronizes the value across all clients.
+        /// Gets whether the versus match has started.
         /// </summary>
-        internal bool HasStarted
-        {
-            get
-            {
-                return _hasStarted;
-            }
-            set
-            {
-                // When set by the host, broadcast the new value to all clients
-                SendData(1, packetWriter =>
-                {
-                    packetWriter.WriteBool(value);
-                });
-            }
-        }
+        internal bool HasStarted => _hasStarted;
 
         /// <summary>
-        /// Gets or sets which team the host is on.
-        /// Setting this property automatically synchronizes the team assignment across all clients.
+        /// Gets which team the host is on.
         /// </summary>
-        internal PlayerTeam HostTeam
-        {
-            get
-            {
-                return _hostTeam;
-            }
-            set
-            {
-                SendData(2, packetWriter =>
-                {
-                    packetWriter.WriteByte((byte)value);
-                });
-            }
-        }
+        internal PlayerTeam HostTeam => _hostTeam;
 
         /// <inheritdoc/>
         internal sealed override RpcType Rpc => RpcType.LobbyData;
+
+        /// <summary>
+        /// Sets whether the versus match has started and synchronizes the value across all clients.
+        /// </summary>
+        /// <param name="value">Whether the match has started.</param>
+        internal void SetHasStarted(bool value)
+        {
+            _hasStarted = value;
+            SendData(1, packetWriter =>
+            {
+                packetWriter.WriteBool(value);
+            });
+        }
+
+        /// <summary>
+        /// Sets which team the host is on and synchronizes the team assignment across all clients.
+        /// </summary>
+        /// <param name="team">The team for the host.</param>
+        internal void SetHostTeam(PlayerTeam team)
+        {
+            _hostTeam = team;
+            SendData(2, packetWriter =>
+            {
+                packetWriter.WriteByte((byte)team);
+            });
+        }
 
         /// <summary>
         /// Initiates a lobby reset sequence.
@@ -242,18 +238,18 @@ internal sealed class NetLobbyData
         /// Synchronizes all networked lobby data to newly connected clients.
         /// This ensures late-joining clients receive the current game state.
         /// </summary>
-        internal static void SendAllData()
+        internal void SendAllData()
         {
             // Send match start status (dataId = 1)
             SendData(1, packetWriter =>
             {
-                packetWriter.WriteBool(NetLobby.LobbyData.Networked._hasStarted);
+                packetWriter.WriteBool(_hasStarted);
             }, false);
 
-            // Send host team assignment (dataId = 3)
+            // Send host team assignment (dataId = 2)
             SendData(2, packetWriter =>
             {
-                packetWriter.WriteByte((byte)NetLobby.LobbyData.Networked._hostTeam);
+                packetWriter.WriteByte((byte)_hostTeam);
             }, true);
         }
 
@@ -266,7 +262,7 @@ internal sealed class NetLobbyData
         /// identifier is included.</param>
         /// <param name="receiveLocally">Indicates whether the packet should also be received by the local client. Set to <see langword="true"/> to
         /// deliver the packet locally; otherwise, <see langword="false"/>.</param>
-        private static void SendData(byte dataId, Action<PacketWriter> callback = null, bool receiveLocally = true)
+        private void SendData(byte dataId, Action<PacketWriter> callback = null, bool receiveLocally = true)
         {
             var packetWriter = PacketWriter.Get();
             packetWriter.WriteByte(dataId); // Write data type identifier
@@ -292,7 +288,7 @@ internal sealed class NetLobbyData
         private static IEnumerator CoWaitHandle(PacketReader packetReader)
         {
             // Wait for the gameplay activity and versus mode to be initialized
-            while (Instances.GameplayActivity?.VersusMode == null && !VersusManager.IsUIReady())
+            while (NetLobby.LobbyData?.Networked?._restartingLobby != false || !VersusManager.IsUIReady())
             {
                 // If we leave the lobby while waiting, clean up and exit
                 if (!NetLobby.AmInLobby())
@@ -304,8 +300,8 @@ internal sealed class NetLobbyData
                 yield return null;
             }
 
-            var dataId = packetReader.ReadByte();
             var data = NetLobby.LobbyData.Networked;
+            var dataId = packetReader.ReadByte();
 
             switch (dataId)
             {
