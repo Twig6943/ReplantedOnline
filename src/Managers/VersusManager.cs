@@ -372,9 +372,12 @@ internal static class VersusManager
                 ZombieType.Gravestone => 100,
                 ZombieType.Zamboni => 50,
                 ZombieType.Zombatar => 50,
+                ZombieType.Catapult => 30,
                 ZombieType.Football => 30,
                 ZombieType.Dancer => 25,
-                ZombieType.Catapult => 15,
+                ZombieType.Pogo => 15,
+                ZombieType.Pail => 15,
+                ZombieType.Polevaulter => 15,
                 ZombieType.BackupDancer => 0,
                 _ => 10,
             };
