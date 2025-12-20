@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.UI;
+using Il2CppTMPro;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Network.Online;
 using UnityEngine.UI;
@@ -7,7 +8,7 @@ using UnityEngine.UI;
 namespace ReplantedOnline.Patches.UI;
 
 [HarmonyPatch]
-internal static class GameplayOptionsMenuPatch
+internal static class PauseMenuPatch
 {
     [HarmonyPatch(typeof(GameplayOptionsMenu), nameof(GameplayOptionsMenu.OnEnable))]
     [HarmonyPostfix]
@@ -24,6 +25,8 @@ internal static class GameplayOptionsMenuPatch
                 {
                     NetLobby.LobbyData?.Networked?.ResetLobby();
                 });
+                restartLevelButton.gameObject.DestroyAllTextLocalizers();
+                restartLevelButton.GetComponentInChildren<TextMeshProUGUI>(true)?.SetText("Restart Lobby");
             }
             else
             {
@@ -34,6 +37,10 @@ internal static class GameplayOptionsMenuPatch
             var mainMneuButton = __instance.transform.Find("P_OptionsPanel_Canvas/Layout/Center/Panel/Bottom/Buttons/Hlayout/P_BasicButton_MainMenu")?.GetComponentInChildren<Button>(true);
             mainMneuButton.onClick = new();
             mainMneuButton.onClick.AddListener(() => NetLobby.LeaveLobby());
+
+            // Remove almanac button
+            var almanacButton = __instance.transform.Find("P_OptionsPanel_Canvas/Layout/Center/P_ControllerPrompt_Legend");
+            UnityEngine.Object.Destroy(almanacButton.gameObject);
         }
     }
 }
