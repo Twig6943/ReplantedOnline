@@ -278,6 +278,7 @@ internal sealed class ZombieNetworked : NetworkClass
             return;
         }
 
+        packetWriter.WriteInt(_Zombie.mRow);
         packetWriter.WriteFloat(_Zombie.mVelX);
         packetWriter.WriteFloat(_Zombie.mPosX);
 
@@ -305,6 +306,7 @@ internal sealed class ZombieNetworked : NetworkClass
 
         if (!AmOwner)
         {
+            _Zombie.mRow = packetReader.ReadInt();
             _Zombie.mVelX = packetReader.ReadFloat();
             _Zombie.UpdateAnimSpeed();
             var posX = packetReader.ReadFloat();
