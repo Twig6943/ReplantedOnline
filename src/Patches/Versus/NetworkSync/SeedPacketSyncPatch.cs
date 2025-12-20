@@ -48,7 +48,6 @@ internal static class SeedPacketSyncPatch
                         seedPacket.WasPlanted(ReplantedOnlineMod.Constants.LOCAL_PLAYER_INDEX); // TODO: Fix no cooldown on gamepad
                         __instance.Board.TakeSunMoney(cost, ReplantedOnlineMod.Constants.LOCAL_PLAYER_INDEX);
                         PlaceSeed(seedType, seedPacket.mImitaterType, gridX, gridY, true);
-                        Instances.GameplayActivity.m_audioService.PlaySample(Sound.SOUND_PLANT);
                     }
                     else
                     {
@@ -104,7 +103,6 @@ internal static class SeedPacketSyncPatch
                         __instance.Board.TakeSunMoney(cost, ReplantedOnlineMod.Constants.LOCAL_PLAYER_INDEX);
                         __instance.Board.ClearCursor();
                         PlaceSeed(seedType, seedPacket.mImitaterType, gridX, gridY, true);
-                        Instances.GameplayActivity.m_audioService.PlaySample(Sound.SOUND_PLANT);
                     }
                     else
                     {
