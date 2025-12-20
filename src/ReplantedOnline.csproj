@@ -71,6 +71,9 @@
 		<Reference Include="UnityEngine.ImageConversionModule">
 			<HintPath>References\UnityEngine\UnityEngine.ImageConversionModule.dll</HintPath>
 		</Reference>
+		<Reference Include="Unity.Addressables">
+			<HintPath>References\UnityEngine\Unity.Addressables.dll</HintPath>
+		</Reference>
 
 		<!-- Replanted -->
 		<Reference Include="Assembly-CSharp">

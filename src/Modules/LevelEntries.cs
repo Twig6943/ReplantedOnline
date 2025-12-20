@@ -1,5 +1,5 @@
 ﻿using Il2CppReloaded.Data;
-using UnityEngine;
+using ReplantedOnline.Helper;
 
 namespace ReplantedOnline.Modules;
 
@@ -9,7 +9,6 @@ namespace ReplantedOnline.Modules;
 /// </summary>
 internal static class LevelEntries
 {
-    private static List<LevelEntryData> _allLevels = [];
     private static readonly Dictionary<string, LevelEntryData> _levelNameLookup = [];
 
     /// <summary>
@@ -18,10 +17,7 @@ internal static class LevelEntries
     /// </summary>
     internal static void Init()
     {
-        var levels = Resources.FindObjectsOfTypeAll<LevelEntryData>();
-        _allLevels = [.. levels];
-
-        foreach (var level in _allLevels)
+        foreach (var level in Instances.DataServiceActivity.Service.AllLevelsData.EnumerateIl2CppReadonlyList())
         {
             _levelNameLookup[level.name] = level;
         }

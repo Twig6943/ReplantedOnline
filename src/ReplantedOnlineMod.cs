@@ -27,6 +27,16 @@ internal class ReplantedOnlineMod : MelonMod
         Application.runInBackground = true;
     }
 
+    private void OnInitializeMainMenu()
+    {
+        if (!SteamClient.initialized)
+            SteamClient.Init(0);
+        LevelEntries.Init();
+        PlantDefinitions.Init();
+        ContentManager.Init();
+        NetLobby.Initialize();
+    }
+
     public override void OnUpdate()
     {
         if (!loaded) return;
@@ -44,11 +54,7 @@ internal class ReplantedOnlineMod : MelonMod
         {
             if (loaded) return;
             loaded = true;
-            if (!SteamClient.initialized)
-                SteamClient.Init(0);
-            LevelEntries.Init();
-            PlantDefinitions.Init();
-            NetLobby.Initialize();
+            OnInitializeMainMenu();
         }
     }
 
