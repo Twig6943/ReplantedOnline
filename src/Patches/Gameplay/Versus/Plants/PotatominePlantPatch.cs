@@ -5,7 +5,7 @@ using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object.Game;
 using ReplantedOnline.Network.Online;
 
-namespace ReplantedOnline.Patches.Versus.Plants;
+namespace ReplantedOnline.Patches.Gameplay.Versus.Plants;
 
 [HarmonyPatch]
 internal static class PotatominePlantPatch

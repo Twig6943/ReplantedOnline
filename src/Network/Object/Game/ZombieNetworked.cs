@@ -7,7 +7,7 @@ using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
-using ReplantedOnline.Patches.Versus.NetworkSync;
+using ReplantedOnline.Patches.Gameplay.Versus.Networked;
 using System.Collections;
 using UnityEngine;
 using Zombie = Il2CppReloaded.Gameplay.Zombie;

@@ -4,7 +4,7 @@ using ReplantedOnline.Helper;
 using ReplantedOnline.Monos;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
-using ReplantedOnline.Patches.Versus.NetworkSync;
+using ReplantedOnline.Patches.Gameplay.Versus.Networked;
 using UnityEngine;
 
 namespace ReplantedOnline.Network.Object.Game;

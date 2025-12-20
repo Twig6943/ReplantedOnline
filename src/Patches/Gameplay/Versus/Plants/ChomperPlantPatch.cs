@@ -3,7 +3,7 @@ using Il2CppReloaded.Gameplay;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
 
-namespace ReplantedOnline.Patches.Versus.Plants;
+namespace ReplantedOnline.Patches.Gameplay.Versus.Plants;
 
 [HarmonyPatch]
 internal static class ChomperPlantPatch

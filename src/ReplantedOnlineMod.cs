@@ -7,7 +7,7 @@ using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object;
 using ReplantedOnline.Network.Online;
-using ReplantedOnline.Patches.UI;
+using ReplantedOnline.Patches.Client.UI;
 using UnityEngine;
 
 namespace ReplantedOnline;

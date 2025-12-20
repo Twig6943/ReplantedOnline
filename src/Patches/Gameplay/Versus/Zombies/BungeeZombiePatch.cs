@@ -2,7 +2,7 @@
 using Il2CppReloaded.Gameplay;
 using ReplantedOnline.Network.Online;
 
-namespace ReplantedOnline.Patches.Versus.Zombies;
+namespace ReplantedOnline.Patches.Gameplay.Versus.Zombies;
 
 [HarmonyPatch]
 internal static class BungeeZombiePatch

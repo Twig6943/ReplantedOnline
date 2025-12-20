@@ -5,7 +5,7 @@ using ReplantedOnline.Helper;
 using ReplantedOnline.Network.Online;
 using UnityEngine.UI;
 
-namespace ReplantedOnline.Patches.UI;
+namespace ReplantedOnline.Patches.Client.UI;
 
 [HarmonyPatch]
 internal static class StartMultiplayerButtonPatch

@@ -4,7 +4,7 @@ using ReplantedOnline.Enums;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
-using ReplantedOnline.Patches.Versus.NetworkSync;
+using ReplantedOnline.Patches.Gameplay.Versus.Networked;
 
 namespace ReplantedOnline.Network.RPC.Handlers;
 

@@ -6,7 +6,7 @@ using ReplantedOnline.Network.Object.Game;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.RPC.Handlers;
 
-namespace ReplantedOnline.Patches.Versus.NetworkSync;
+namespace ReplantedOnline.Patches.Gameplay.Versus.Networked;
 
 [HarmonyPatch]
 internal static class LawnMowerSyncPatch

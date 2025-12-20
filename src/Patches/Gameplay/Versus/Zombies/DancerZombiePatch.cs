@@ -2,9 +2,9 @@
 using Il2CppReloaded.Gameplay;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
-using ReplantedOnline.Patches.Versus.NetworkSync;
+using ReplantedOnline.Patches.Gameplay.Versus.Networked;
 
-namespace ReplantedOnline.Patches.Versus.Zombies;
+namespace ReplantedOnline.Patches.Gameplay.Versus.Zombies;
 
 [HarmonyPatch]
 internal static class DancerZombiePatch

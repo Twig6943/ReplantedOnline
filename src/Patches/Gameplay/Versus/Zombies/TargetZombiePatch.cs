@@ -2,7 +2,7 @@
 using Il2CppReloaded.Gameplay;
 using ReplantedOnline.Modules;
 
-namespace ReplantedOnline.Patches.Versus.Zombies;
+namespace ReplantedOnline.Patches.Gameplay.Versus.Zombies;
 
 [HarmonyPatch]
 internal static class TargetZombiePatch

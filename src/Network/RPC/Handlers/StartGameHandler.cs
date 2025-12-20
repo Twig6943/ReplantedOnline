@@ -7,7 +7,7 @@ using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.Packet;
-using ReplantedOnline.Patches.UI;
+using ReplantedOnline.Patches.Gameplay.UI;
 
 namespace ReplantedOnline.Network.RPC.Handlers;
 

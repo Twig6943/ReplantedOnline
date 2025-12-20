@@ -14,7 +14,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace ReplantedOnline.Patches.UI;
+namespace ReplantedOnline.Patches.Gameplay.UI;
 
 [HarmonyPatch]
 internal static class LobbyPatch

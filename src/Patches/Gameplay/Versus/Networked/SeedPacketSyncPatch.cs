@@ -9,7 +9,7 @@ using ReplantedOnline.Network.Object.Game;
 using ReplantedOnline.Network.Online;
 using static Il2CppReloaded.Constants;
 
-namespace ReplantedOnline.Patches.Versus.NetworkSync;
+namespace ReplantedOnline.Patches.Gameplay.Versus.Networked;
 
 [HarmonyPatch]
 internal static class SeedPacketSyncPatch
@@ -125,10 +125,10 @@ internal static class SeedPacketSyncPatch
     private static bool CanPlace(SeedType seedType, int gridX, int gridY)
     {
         // Check if placing a Dancer zombie - they cannot be placed in top or bottom rows (0 and 4)
-        var checkDancerGrid = seedType != SeedType.ZombieDancer || (gridY != 0 && gridY != 4);
+        var checkDancerGrid = seedType != SeedType.ZombieDancer || gridY != 0 && gridY != 4;
 
         return Instances.GameplayActivity.Board.CanPlantAt(gridX, gridY, seedType) == PlantingReason.Ok
-            && VersusState.VersusPhase is (VersusPhase.Gameplay or VersusPhase.SuddenDeath)
+            && VersusState.VersusPhase is VersusPhase.Gameplay or VersusPhase.SuddenDeath
             && checkDancerGrid;
     }
 
@@ -247,11 +247,11 @@ internal static class SeedPacketSyncPatch
         // Fix rendering issues
         if (zombieType is ZombieType.Gravestone)
         {
-            zombie.RenderOrder -= 100 + (5 * (gridY + 1));
+            zombie.RenderOrder -= 100 + 5 * (gridY + 1);
         }
         else if (zombieType is ZombieType.Target)
         {
-            zombie.RenderOrder -= 200 + (10 * (gridY + 1));
+            zombie.RenderOrder -= 200 + 10 * (gridY + 1);
         }
 
         Instances.GameplayActivity.Board.m_zombies.NewArrayItem(zombie, zombie.DataID);

@@ -2,10 +2,10 @@
 using Il2CppSteamworks;
 using ReplantedOnline.Managers;
 
-namespace ReplantedOnline.Patches.Steam;
+namespace ReplantedOnline.Patches.Client;
 
 [HarmonyPatch]
-internal class SteamClientPatch
+internal class SteamPatch
 {
     [HarmonyPatch(typeof(SteamClient), nameof(SteamClient.Init))]
     [HarmonyPrefix]

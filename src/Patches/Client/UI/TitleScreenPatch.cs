@@ -4,10 +4,10 @@ using ReplantedOnline.Helper;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace ReplantedOnline.Patches.UI;
+namespace ReplantedOnline.Patches.Client.UI;
 
 [HarmonyPatch]
-internal static class SplashScreenPatch
+internal static class TitleScreenPatch
 {
     [HarmonyPatch(typeof(PanelViewContainer), nameof(PanelViewContainer.Awake))]
     [HarmonyPostfix]

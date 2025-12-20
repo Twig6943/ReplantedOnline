@@ -4,11 +4,18 @@ using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
 
-namespace ReplantedOnline.Patches.Versus;
+namespace ReplantedOnline.Patches.Gameplay.Versus;
 
 [HarmonyPatch]
-internal static class VersusNerfsPatch
+internal static class VersusModePatch
 {
+    [HarmonyPatch(typeof(VersusMode), nameof(VersusMode.InitializeGameplay))]
+    [HarmonyPostfix]
+    private static void InitializeGameplay_Postfix()
+    {
+        VersusManager.OnStart();
+    }
+
     [HarmonyPatch(typeof(Board), nameof(Board.AddCoin))]
     [HarmonyPrefix]
     private static bool BoardAddCoin_Prefix(CoinType theCoinType)
@@ -16,7 +23,7 @@ internal static class VersusNerfsPatch
         // Only apply these changes when in an online lobby
         if (NetLobby.AmInLobby())
         {
-            if (theCoinType is (CoinType.VersusTrophyPlant or CoinType.VersusTrophyZombie))
+            if (theCoinType is CoinType.VersusTrophyPlant or CoinType.VersusTrophyZombie)
             {
                 return false;
             }

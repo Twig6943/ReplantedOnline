@@ -2,7 +2,7 @@
 using Il2CppTekly.PanelViews;
 using MelonLoader;
 using ReplantedOnline.Enums;
-using ReplantedOnline.Patches.Versus.NetworkSync;
+using ReplantedOnline.Patches.Gameplay.Versus.Networked;
 using System.Reflection;
 using UnityEngine;
 
