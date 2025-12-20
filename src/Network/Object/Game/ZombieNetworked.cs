@@ -50,143 +50,79 @@ internal sealed class ZombieNetworked : NetworkClass
         _Zombie.RemoveNetworkedLookup();
     }
 
-    internal bool EnteringHouse;
-    private float _syncCooldown = 2f;
-    private float _lastPos;
-
     public void Update()
     {
         if (!IsOnNetwork) return;
+        if (_Zombie == null) return;
+
+        switch (_Zombie.mZombieType)
+        {
+            case ZombieType.Gravestone:
+                break;
+            case ZombieType.Bungee:
+                BungeeUpdate();
+                break;
+            default:
+                NormalUpdate();
+                break;
+        }
+    }
+
+    internal bool EnteringHouse;
+    private float _syncCooldown = 2f;
+    private float _lastPos;
+    private void NormalUpdate()
+    {
+        if (_Zombie == null) return;
 
         if (AmOwner)
         {
-            if (_Zombie != null)
+            if (!_Zombie.mDead)
             {
-                if (!_Zombie.mDead)
+                if (_syncCooldown <= 0f && _lastPos != _Zombie.mPosX)
                 {
-                    if (_Zombie.mZombieType is not (ZombieType.Gravestone or ZombieType.Bungee))
-                    {
-                        if (_syncCooldown <= 0f && _lastPos != _Zombie.mPosX)
-                        {
-                            MarkDirty();
-                            _syncCooldown = 2f;
-                            _lastPos = _Zombie.mPosX;
-                        }
-                        _syncCooldown -= Time.deltaTime;
-                    }
+                    MarkDirty();
+                    _syncCooldown = 2f;
+                    _lastPos = _Zombie.mPosX;
                 }
-                else
-                {
-                    if (_Zombie.mZombieType is ZombieType.Bungee)
-                    {
-                        DespawnAndDestroy();
-                    }
-                }
+                _syncCooldown -= Time.deltaTime;
             }
         }
         else
         {
             if (!EnteringHouse)
             {
-                if (_Zombie?.mPosX <= 0f)
+                if (_Zombie.mPosX <= 0f)
                 {
-                    _Zombie?.mPosX = 0f;
+                    _Zombie.mPosX = 0f;
                 }
             }
         }
     }
 
-    [HideFromIl2Cpp]
-    public override void HandleRpc(SteamNetClient sender, byte rpcId, PacketReader packetReader)
+    private void BungeeUpdate()
     {
-        if (sender.SteamId != OwnerId) return;
+        if (_Zombie == null) return;
 
-        switch (rpcId)
+        if (AmOwner)
         {
-            case 0:
-                {
-                    var theDamage = packetReader.ReadInt();
-                    var damageFlags = (DamageFlags)packetReader.ReadByte();
-                    HandleTakeDamageRpc(theDamage, damageFlags);
-                }
-                break;
-            case 1:
-                {
-                    var damageFlags = (DamageFlags)packetReader.ReadByte();
-                    HandleDeathRpc(damageFlags);
-                }
-                break;
-            case 2:
-                {
-                    var xPos = packetReader.ReadFloat();
-                    HandleEnteringHouseRpc(xPos);
-                }
-                break;
-        }
-    }
-
-    internal void SendTakeDamageRpc(int theDamage, DamageFlags theDamageFlags)
-    {
-        var writer = PacketWriter.Get();
-        writer.WriteInt(theDamage);
-        writer.WriteByte((byte)theDamageFlags);
-        this.SendRpc(0, writer);
-        writer.Recycle();
-    }
-
-    [HideFromIl2Cpp]
-    private void HandleTakeDamageRpc(int theDamage, DamageFlags damageFlags)
-    {
-        // Only die from rpc
-        if (((_Zombie.mBodyHealth + _Zombie.mHelmHealth + _Zombie.mShieldHealth) - theDamage) > 1)
-        {
-            _Zombie.TakeDamageOriginal(theDamage, damageFlags);
-        }
-    }
-
-    private bool dead;
-    internal void SendDeathRpc(DamageFlags damageFlags)
-    {
-        if (!dead)
-        {
-            dead = true;
-            var writer = PacketWriter.Get();
-            writer.WriteByte((byte)damageFlags);
-            this.SendRpc(1, writer);
-            writer.Recycle();
-            DespawnAndDestroy();
-        }
-    }
-
-    [HideFromIl2Cpp]
-    private void HandleDeathRpc(DamageFlags damageFlags)
-    {
-        if (!dead)
-        {
-            dead = true;
-            CheckDeath(() =>
+            if (_Zombie.mPhaseCounter < 10 && _State is not ZombieType.Bungee)
             {
-                _Zombie.PlayDeathAnimOriginal(damageFlags);
-            }, true);
+                SendBungeeTakeRpc();
+                DespawnAndDestroy();
+            }
         }
-    }
-
-    internal void SendEnteringHouseRpc(float xPos)
-    {
-        EnteringHouse = true;
-        var writer = PacketWriter.Get();
-        writer.WriteFloat(xPos);
-        this.SendRpc(2, writer);
-        writer.Recycle();
-    }
-
-    [HideFromIl2Cpp]
-    internal void HandleEnteringHouseRpc(float xPos)
-    {
-        EnteringHouse = true;
-        StopLarpPos();
-        _Zombie?.mPosX = xPos;
-        VersusManager.EndGame(_Zombie?.mController?.gameObject, PlayerTeam.Zombies);
+        else
+        {
+            if (_State is not ZombieType.Bungee)
+            {
+                _Zombie.mPhaseCounter = int.MaxValue;
+            }
+            else
+            {
+                _Zombie.mPhaseCounter = 0;
+            }
+        }
     }
 
     [HideFromIl2Cpp]
@@ -219,6 +155,112 @@ internal sealed class ZombieNetworked : NetworkClass
         else
         {
             callback();
+        }
+    }
+
+    internal void SendTakeDamageRpc(int theDamage, DamageFlags theDamageFlags)
+    {
+        var writer = PacketWriter.Get();
+        writer.WriteInt(theDamage);
+        writer.WriteByte((byte)theDamageFlags);
+        this.SendRpc(0, writer);
+        writer.Recycle();
+    }
+
+    private void HandleTakeDamageRpc(int theDamage, DamageFlags damageFlags)
+    {
+        // Only die from rpc
+        if (((_Zombie.mBodyHealth + _Zombie.mHelmHealth + _Zombie.mShieldHealth) - theDamage) > 1)
+        {
+            _Zombie.TakeDamageOriginal(theDamage, damageFlags);
+        }
+    }
+
+    private bool dead;
+    internal void SendDeathRpc(DamageFlags damageFlags)
+    {
+        if (!dead)
+        {
+            dead = true;
+            var writer = PacketWriter.Get();
+            writer.WriteByte((byte)damageFlags);
+            this.SendRpc(1, writer);
+            writer.Recycle();
+            DespawnAndDestroy();
+        }
+    }
+
+    private void HandleDeathRpc(DamageFlags damageFlags)
+    {
+        if (!dead)
+        {
+            dead = true;
+            CheckDeath(() =>
+            {
+                _Zombie.PlayDeathAnimOriginal(damageFlags);
+            }, true);
+        }
+    }
+
+    internal void SendEnteringHouseRpc(float xPos)
+    {
+        EnteringHouse = true;
+        var writer = PacketWriter.Get();
+        writer.WriteFloat(xPos);
+        this.SendRpc(2, writer);
+        writer.Recycle();
+    }
+
+    private void HandleEnteringHouseRpc(float xPos)
+    {
+        EnteringHouse = true;
+        StopLarpPos();
+        _Zombie?.mPosX = xPos;
+        VersusManager.EndGame(_Zombie?.mController?.gameObject, PlayerTeam.Zombies);
+    }
+
+    private void SendBungeeTakeRpc()
+    {
+        _State = ZombieType.Bungee;
+        this.SendRpc(3);
+    }
+
+    private void HandleBungeeTakeRpc()
+    {
+        _State = ZombieType.Bungee;
+    }
+
+    [HideFromIl2Cpp]
+    public override void HandleRpc(SteamNetClient sender, byte rpcId, PacketReader packetReader)
+    {
+        if (sender.SteamId != OwnerId) return;
+
+        switch (rpcId)
+        {
+            case 0:
+                {
+                    var theDamage = packetReader.ReadInt();
+                    var damageFlags = (DamageFlags)packetReader.ReadByte();
+                    HandleTakeDamageRpc(theDamage, damageFlags);
+                }
+                break;
+            case 1:
+                {
+                    var damageFlags = (DamageFlags)packetReader.ReadByte();
+                    HandleDeathRpc(damageFlags);
+                }
+                break;
+            case 2:
+                {
+                    var xPos = packetReader.ReadFloat();
+                    HandleEnteringHouseRpc(xPos);
+                }
+                break;
+            case 3:
+                {
+                    HandleBungeeTakeRpc();
+                }
+                break;
         }
     }
 

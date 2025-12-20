@@ -24,6 +24,8 @@ internal static class NetworkDispatcher
     /// <param name="steamId">The Steam ID of the target client to receive the packet.</param>
     internal static void SendNetworkClasssTo(SteamId steamId)
     {
+        MelonLogger.Msg($"[NetworkDispatcher] Sending network classes to {steamId}");
+
         if (NetLobby.LobbyData.NetworkClassSpawned.Count > 0)
         {
             foreach (var networkClass in NetLobby.LobbyData.NetworkClassSpawned.Values)
@@ -107,6 +109,7 @@ internal static class NetworkDispatcher
     /// <param name="packetWriter">The packet writer containing the data to send.</param>
     /// <param name="tag">The packet tag identifying the packet type.</param>
     /// <param name="packetChannel">The channel to send the packet on.</param>
+    /// <param name="sendCallback">Call back that is .</param>
     internal static void SendPacketTo(SteamId steamId, PacketWriter packetWriter, PacketTag tag, PacketChannel packetChannel)
     {
         if (steamId.GetNetClient().AmLocal) return;
@@ -178,6 +181,11 @@ internal static class NetworkDispatcher
             packet.Recycle();
         }
 
+        while (SteamNetworking.IsP2PPacketAvailable(out uint messageSize, (int)PacketChannel.Rpc))
+        {
+            ReadPacket(messageSize, (int)PacketChannel.Rpc);
+        }
+
         while (SteamNetworking.IsP2PPacketAvailable(out uint messageSize, (int)PacketChannel.Main))
         {
             ReadPacket(messageSize, (int)PacketChannel.Main);
@@ -186,11 +194,6 @@ internal static class NetworkDispatcher
         while (SteamNetworking.IsP2PPacketAvailable(out uint messageSize, (int)PacketChannel.Buffered))
         {
             ReadPacket(messageSize, (int)PacketChannel.Buffered);
-        }
-
-        while (SteamNetworking.IsP2PPacketAvailable(out uint messageSize, (int)PacketChannel.Rpc))
-        {
-            ReadPacket(messageSize, (int)PacketChannel.Rpc);
         }
     }
 

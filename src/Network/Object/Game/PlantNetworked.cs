@@ -51,13 +51,15 @@ internal sealed class PlantNetworked : NetworkClass
         AddChild(AnimationControllerNetworked);
     }
 
+    private bool dead;
     public void Update()
     {
         if (!IsOnNetwork) return;
+        if (_Plant == null) return;
 
         if (!AmOwner)
         {
-            if (!dead && _Plant != null)
+            if (!dead)
             {
                 _Plant.mDead = false;
                 if (_Plant.mPlantHealth < 25)
@@ -73,6 +75,23 @@ internal sealed class PlantNetworked : NetworkClass
         _Plant.RemoveNetworkedLookup();
     }
 
+    internal void SendDieRpc()
+    {
+        if (!dead)
+        {
+            dead = true;
+            this.SendRpc(0);
+            Despawn();
+            Destroy(gameObject);
+        }
+    }
+
+    private void HandleDieRpc()
+    {
+        dead = true;
+        _Plant.DieOriginal();
+    }
+
     [HideFromIl2Cpp]
     public override void HandleRpc(SteamNetClient sender, byte rpcId, PacketReader packetReader)
     {
@@ -86,25 +105,6 @@ internal sealed class PlantNetworked : NetworkClass
                 }
                 break;
         }
-    }
-
-    internal void SendDieRpc()
-    {
-        if (!dead)
-        {
-            dead = true;
-            this.SendRpc(0);
-            Despawn();
-            Destroy(gameObject);
-        }
-    }
-
-
-    private bool dead;
-    private void HandleDieRpc()
-    {
-        dead = true;
-        _Plant.DieOriginal();
     }
 
     /// <summary>

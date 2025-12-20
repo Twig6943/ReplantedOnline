@@ -45,6 +45,12 @@ internal abstract class RuntimePrefab : MonoBehaviour
     internal string GUID { get; private set; }
 
     /// <summary>
+    /// Gets the current state of the object.
+    /// This property can hold any type of object to represent various states.
+    /// </summary>
+    internal object _State { get; set; }
+
+    /// <summary>
     /// Creates a new runtime prefab of the specified type.
     /// </summary>
     /// <typeparam name="T">The type of RuntimePrefab to create, must inherit from RuntimePrefab.</typeparam>

@@ -33,6 +33,22 @@ internal sealed class AnimationControllerNetworked : NetworkClass
         _AnimationController.RemoveNetworkedLookup();
     }
 
+    internal void SendPlayAnimationRpc(string animationName, CharacterTracks track, float fps, AnimLoopType loopType)
+    {
+        var packetWriter = PacketWriter.Get();
+        packetWriter.WriteString(animationName);
+        packetWriter.WriteInt((int)track);
+        packetWriter.WriteFloat(fps);
+        packetWriter.WriteByte((byte)loopType);
+        this.SendRpc(0, packetWriter);
+        packetWriter.Recycle();
+    }
+
+    private void HandlePlayAnimationRpc(string animationName, CharacterTracks track, float fps, AnimLoopType loopType)
+    {
+        _AnimationController?.PlayAnimationOriginal(animationName, track, fps, loopType);
+    }
+
     [HideFromIl2Cpp]
     public override void HandleRpc(SteamNetClient sender, byte rpcId, PacketReader packetReader)
     {
@@ -50,21 +66,5 @@ internal sealed class AnimationControllerNetworked : NetworkClass
                 }
                 break;
         }
-    }
-
-    internal void SendPlayAnimationRpc(string animationName, CharacterTracks track, float fps, AnimLoopType loopType)
-    {
-        var packetWriter = PacketWriter.Get();
-        packetWriter.WriteString(animationName);
-        packetWriter.WriteInt((int)track);
-        packetWriter.WriteFloat(fps);
-        packetWriter.WriteByte((byte)loopType);
-        this.SendRpc(0, packetWriter);
-        packetWriter.Recycle();
-    }
-
-    private void HandlePlayAnimationRpc(string animationName, CharacterTracks track, float fps, AnimLoopType loopType)
-    {
-        _AnimationController?.PlayAnimationOriginal(animationName, track, fps, loopType);
     }
 }
