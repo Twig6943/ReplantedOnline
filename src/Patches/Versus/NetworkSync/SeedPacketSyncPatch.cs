@@ -182,9 +182,11 @@ internal static class SeedPacketSyncPatch
 
     internal static Il2CppReloaded.Gameplay.Zombie SpawnZombie(ZombieType zombieType, int gridX, int gridY, bool shakeBush, bool spawnOnNetwork)
     {
+        if (zombieType is ZombieType.Bobsled) return null;
+
         // Determine if this zombie type rises from the ground (like grave zombies)
         // Bungee zombies are excluded from rising behavior even if they normally would
-        var rise = VersusMode.ZombieRisesFromGround(zombieType) && zombieType != ZombieType.Bungee && zombieType != ZombieType.Target;
+        var rise = VersusMode.ZombieRisesFromGround(zombieType) && zombieType is not (ZombieType.Bungee or ZombieType.Target);
 
         // Some zombies have forced spawn positions on the right side
         var forceXPos = !VersusMode.ZombieRisesFromGround(zombieType);
