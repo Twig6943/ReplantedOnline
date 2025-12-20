@@ -117,6 +117,23 @@ internal sealed class PlantNetworked : NetworkClass
         }
     }
 
+    internal void SendPotatomineRpc(Zombie target)
+    {
+        if (_State is null)
+        {
+            _State = target;
+            var writer = PacketWriter.Get();
+            writer.WriteNetworkClass(target.GetNetworked<ZombieNetworked>());
+            this.SendRpc(2, writer);
+            writer.Recycle();
+        }
+    }
+
+    private void HandlePotatomineRpc(Zombie target)
+    {
+        _State ??= target;
+    }
+
     [HideFromIl2Cpp]
     public override void HandleRpc(SteamNetClient sender, byte rpcId, PacketReader packetReader)
     {
@@ -133,6 +150,12 @@ internal sealed class PlantNetworked : NetworkClass
                 {
                     var target = (ZombieNetworked)packetReader.ReadNetworkClass();
                     HandleSquashRpc(target._Zombie);
+                }
+                break;
+            case 2:
+                {
+                    var target = (ZombieNetworked)packetReader.ReadNetworkClass();
+                    HandlePotatomineRpc(target._Zombie);
                 }
                 break;
         }
