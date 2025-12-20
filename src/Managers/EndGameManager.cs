@@ -91,6 +91,7 @@ internal static class EndGameManager
                 {
                     winner.SetPortrait(netClient.Team);
                     winner.SetName(netClient.Name);
+                    winner.DidWin();
                 }
                 else
                 {
@@ -176,9 +177,19 @@ internal static class EndGameManager
         private GameObject ZombieAvatar;
 
         /// <summary>
-        /// Winner trophy/indicator GameObject.
+        /// Trophy GameObject.
         /// </summary>
-        private GameObject Winner;
+        private GameObject Trophy;
+
+        /// <summary>
+        /// Plant trophy GameObject.
+        /// </summary>
+        private GameObject PlantTrophy;
+
+        /// <summary>
+        /// Zombie trophy GameObject.
+        /// </summary>
+        private GameObject ZombieTrophy;
 
         /// <summary>
         /// Initializes the nameplate by finding and caching all relevant GameObjects.
@@ -191,7 +202,13 @@ internal static class EndGameManager
             ZombieFrame = player.transform.Find("ZombieFrame").gameObject;
             PlantAvatar = player.transform.Find("PlayerAvatar/PlantAvatar").gameObject;
             ZombieAvatar = player.transform.Find("PlayerAvatar/ZombieAvatar").gameObject;
-            Winner = player.transform.Find("TrophyCount/Winner/Animator").gameObject;
+
+            Trophy = player.transform.Find("TrophyCount/Winner/Animator").gameObject;
+            PlantTrophy = Trophy.transform.Find("Trophy/PlantTrophy").gameObject;
+            ZombieTrophy = Trophy.transform.Find("Trophy/ZombieTrophy").gameObject;
+            var count = player.transform.Find("TrophyCount/TrophesCount").gameObject;
+            count.SetActive(false);
+
             SetName("???");
         }
 
@@ -214,20 +231,26 @@ internal static class EndGameManager
                 case PlayerTeam.Plants:
                     PlantFrame.SetActive(true);
                     PlantAvatar.SetActive(true);
+                    PlantTrophy.SetActive(true);
                     ZombieFrame.SetActive(false);
                     ZombieAvatar.SetActive(false);
+                    ZombieTrophy.SetActive(false);
                     break;
                 case PlayerTeam.Zombies:
                     ZombieFrame.SetActive(true);
                     ZombieAvatar.SetActive(true);
+                    ZombieTrophy.SetActive(true);
                     PlantFrame.SetActive(false);
                     PlantAvatar.SetActive(false);
+                    PlantTrophy.SetActive(false);
                     break;
                 default:
                     PlantFrame.SetActive(false);
                     PlantAvatar.SetActive(false);
+                    PlantTrophy.SetActive(false);
                     ZombieFrame.SetActive(false);
                     ZombieAvatar.SetActive(false);
+                    ZombieTrophy.SetActive(false);
                     break;
             }
         }
@@ -237,7 +260,7 @@ internal static class EndGameManager
         /// </summary>
         internal void DidWin()
         {
-            Winner.SetActive(true);
+            Trophy.SetActive(true);
         }
 
         /// <summary>
@@ -250,7 +273,7 @@ internal static class EndGameManager
             ZombieFrame = null;
             PlantAvatar = null;
             ZombieAvatar = null;
-            Winner = null;
+            PlantTrophy = null;
         }
     }
 }
