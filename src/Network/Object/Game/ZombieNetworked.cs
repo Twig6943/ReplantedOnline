@@ -71,28 +71,25 @@ internal sealed class ZombieNetworked : NetworkClass
         switch (_Zombie.mZombieType)
         {
             case ZombieType.Gravestone:
-                break;
+                return;
             case ZombieType.Bungee:
                 BungeeUpdate();
-                break;
+                return;
             case ZombieType.Digger:
                 if (_Zombie.mZombiePhase is ZombiePhase.DiggerWalking or ZombiePhase.DiggerWalkingWithoutAxe)
                 {
                     NormalUpdate();
                 }
-                break;
+                return;
             case ZombieType.JackInTheBox:
                 JackInTheBoxUpdate();
-                NormalUpdate();
                 break;
             case ZombieType.Polevaulter:
                 PolevaulterUpdate();
-                NormalUpdate();
-                break;
-            default:
-                NormalUpdate();
                 break;
         }
+
+        NormalUpdate();
     }
 
     internal bool EnteringHouse;
@@ -195,7 +192,6 @@ internal sealed class ZombieNetworked : NetworkClass
             {
                 _State = States.SetPhaseCounterState;
                 SendSetPhaseCounterRpc();
-                DespawnAndDestroy();
             }
         }
         else
