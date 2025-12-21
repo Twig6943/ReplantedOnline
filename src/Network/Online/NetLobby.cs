@@ -15,12 +15,12 @@ namespace ReplantedOnline.Network.Online;
 /// </summary>
 internal static class NetLobby
 {
+    private const int MAX_LOBBY_SIZE = 2;
+
     /// <summary>
     /// The LobbyData of the current lobby the player is in, or null if not in a lobby.
     /// </summary>
     internal static NetLobbyData LobbyData;
-
-    private const int MAX_LOBBY_SIZE = 2;
 
     /// <summary>
     /// Initializes all Steamworks callbacks for lobby and P2P networking events.
@@ -129,34 +129,6 @@ internal static class NetLobby
         Transitions.ToMainMenu(callback);
         LobbyData = null;
         MelonLogger.Msg("[NetLobby] Successfully left lobby");
-    }
-
-    /// <summary>
-    /// Gets the number of members currently in the lobby.
-    /// </summary>
-    /// <returns>The number of lobby members.</returns>
-    internal static int GetLobbyMemberCount()
-    {
-        return LobbyData.AllClients.Count;
-    }
-
-    /// <summary>
-    /// Gets the Steam ID of a lobby member by their index.
-    /// </summary>
-    /// <param name="index">The zero-based index of the lobby member.</param>
-    /// <returns>The Steam ID of the lobby member at the specified index.</returns>
-    internal static SteamId GetLobbyMemberByIndex(int index)
-    {
-        return SteamMatchmaking.Internal.GetLobbyMemberByIndex(LobbyData.LobbyId, index);
-    }
-
-    /// <summary>
-    /// Gets the Steam ID of the lobby owner.
-    /// </summary>
-    /// <returns>The Steam ID of the lobby owner.</returns>
-    internal static SteamId GetLobbyOwner()
-    {
-        return SteamMatchmaking.Internal.GetLobbyOwner(LobbyData.LobbyId);
     }
 
     /// <summary>
@@ -422,6 +394,34 @@ internal static class NetLobby
     }
 
     /// <summary>
+    /// Gets the number of members currently in the lobby.
+    /// </summary>
+    /// <returns>The number of lobby members.</returns>
+    internal static int GetLobbyMemberCount()
+    {
+        return LobbyData.AllClients.Count;
+    }
+
+    /// <summary>
+    /// Gets the Steam ID of a lobby member by their index.
+    /// </summary>
+    /// <param name="index">The zero-based index of the lobby member.</param>
+    /// <returns>The Steam ID of the lobby member at the specified index.</returns>
+    internal static SteamId GetLobbyMemberByIndex(int index)
+    {
+        return SteamMatchmaking.Internal.GetLobbyMemberByIndex(LobbyData.LobbyId, index);
+    }
+
+    /// <summary>
+    /// Gets the Steam ID of the lobby owner.
+    /// </summary>
+    /// <returns>The Steam ID of the lobby owner.</returns>
+    internal static SteamId GetLobbyOwner()
+    {
+        return SteamMatchmaking.Internal.GetLobbyOwner(LobbyData.LobbyId);
+    }
+
+    /// <summary>
     /// Checks if a player is currently in our lobby.
     /// </summary>
     /// <param name="steamId">The Steam ID of the player to check.</param>
@@ -436,16 +436,6 @@ internal static class NetLobby
 
         return false;
     }
-
-    /// <summary>
-    /// Gets the game code for the current lobby
-    /// </summary>
-    internal static string GetCurrentLobbyGameCode()
-    {
-        if (!AmInLobby()) return string.Empty;
-        return SteamMatchmaking.Internal.GetLobbyData(LobbyData.LobbyId, ReplantedOnlineMod.Constants.GAME_CODE_KEY);
-    }
-
 
     /// <summary>
     /// Checks if the player is currently in a lobby.
@@ -470,5 +460,14 @@ internal static class NetLobby
     internal static bool AmLobbyHost(SteamId id)
     {
         return GetLobbyOwner() == id;
+    }
+
+    /// <summary>
+    /// Gets the game code for the current lobby
+    /// </summary>
+    internal static string GetCurrentLobbyGameCode()
+    {
+        if (!AmInLobby()) return string.Empty;
+        return SteamMatchmaking.Internal.GetLobbyData(LobbyData.LobbyId, ReplantedOnlineMod.Constants.GAME_CODE_KEY);
     }
 }
