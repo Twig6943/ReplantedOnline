@@ -130,7 +130,7 @@ internal sealed class ZombieNetworked : NetworkClass
 
         if (AmOwner)
         {
-            if (_Zombie.mPhaseCounter < 10 && _State is not SetPhaseCounterState)
+            if (_Zombie.mZombiePhase is ZombiePhase.BungeeGrabbing && _Zombie.mPhaseCounter < 10 && _State is not SetPhaseCounterState)
             {
                 _State = SetPhaseCounterState;
                 SendSetPhaseCounterRpc();
@@ -145,7 +145,10 @@ internal sealed class ZombieNetworked : NetworkClass
             }
             else
             {
-                _Zombie.mPhaseCounter = 0;
+                if (_Zombie.mZombiePhase is ZombiePhase.BungeeGrabbing)
+                {
+                    _Zombie.mPhaseCounter = 0;
+                }
             }
         }
     }
