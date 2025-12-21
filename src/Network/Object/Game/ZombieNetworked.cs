@@ -21,6 +21,7 @@ namespace ReplantedOnline.Network.Object.Game;
 /// </summary>
 internal sealed class ZombieNetworked : NetworkClass
 {
+    internal const string SetPhaseCounterState = "PhaseCounter";
 
     /// <summary>
     /// Represents the networked animation controller used to synchronize animation states across multiple clients.
@@ -76,6 +77,9 @@ internal sealed class ZombieNetworked : NetworkClass
             case ZombieType.Bungee:
                 BungeeUpdate();
                 break;
+            case ZombieType.JackInTheBox:
+                JackInTheBoxUpdate();
+                break;
             case ZombieType.Digger:
                 if (_Zombie.mZombiePhase is (ZombiePhase.DiggerWalking or ZombiePhase.DiggerWalkingWithoutAxe))
                 {
@@ -126,21 +130,50 @@ internal sealed class ZombieNetworked : NetworkClass
 
         if (AmOwner)
         {
-            if (_Zombie.mPhaseCounter < 10 && _State is not ZombieType.Bungee)
+            if (_Zombie.mPhaseCounter < 10 && _State is not SetPhaseCounterState)
             {
-                SendBungeeTakeRpc();
+                _State = SetPhaseCounterState;
+                SendSetPhaseCounterRpc();
                 DespawnAndDestroy();
             }
         }
         else
         {
-            if (_State is not ZombieType.Bungee)
+            if (_State is not SetPhaseCounterState)
             {
                 _Zombie.mPhaseCounter = int.MaxValue;
             }
             else
             {
                 _Zombie.mPhaseCounter = 0;
+            }
+        }
+    }
+    private void JackInTheBoxUpdate()
+    {
+        if (_Zombie == null) return;
+
+        if (AmOwner)
+        {
+            if (_Zombie.mPhaseCounter < 10 && _State is not SetPhaseCounterState)
+            {
+                _State = SetPhaseCounterState;
+                SendSetPhaseCounterRpc();
+                DespawnAndDestroy();
+            }
+        }
+        else
+        {
+            if (_State is not SetPhaseCounterState)
+            {
+                _Zombie.mPhaseCounter = int.MaxValue;
+            }
+            else
+            {
+                if (_Zombie.mZombiePhase is ZombiePhase.JackInTheBoxRunning)
+                {
+                    _Zombie.mPhaseCounter = 0;
+                }
             }
         }
     }
@@ -258,15 +291,14 @@ internal sealed class ZombieNetworked : NetworkClass
         VersusManager.EndGame(_Zombie?.mController?.gameObject, PlayerTeam.Zombies);
     }
 
-    private void SendBungeeTakeRpc()
+    private void SendSetPhaseCounterRpc()
     {
-        _State = ZombieType.Bungee;
         this.SendRpc(4);
     }
 
-    private void HandleBungeeTakeRpc()
+    private void HandleSetPhaseCounterRpc()
     {
-        _State = ZombieType.Bungee;
+        _State = SetPhaseCounterState;
     }
 
     [HideFromIl2Cpp]
@@ -302,7 +334,7 @@ internal sealed class ZombieNetworked : NetworkClass
                 break;
             case 4:
                 {
-                    HandleBungeeTakeRpc();
+                    HandleSetPhaseCounterRpc();
                 }
                 break;
         }
