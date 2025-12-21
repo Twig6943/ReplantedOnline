@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.Gameplay;
+using MelonLoader;
 using ReplantedOnline.Enums;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Managers;
@@ -29,13 +30,17 @@ internal static class ZombiePatch
     /// Handles zombies spawned during waves
     [HarmonyPatch(typeof(Board), nameof(Board.AddZombieInRow))]
     [HarmonyPrefix]
-    private static bool AddZombieInRow_Prefix(Board __instance, ZombieType theZombieType, int theRow, ref Zombie __result)
+    private static bool AddZombieInRow_Prefix(Board __instance, ZombieType theZombieType, int theRow, int theFromWave, ref Zombie __result)
     {
         // Only intercept during active gameplay in multiplayer
         if (NetLobby.AmInLobby() && VersusState.VersusPhase is VersusPhase.Gameplay or VersusPhase.SuddenDeath)
         {
             // Allow Target zombies (like Target Zombie from I, Zombie) to use original logic
             if (theZombieType == ZombieType.Target) return true;
+
+            if (!VersusState.AmPlantSide) return false;
+
+            MelonLogger.Error(theFromWave);
 
             // Spawn zombie at column 9 (right side of board) with network synchronization
             __result = Utils.SpawnZombie(theZombieType, 9, theRow, true, true);

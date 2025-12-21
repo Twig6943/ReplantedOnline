@@ -38,9 +38,17 @@ internal sealed class AnimationControllerNetworked : NetworkClass
     {
         if (!AmOwner) return false;
 
-        if (ParentNetworkClass is PlantNetworked plantNet)
+        if (ParentNetworkClass is PlantNetworked netPlant)
         {
-            if (plantNet._Plant.mSeedType is SeedType.Chomper)
+            if (netPlant._Plant.mSeedType is SeedType.Chomper)
+            {
+                return true;
+            }
+        }
+
+        if (ParentNetworkClass is ZombieNetworked netZombie)
+        {
+            if (netZombie.ZombieType is (ZombieType.Gargantuar or ZombieType.RedeyeGargantuar or ZombieType.Imp))
             {
                 return true;
             }

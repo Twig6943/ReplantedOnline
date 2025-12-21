@@ -16,14 +16,14 @@ namespace ReplantedOnline.Network.Object.Game;
 internal sealed class PlantNetworked : NetworkClass
 {
     /// <summary>
-    /// The underlying plant instance that this networked object represents.
-    /// </summary>
-    internal Plant _Plant;
-
-    /// <summary>
     /// Represents the networked animation controller used to synchronize animation states across multiple clients.
     /// </summary>
     internal AnimationControllerNetworked AnimationControllerNetworked;
+
+    /// <summary>
+    /// The underlying plant instance that this networked object represents.
+    /// </summary>
+    internal Plant _Plant;
 
     /// <summary>
     /// The type of seed used to plant this plant when spawning.
