@@ -43,7 +43,7 @@ internal static class ZombiePatch
             MelonLogger.Error(theFromWave);
 
             // Spawn zombie at column 9 (right side of board) with network synchronization
-            __result = Utils.SpawnZombie(theZombieType, 9, theRow, true, true);
+            __result = Utils.SpawnZombie(theZombieType, 9, theRow, theZombieType is not ZombieType.Imp, true);
 
             // Skip original method since we handled spawning with network sync
             return false;
