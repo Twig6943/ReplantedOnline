@@ -159,7 +159,7 @@ internal static class VersusManager
             return;
 
 #if DEBUG
-        LobbyPatch.SetButtonsInteractable(true);
+        VersusLobbyPatch.SetButtonsInteractable(true);
         return;
 #endif
 

@@ -53,16 +53,35 @@ internal static class ZombiePatch
     [HarmonyPrefix]
     private static bool Zombie_WalkIntoHouse_Prefix(Zombie __instance)
     {
-        if (VersusState.AmPlantSide)
+        if (NetLobby.AmInLobby())
         {
-            var netZombie = __instance.GetNetworked<ZombieNetworked>();
-            if (netZombie != null && !netZombie.EnteringHouse)
+            if (VersusState.AmPlantSide)
             {
+                var netZombie = __instance.GetNetworked<ZombieNetworked>();
                 netZombie.SendEnteringHouseRpc(__instance.mPosX);
                 VersusManager.EndGame(__instance.mController?.gameObject, PlayerTeam.Zombies);
             }
+
+            return false;
         }
 
-        return false;
+        return true;
+    }
+
+
+    [HarmonyPatch(typeof(Zombie), nameof(Zombie.StartMindControlled))]
+    [HarmonyPrefix]
+    private static bool Zombie_StartMindControlled_Prefix(Zombie __instance)
+    {
+        if (NetLobby.AmInLobby())
+        {
+            if (VersusState.AmPlantSide)
+            {
+                var netZombie = __instance.GetNetworked<ZombieNetworked>();
+                netZombie.SendMindControlledRpc();
+            }
+        }
+
+        return true;
     }
 }

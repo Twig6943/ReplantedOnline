@@ -323,9 +323,20 @@ internal sealed class ZombieNetworked : NetworkClass
         VersusManager.EndGame(_Zombie?.mController?.gameObject, PlayerTeam.Zombies);
     }
 
-    private void SendSetPhaseCounterRpc()
+    internal void SendMindControlledRpc()
     {
         this.SendRpc(4);
+    }
+
+    private void HandleMindControlledRpc()
+    {
+        _State = States.MindControlledState;
+        _Zombie.StartMindControlled();
+    }
+
+    private void SendSetPhaseCounterRpc()
+    {
+        this.SendRpc(5);
     }
 
     private void HandleSetPhaseCounterRpc()
@@ -365,6 +376,11 @@ internal sealed class ZombieNetworked : NetworkClass
                 }
                 break;
             case 4:
+                {
+                    HandleMindControlledRpc();
+                }
+                break;
+            case 5:
                 {
                     HandleSetPhaseCounterRpc();
                 }
