@@ -1,5 +1,8 @@
-﻿using ReplantedOnline.Network.Online;
+﻿using Il2CppSteamworks;
+using ReplantedOnline.Modules;
+using ReplantedOnline.Network.Online;
 using ReplantedOnline.Patches.Client;
+using System.Text;
 using UnityEngine;
 
 namespace ReplantedOnline.Monos;
@@ -41,26 +44,58 @@ internal sealed class InfoDisplay : MonoBehaviour
             GUIStyle.Internal_Copy(_style, GUI.skin.label);
         }
 
-        float alpha = NetLobby.AmInLobby() ? 1f : 0.8f;
-        _style.normal.textColor = new Color(1f, 1f, 1f, alpha);
-        GUI.backgroundColor = new Color(23f / 255f, 23f / 255f, 23f / 255f, 1f);
-        GUI.contentColor = Color.white;
-        GUI.color = Color.white;
-
-        var info = GetInfo();
-        Vector2 labelSize = _style.CalcSize(new GUIContent(info));
         float padding = 5f;
 
-        GUI.Label(
-            new Rect(
-                Screen.width - labelSize.x - padding,
-                Screen.height - labelSize.y - padding,
-                labelSize.x,
-                labelSize.y
-            ),
+        // Bottom right info
+        var info = GetInfo();
+        DrawLabelWithOutline(
             info,
-            _style
+            new Rect(
+                Screen.width - _style.CalcSize(new GUIContent(info)).x - padding,
+                Screen.height - _style.CalcSize(new GUIContent(info)).y - padding,
+                _style.CalcSize(new GUIContent(info)).x,
+                _style.CalcSize(new GUIContent(info)).y
+            ),
+            _style,
+            Color.white,
+            Color.black
         );
+
+        // Top left debug info
+        var debugInfo = GetDebugInfo();
+        DrawLabelWithOutline(
+            debugInfo,
+            new Rect(padding, padding,
+                    _style.CalcSize(new GUIContent(debugInfo)).x,
+                    _style.CalcSize(new GUIContent(debugInfo)).y),
+            _style,
+            Color.white * 0.95f,
+            Color.black
+        );
+    }
+
+    /// <summary>
+    /// Draws a text label with an outline effect using multiple offset labels.
+    /// </summary>
+    /// <param name="text">The text to display.</param>
+    /// <param name="rect">The position and size of the text area.</param>
+    /// <param name="style">The GUIStyle to use for the text.</param>
+    /// <param name="textColor">The color of the main text.</param>
+    /// <param name="outlineColor">The color of the outline.</param>
+    /// <param name="outlineWidth">The width/thickness of the outline in pixels. Default is 1.</param>
+    private static void DrawLabelWithOutline(string text, Rect rect, GUIStyle style, Color textColor, Color outlineColor, int outlineWidth = 1)
+    {
+        style.normal.textColor = outlineColor;
+        GUI.Label(new Rect(rect.x - outlineWidth, rect.y, rect.width, rect.height), text, style);
+        GUI.Label(new Rect(rect.x + outlineWidth, rect.y, rect.width, rect.height), text, style);
+        GUI.Label(new Rect(rect.x, rect.y - outlineWidth, rect.width, rect.height), text, style);
+        GUI.Label(new Rect(rect.x, rect.y + outlineWidth, rect.width, rect.height), text, style);
+        GUI.Label(new Rect(rect.x - outlineWidth, rect.y - outlineWidth, rect.width, rect.height), text, style);
+        GUI.Label(new Rect(rect.x + outlineWidth, rect.y - outlineWidth, rect.width, rect.height), text, style);
+        GUI.Label(new Rect(rect.x - outlineWidth, rect.y + outlineWidth, rect.width, rect.height), text, style);
+        GUI.Label(new Rect(rect.x + outlineWidth, rect.y + outlineWidth, rect.width, rect.height), text, style);
+        style.normal.textColor = textColor;
+        GUI.Label(rect, text, style);
     }
 
     /// <summary>
@@ -69,5 +104,47 @@ internal sealed class InfoDisplay : MonoBehaviour
     private static string GetInfo()
     {
         return $"{ModInfo.MOD_NAME}: v{ModInfo.MOD_VERSION_FORMATTED}-{ModInfo.RELEASE_DATE} Server: {Enum.GetName(SteamPatch.AppServer).ToLower()}";
+    }
+
+    /// <summary>
+    /// NEW: Gets debug information to display in top left corner.
+    /// </summary>
+    private static string GetDebugInfo()
+    {
+#if DEBUG
+        StringBuilder sb = new();
+
+        sb.AppendLine("Debug Info >");
+        sb.AppendLine($" Steam initialized: {SteamClient.initialized}");
+        sb.AppendLine($" Steam Appid: {SteamClient.AppId}");
+        sb.AppendLine($" Prefabs: {RuntimePrefab.Prefabs.Count}");
+
+        if (NetLobby.AmInLobby())
+        {
+            sb.AppendLine("Lobby Info >");
+            sb.AppendLine($" Network Classes: {NetLobby.LobbyData.NetworkClassSpawned.Count}");
+            if (!NetLobby.LobbyData.Networked.HasStarted)
+            {
+                sb.AppendLine(" Versus Phase: Lobby");
+            }
+            else
+            {
+                sb.AppendLine($" Versus Phase: {Enum.GetName(Instances.GameplayActivity.VersusMode.Phase)}");
+            }
+            sb.AppendLine($" Clients: {NetLobby.LobbyData.AllClients.Count}");
+
+            foreach (var client in NetLobby.LobbyData.AllClients.Values)
+            {
+                sb.AppendLine($"{client.Name} Client Info >");
+                sb.AppendLine($" Team: {Enum.GetName(client.Team)}");
+                sb.AppendLine($" AmLocal: {client.AmLocal}");
+                sb.AppendLine($" AmHost: {client.AmHost}");
+            }
+        }
+
+        return sb.ToString();
+#else
+        return string.Empty;
+#endif
     }
 }
