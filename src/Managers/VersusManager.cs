@@ -158,10 +158,11 @@ internal static class VersusManager
         if (!NetLobby.AmLobbyHost())
             return;
 
-#if DEBUG
-        VersusLobbyPatch.SetButtonsInteractable(true);
-        return;
-#endif
+        if (ModInfo.MOD_RELEASE == nameof(ReleaseType.dev))
+        {
+            VersusLobbyPatch.SetButtonsInteractable(true);
+            return;
+        }
 
         var networked = NetLobby.LobbyData?.Networked;
         var clients = NetLobby.LobbyData?.AllClients.Values;
