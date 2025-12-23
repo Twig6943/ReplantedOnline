@@ -335,19 +335,11 @@ internal static class VersusManager
         // Initial cooldowns
         foreach (var seedPacket in allSeedPackets)
         {
-            if (seedPacket.mPacketType is SeedType.Sunflower or SeedType.ZombieGravestone) continue;
+            if (seedPacket.mPacketType is SeedType.Sunflower or SeedType.Peashooter or SeedType.Potatomine or SeedType.Wallnut or SeedType.Puffshroom
+                or SeedType.ZombieGravestone or SeedType.ZombieNormal) continue;
 
             seedPacket.Deactivate();
-            if (!Challenge.IsZombieSeedType(seedPacket.mPacketType))
-            {
-                // Initial 8 second cooldown
-                seedPacket.mRefreshTime = 1000;
-            }
-            else
-            {
-                // Initial 10 second cooldown plus base cooldown
-                seedPacket.mRefreshTime = 1200 + Instances.DataServiceActivity.Service.GetPlantDefinition(seedPacket.mPacketType).m_versusBaseRefreshTime;
-            }
+            seedPacket.mRefreshTime = Instances.DataServiceActivity.Service.GetPlantDefinition(seedPacket.mPacketType).m_versusBaseRefreshTime;
             seedPacket.mRefreshing = true;
         }
     }
@@ -396,8 +388,8 @@ internal static class VersusManager
         {
             zombieMultiplier += zombie.mZombieType switch
             {
-                ZombieType.Target => 300,
-                ZombieType.Gargantuar => 250,
+                ZombieType.Target => 250,
+                ZombieType.Gargantuar => 150,
                 ZombieType.Gravestone => 100,
                 ZombieType.Zamboni => 50,
                 ZombieType.Zombatar => 50,
