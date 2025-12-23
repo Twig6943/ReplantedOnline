@@ -29,7 +29,9 @@ internal static class WavUtils
             using MemoryStream ms = new();
             stream.CopyTo(ms);
             byte[] wavBytes = ms.ToArray();
-            return ToAudioClip(wavBytes);
+            var audio = ToAudioClip(wavBytes);
+            audio.SetName(resourcePath);
+            return audio;
         }
         catch (Exception ex)
         {
@@ -60,7 +62,9 @@ internal static class WavUtils
         try
         {
             byte[] wavBytes = File.ReadAllBytes(filePath);
-            return ToAudioClip(wavBytes);
+            var audio = ToAudioClip(wavBytes);
+            audio.SetName(Path.GetFileName(filePath));
+            return audio;
         }
         catch (Exception ex)
         {

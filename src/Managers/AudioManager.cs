@@ -4,6 +4,7 @@ using ReplantedOnline.Helper;
 using ReplantedOnline.Modules;
 using System.Collections;
 using System.Reflection;
+using UnityEngine;
 
 namespace ReplantedOnline.Managers;
 
@@ -12,6 +13,9 @@ namespace ReplantedOnline.Managers;
 /// </summary>
 internal static class AudioManager
 {
+    private static AudioClip MainMenuTheme;
+    private static AudioClip CustomMainMenuTheme;
+
     /// <summary>
     /// Initializes the audio manager and sets up audio replacements.
     /// </summary>
@@ -19,8 +23,61 @@ internal static class AudioManager
     {
         MelonCoroutines.Start(WaitForAppCore(() =>
         {
-            ReplaceAudio(MusicFile.MainMusic, MusicTune.TitleCrazyDaveMainTheme, "ReplantedOnline.Resources.Sounds.CrazyDaveMainTheme-Compressed.wav");
+            MainMenuTheme = GetAudio(MusicFile.MainMusic, MusicTune.TitleCrazyDaveMainTheme);
+            MainMenuTheme.hideFlags |= HideFlags.HideAndDontSave | HideFlags.DontSaveInEditor;
+            CustomMainMenuTheme = Assembly.GetExecutingAssembly().LoadWavFromResources("ReplantedOnline.Resources.Sounds.CrazyDaveMainTheme-Compressed.wav");
+            CustomMainMenuTheme.hideFlags |= HideFlags.HideAndDontSave | HideFlags.DontSaveInEditor;
+            OnModifyMusic(BloomEngineManager.m_modifyMusic.Value, false);
         }));
+    }
+
+    /// <summary>
+    /// Switches between the original or custom music.
+    /// </summary>
+    internal static void OnModifyMusic(bool custom, bool fromSetting)
+    {
+        if (custom)
+        {
+            ReplaceAudio(MusicFile.MainMusic, MusicTune.TitleCrazyDaveMainTheme, CustomMainMenuTheme, fromSetting);
+
+        }
+        else
+        {
+            ReplaceAudio(MusicFile.MainMusic, MusicTune.TitleCrazyDaveMainTheme, MainMenuTheme, fromSetting);
+        }
+    }
+
+    /// <summary>
+    /// Replaces a specific game audio track with a custom WAV file from embedded resources.
+    /// </summary>
+    /// <param name="id">The MusicFile identifier for the audio to replace.</param>
+    /// <param name="tune">The MusicTune identifier for the specific audio track.</param>
+    /// <param name="clip">The clip to replace with.</param>
+    /// <param name="replay">If the audio should replay.</param>
+    internal static void ReplaceAudio(MusicFile id, MusicTune tune, AudioClip clip, bool replay)
+    {
+        var Audio = Instances.AppCore.m_audioSourcesService.m_musicSourceMappings.FirstOrDefault(am => am.IsId(id, tune));
+        Audio?.m_audioSource?.Stop();
+        Audio?.m_audioSource?.m_audioSource?.clip = clip;
+        if (replay)
+        {
+            Audio?.m_audioSource?.Play(true, true);
+        }
+    }
+
+    /// <summary>
+    /// Retrieves the AudioClip currently assigned to a specific game audio track.
+    /// </summary>
+    /// <param name="id">The MusicFile identifier for the audio to retrieve.</param>
+    /// <param name="tune">The MusicTune identifier for the specific audio track.</param>
+    /// <returns>
+    /// The AudioClip currently assigned to the specified audio track, or null if no matching
+    /// audio source is found.
+    /// </returns>
+    internal static AudioClip GetAudio(MusicFile id, MusicTune tune)
+    {
+        var Audio = Instances.AppCore.m_audioSourcesService.m_musicSourceMappings.FirstOrDefault(am => am.IsId(id, tune));
+        return Audio?.m_audioSource.m_audioSource.clip;
     }
 
     /// <summary>
@@ -36,24 +93,5 @@ internal static class AudioManager
         }
 
         callback();
-    }
-
-    /// <summary>
-    /// Replaces a specific game audio track with a custom WAV file from embedded resources.
-    /// </summary>
-    /// <param name="id">The MusicFile identifier for the audio to replace.</param>
-    /// <param name="tune">The MusicTune identifier for the specific audio track.</param>
-    /// <param name="resourceClipPath">The fully qualified path to the embedded WAV resource.</param>
-    internal static void ReplaceAudio(MusicFile id, MusicTune tune, string resourceClipPath)
-    {
-        var Audio = Instances.AppCore.m_audioSourcesService.m_musicSourceMappings.FirstOrDefault(am => am.IsId(id, tune));
-        if (Audio != null)
-        {
-            var clip = Assembly.GetExecutingAssembly().LoadWavFromResources(resourceClipPath);
-            if (clip != null)
-            {
-                Audio.m_audioSource.m_audioSource.clip = clip;
-            }
-        }
     }
 }

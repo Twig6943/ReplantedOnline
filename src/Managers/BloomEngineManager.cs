@@ -14,6 +14,7 @@ internal static class BloomEngineManager
 {
     private static MelonPreferences_Category m_configCategory;
     internal static MelonPreferences_Entry<uint> m_gameServer;
+    internal static MelonPreferences_Entry<bool> m_modifyMusic;
 
     /// <summary>
     /// Ensures MelonPreferences are only initialized once.
@@ -35,10 +36,17 @@ internal static class BloomEngineManager
         );
 
         m_gameServer = m_configCategory.CreateEntry(
-            "GameServerId",
+            "game_server_id",
             (uint)AppIdServers.PVZ_Replanted,
             "Steam Game ID Server",
             "The Steam App ID to connect to for P2P"
+        );
+
+        m_modifyMusic = m_configCategory.CreateEntry(
+            "modify_music",
+            true,
+            "Modify Music",
+            "Rather to Modify Music or not"
         );
 
         // Reset to default if an invalid enum value was stored
@@ -71,6 +79,7 @@ internal static class BloomEngineManager
     internal static class BloomConfigs
     {
         internal static EnumInputField GameServer;
+        internal static BoolInputField ModifyMusic;
 
         /// <summary>
         /// Initializes BloomEngine config fields and syncs values
@@ -87,14 +96,33 @@ internal static class BloomEngineManager
                 {
                     if (value is AppIdServers appIdServer)
                     {
-                        m_gameServer.Value = (uint)appIdServer;
-                        MelonPreferences.Save();
+                        bool changed = ((uint)appIdServer) != m_gameServer.Value;
+                        if (changed)
+                        {
+                            m_gameServer.Value = (uint)appIdServer;
+                            MelonPreferences.Save();
+                        }
                     }
                 },
                 validateValue: value =>
                 {
                     return Enum.GetValues<AppIdServers>()
                         .Contains((AppIdServers)value);
+                }
+            );
+
+            ModifyMusic = ConfigMenu.CreateBoolInput(
+                "Modify Music",
+                m_modifyMusic.Value,
+                value =>
+                {
+                    bool changed = value != m_modifyMusic.Value;
+                    m_modifyMusic.Value = value;
+                    if (changed)
+                    {
+                        MelonPreferences.Save();
+                        AudioManager.OnModifyMusic(value, true);
+                    }
                 }
             );
         }
