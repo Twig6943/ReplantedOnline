@@ -14,7 +14,7 @@ internal static class SquashPlantPatch
     [HarmonyPrefix]
     private static bool Plant_FindSquashTarget_Prefix(Plant __instance)
     {
-        if (__instance.mSeedType is not SeedType.Squash) return true;
+        if (__instance.mSeedType != SeedType.Squash) return true;
 
         // Check if we're in an online multiplayer lobby
         if (NetLobby.AmInLobby())
@@ -33,7 +33,7 @@ internal static class SquashPlantPatch
     [HarmonyPostfix]
     private static void Plant_FindSquashTarget_Postfix(Plant __instance, Zombie __result)
     {
-        if (__instance.mSeedType is not SeedType.Squash) return;
+        if (__instance.mSeedType != SeedType.Squash) return;
 
         // Check if we're in an online multiplayer lobby
         if (NetLobby.AmInLobby())

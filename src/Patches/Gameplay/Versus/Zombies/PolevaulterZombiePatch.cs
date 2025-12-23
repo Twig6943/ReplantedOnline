@@ -13,7 +13,7 @@ internal static class PolevaulterZombiePatch
     [HarmonyPrefix]
     private static bool Zombie_UpdateZombiePolevaulter_Prefix(Zombie __instance)
     {
-        if (__instance.mZombieType is not ZombieType.Polevaulter) return true;
+        if (__instance.mZombieType != ZombieType.Polevaulter) return true;
 
         if (NetLobby.AmInLobby())
         {

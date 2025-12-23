@@ -24,8 +24,13 @@ internal static class PlantSyncPatch
         // Only handle network synchronization if we're in a multiplayer lobby
         if (NetLobby.AmInLobby())
         {
-            // Potato mine dies by HandleSetZombieTargetRpc
-            if (__instance.mSeedType is SeedType.Potatomine) return true;
+            // Potato mine dies by HandleSetZombieTargetRpc when Armed
+            if (__instance.mSeedType == SeedType.Potatomine && __instance.mState == PlantState.PotatoArmed) return true;
+
+            if (__instance.mSeedType == SeedType.Jalapeno) return true;
+            if (__instance.mSeedType == SeedType.Doomshroom) return true;
+            if (__instance.mSeedType == SeedType.Iceshroom) return true;
+            if (__instance.mSeedType == SeedType.Cherrybomb) return true;
 
             if (!VersusState.AmPlantSide) return false;
 

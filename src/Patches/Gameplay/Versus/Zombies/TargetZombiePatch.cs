@@ -12,20 +12,18 @@ internal static class TargetZombiePatch
     [HarmonyPrefix]
     private static void Zombie_DropHead_Prefix(Zombie __instance, ref int __state)
     {
-        if (__instance.mZombieType is ZombieType.Target)
-        {
-            __state = Instances.GameplayActivity.VersusMode.ZombieLife;
-            Instances.GameplayActivity.VersusMode.ZombieLife = 3;
-        }
+        if (__instance.mZombieType != ZombieType.Target) return;
+
+        __state = Instances.GameplayActivity.VersusMode.ZombieLife;
+        Instances.GameplayActivity.VersusMode.ZombieLife = 3;
     }
 
     [HarmonyPatch(typeof(Zombie), nameof(Zombie.DropHead))]
     [HarmonyPostfix]
     private static void Zombie_DropHead_Postfix(Zombie __instance, int __state)
     {
-        if (__instance.mZombieType is ZombieType.Target)
-        {
-            Instances.GameplayActivity.VersusMode.ZombieLife = __state;
-        }
+        if (__instance.mZombieType != ZombieType.Target) return;
+
+        Instances.GameplayActivity.VersusMode.ZombieLife = __state;
     }
 }

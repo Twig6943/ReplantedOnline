@@ -14,7 +14,7 @@ internal static class ChomperPlantPatch
     [HarmonyPrefix]
     private static bool Plant_FindTargetZombie_Prefix(Plant __instance)
     {
-        if (__instance.mSeedType is not SeedType.Chomper) return true;
+        if (__instance.mSeedType != SeedType.Chomper) return true;
 
         // Check if we're in an online multiplayer lobby
         if (NetLobby.AmInLobby())
@@ -34,7 +34,7 @@ internal static class ChomperPlantPatch
     [HarmonyPostfix]
     private static void Plant_FindTargetZombie_Postfix(Plant __instance, Zombie __result)
     {
-        if (__instance.mSeedType is not SeedType.Chomper) return;
+        if (__instance.mSeedType != SeedType.Chomper) return;
 
         // Check if we're in an online multiplayer lobby
         if (NetLobby.AmInLobby())

@@ -14,7 +14,7 @@ internal static class FlagZombiePatch
     [HarmonyPostfix]
     private static void Zombie_ZombieInitialize_Postfix(ZombieType theType)
     {
-        if (theType is not ZombieType.Flag) return;
+        if (theType != ZombieType.Flag) return;
 
         if (NetLobby.AmInLobby())
         {

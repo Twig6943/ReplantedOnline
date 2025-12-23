@@ -1,9 +1,13 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.Gameplay;
+using MelonLoader;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object.Game;
 using ReplantedOnline.Network.Online;
+using ReplantedOnline.Patches.Gameplay.Versus.Networked;
+using System.Collections;
+using UnityEngine;
 
 namespace ReplantedOnline.Patches.Gameplay.Versus.Plants;
 
@@ -14,7 +18,7 @@ internal static class PotatominePlantPatch
     [HarmonyPrefix]
     private static bool Plant_FindTargetZombie_Prefix(Plant __instance)
     {
-        if (__instance.mSeedType is not SeedType.Potatomine) return true;
+        if (__instance.mSeedType != SeedType.Potatomine) return true;
 
         // Check if we're in an online multiplayer lobby
         if (NetLobby.AmInLobby())
@@ -33,7 +37,7 @@ internal static class PotatominePlantPatch
     [HarmonyPostfix]
     private static void Plant_FindTargetZombie_Postfix(Plant __instance, ref Zombie __result)
     {
-        if (__instance.mSeedType is not SeedType.Potatomine) return;
+        if (__instance.mSeedType != SeedType.Potatomine) return;
 
         // Check if we're in an online multiplayer lobby
         if (NetLobby.AmInLobby())
@@ -59,9 +63,17 @@ internal static class PotatominePlantPatch
                     {
                         // Override the result with the networked zombie target
                         __result = zombie;
+                        netPlant._State = null;
+                        MelonCoroutines.Start(CoWaitAndDie(__instance));
                     }
                 }
             }
         }
+    }
+
+    private static IEnumerator CoWaitAndDie(Plant plant)
+    {
+        yield return new WaitForSeconds(2f);
+        plant.DieOriginal();
     }
 }

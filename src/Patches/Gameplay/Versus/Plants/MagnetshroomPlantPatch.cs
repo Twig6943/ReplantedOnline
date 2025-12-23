@@ -14,7 +14,7 @@ internal static class MagnetshroomPlantPatch
     [HarmonyPrefix]
     private static bool Plant_MagnetShroomAttactItem_Prefix(Plant __instance, ref Zombie theZombie)
     {
-        if (__instance.mSeedType is not SeedType.Magnetshroom) return true;
+        if (__instance.mSeedType != SeedType.Magnetshroom) return true;
 
         // Check if we're in an online multiplayer lobby
         if (NetLobby.AmInLobby())
