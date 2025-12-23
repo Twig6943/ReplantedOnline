@@ -20,7 +20,7 @@ internal static class ModInfo
     /// <summary>
     /// The release type of the current mod version.
     /// </summary>
-    internal const string MOD_RELEASE = nameof(ReleaseType.beta);
+    internal const string MOD_RELEASE = nameof(ReleaseType.dev);
 
     /// <summary>
     /// The number of the release.

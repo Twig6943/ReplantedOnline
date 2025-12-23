@@ -326,13 +326,22 @@ internal static class VersusManager
         allSeedPackets.AddRange(Instances.GameplayActivity.Board.SeedBanks.LocalItem().SeedPackets);
         allSeedPackets.AddRange(Instances.GameplayActivity.Board.SeedBanks.OpponentItem().SeedPackets);
 
-        // Initial 10 second cooldown plus base cooldown
+        // Initial cooldowns
         foreach (var seedPacket in allSeedPackets)
         {
             if (seedPacket.mPacketType is SeedType.Sunflower or SeedType.ZombieGravestone) continue;
 
             seedPacket.Deactivate();
-            seedPacket.mRefreshTime = 1200 + Instances.DataServiceActivity.Service.GetPlantDefinition(seedPacket.mPacketType).m_versusBaseRefreshTime;
+            if (!Challenge.IsZombieSeedType(seedPacket.mPacketType))
+            {
+                // Initial 8 second cooldown
+                seedPacket.mRefreshTime = 1000;
+            }
+            else
+            {
+                // Initial 10 second cooldown plus base cooldown
+                seedPacket.mRefreshTime = 1200 + Instances.DataServiceActivity.Service.GetPlantDefinition(seedPacket.mPacketType).m_versusBaseRefreshTime;
+            }
             seedPacket.mRefreshing = true;
         }
     }
