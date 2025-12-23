@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.Gameplay;
 using Il2CppSource.DataModels;
+using Il2CppSource.UI;
 using Il2CppTekly.PanelViews;
 using Il2CppTMPro;
 using MelonLoader;
@@ -110,6 +111,11 @@ internal static class VersusLobbyPatch
         {
             button.onClick = new();
             button.onClick.AddListener(callback);
+            var bt = button.GetComponentInChildren<ButtonTransition>(true);
+            if (bt != null)
+            {
+                UnityEngine.Object.Destroy(bt);
+            }
         }
     }
 
