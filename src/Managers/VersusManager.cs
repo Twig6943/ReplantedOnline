@@ -165,11 +165,10 @@ internal static class VersusManager
         }
 
         var networked = NetLobby.LobbyData?.Networked;
-        var clients = NetLobby.LobbyData?.AllClients.Values;
 
         bool shouldEnableButtons = networked != null
             && !networked.PickingSides
-            && clients?.Count > 1
+            && NetLobby.GetLobbyMemberCount() > 1
             && NetLobby.LobbyData.AllClientsReady();
 
         VersusLobbyPatch.SetButtonsInteractable(shouldEnableButtons);

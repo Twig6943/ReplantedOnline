@@ -154,10 +154,29 @@ internal static class VersusLobbyPatch
     }
 
     [HarmonyPatch(typeof(VersusPlayerModel), nameof(VersusPlayerModel.Confirm))]
-    [HarmonyPostfix]
-    private static void Confirm_Prefix(VersusPlayerModel __instance)
+    [HarmonyPrefix]
+    private static bool Confirm_Prefix(VersusPlayerModel __instance, ref bool __state)
     {
-        if (!NetLobby.AmLobbyHost()) return;
+        __state = false;
+        if (!NetLobby.AmLobbyHost()) return false;
+
+        if (ModInfo.MOD_RELEASE != nameof(ReleaseType.dev))
+        {
+            if (!NetLobby.LobbyData.AllClientsReady() || NetLobby.GetLobbyMemberCount() < 2)
+            {
+                return false;
+            }
+        }
+
+        __state = true;
+        return true;
+    }
+
+    [HarmonyPatch(typeof(VersusPlayerModel), nameof(VersusPlayerModel.Confirm))]
+    [HarmonyPostfix]
+    private static void Confirm_Postfix(VersusPlayerModel __instance, bool __state)
+    {
+        if (!__state) return;
 
         if (Instances.GameplayActivity.VersusMode.PlantPlayerIndex == 0)
         {
@@ -170,10 +189,21 @@ internal static class VersusLobbyPatch
     }
 
     [HarmonyPatch(typeof(VersusPlayerModel), nameof(VersusPlayerModel.Cancel))]
-    [HarmonyPostfix]
-    private static void Cancel_Prefix(VersusPlayerModel __instance)
+    [HarmonyPrefix]
+    private static bool Cancel_Prefix(VersusPlayerModel __instance, ref bool __state)
     {
-        if (!NetLobby.AmLobbyHost()) return;
+        __state = false;
+        if (!NetLobby.AmLobbyHost()) return false;
+
+        __state = true;
+        return true;
+    }
+
+    [HarmonyPatch(typeof(VersusPlayerModel), nameof(VersusPlayerModel.Cancel))]
+    [HarmonyPostfix]
+    private static void Cancel_Postfix(VersusPlayerModel __instance, bool __state)
+    {
+        if (!__state) return;
 
         NetLobby.LobbyData.Networked.SetHostTeam(PlayerTeam.None);
     }
