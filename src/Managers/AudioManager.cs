@@ -13,9 +13,6 @@ namespace ReplantedOnline.Managers;
 /// </summary>
 internal static class AudioManager
 {
-    private static AudioClip MainMenuTheme;
-    private static AudioClip CustomMainMenuTheme;
-
     /// <summary>
     /// Initializes the audio manager and sets up audio replacements.
     /// </summary>
@@ -23,12 +20,23 @@ internal static class AudioManager
     {
         MelonCoroutines.Start(WaitForAppCore(() =>
         {
-            MainMenuTheme = GetAudio(MusicFile.MainMusic, MusicTune.TitleCrazyDaveMainTheme);
-            MainMenuTheme.hideFlags |= HideFlags.HideAndDontSave | HideFlags.DontSaveInEditor;
-            CustomMainMenuTheme = Assembly.GetExecutingAssembly().LoadWavFromResources("ReplantedOnline.Resources.Sounds.CrazyDaveMainTheme-Compressed.wav");
-            CustomMainMenuTheme.hideFlags |= HideFlags.HideAndDontSave | HideFlags.DontSaveInEditor;
+            CatchAudio();
             OnModifyMusic(BloomEngineManager.m_modifyMusic.Value, false);
         }));
+    }
+
+    private static AudioClip MainMenuTheme;
+    private static AudioClip CustomMainMenuTheme;
+
+    /// <summary>
+    /// Captures and caches audio.
+    /// </summary>
+    private static void CatchAudio()
+    {
+        MainMenuTheme = GetAudio(MusicFile.MainMusic, MusicTune.TitleCrazyDaveMainTheme);
+        MainMenuTheme.hideFlags |= HideFlags.HideAndDontSave | HideFlags.DontSaveInEditor;
+        CustomMainMenuTheme = Assembly.GetExecutingAssembly().LoadWavFromResources("ReplantedOnline.Resources.Sounds.CrazyDaveMainTheme-Compressed.wav");
+        CustomMainMenuTheme.hideFlags |= HideFlags.HideAndDontSave | HideFlags.DontSaveInEditor;
     }
 
     /// <summary>
