@@ -25,7 +25,7 @@ internal static class TitleScreenPatch
                     logo.gameObject.DestroyAllImageLocalizers();
                     UnityEngine.Object.Destroy(logo);
                     screen.gameObject.DestroyAllImageLocalizers();
-                    screen.sprite = Utils.LoadSprite("ReplantedOnline.Resources.Images.PVZR-Online-Promo-Logo.png");
+                    screen.sprite = Utils.LoadSprite("ReplantedOnline.Resources.Images.PVZR-Online-Promo-Logo-Compressed.png");
                 }
 
                 var loadingRect = splash.Find("Canvas/LoadBar/LoadBarAnimationParent")?.GetComponentInChildren<RectTransform>(true);

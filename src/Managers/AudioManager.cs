@@ -19,7 +19,7 @@ internal static class AudioManager
     {
         MelonCoroutines.Start(WaitForAppCore(() =>
         {
-            ReplaceAudio(MusicFile.MainMusic, MusicTune.TitleCrazyDaveMainTheme, "ReplantedOnline.Resources.Sounds.CrazyDaveMainTheme.wav");
+            ReplaceAudio(MusicFile.MainMusic, MusicTune.TitleCrazyDaveMainTheme, "ReplantedOnline.Resources.Sounds.CrazyDaveMainTheme-Compressed.wav");
         }));
     }
 
