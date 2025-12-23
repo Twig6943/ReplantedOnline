@@ -321,6 +321,19 @@ internal static class VersusManager
             Utils.SpawnZombie(ZombieType.Target, 8, 3, false, true);
             Utils.SpawnZombie(ZombieType.Target, 8, 4, false, true);
         }
+
+        var allSeedPackets = new List<SeedPacket>();
+        allSeedPackets.AddRange(Instances.GameplayActivity.Board.SeedBanks.LocalItem().SeedPackets);
+        allSeedPackets.AddRange(Instances.GameplayActivity.Board.SeedBanks.OpponentItem().SeedPackets);
+
+        // Initial 15 second cooldown i think
+        foreach (var seedPacket in allSeedPackets)
+        {
+            if (seedPacket.mPacketType is SeedType.Sunflower or SeedType.ZombieGravestone) continue;
+            seedPacket.Deactivate();
+            seedPacket.mRefreshTime = 1800;
+            seedPacket.mRefreshing = true;
+        }
     }
 
     internal static void EndGame(GameObject focus, PlayerTeam winningTeam)
