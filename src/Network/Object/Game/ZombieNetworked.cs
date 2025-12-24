@@ -450,7 +450,7 @@ internal sealed class ZombieNetworked : NetworkClass
     /// <summary>
     /// The Coroutine for the larp.
     /// </summary>
-    private Il2CppSystem.Collections.IEnumerator larpCoroutine;
+    private Coroutine larpCoroutine;
 
     /// <summary>
     /// Smoothly interpolates the zombie's position to the target position when distance threshold is exceeded.
@@ -474,8 +474,7 @@ internal sealed class ZombieNetworked : NetworkClass
 
             if (distance < 100f && _Zombie.mZombieType != ZombieType.Pogo)
             {
-                larpCoroutine = CoLarpPos(posX).WrapToIl2cpp();
-                StartCoroutine(larpCoroutine);
+                larpCoroutine = StartCoroutine(CoLarpPos(posX).WrapToIl2cpp());
             }
             else
             {
