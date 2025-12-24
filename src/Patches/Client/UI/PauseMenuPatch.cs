@@ -18,7 +18,7 @@ internal static class PauseMenuPatch
         if (NetLobby.AmInLobby())
         {
             var restartLevelButton = __instance.transform.Find("P_OptionsPanel_Canvas/Layout/Center/Panel/Bottom/Buttons/Hlayout/P_BasicButton_RestartLevel")?.GetComponentInChildren<Button>(true);
-            if (NetLobby.AmLobbyHost())
+            if (restartLevelButton != null && NetLobby.AmLobbyHost())
             {
                 restartLevelButton.onClick = new();
                 restartLevelButton.onClick.AddListener(() =>
@@ -35,12 +35,18 @@ internal static class PauseMenuPatch
 
             // Replace main menu button with lobby leave functionality
             var mainMneuButton = __instance.transform.Find("P_OptionsPanel_Canvas/Layout/Center/Panel/Bottom/Buttons/Hlayout/P_BasicButton_MainMenu")?.GetComponentInChildren<Button>(true);
-            mainMneuButton.onClick = new();
-            mainMneuButton.onClick.AddListener(() => NetLobby.LeaveLobby());
+            if (mainMneuButton != null)
+            {
+                mainMneuButton.onClick = new();
+                mainMneuButton.onClick.AddListener(() => NetLobby.LeaveLobby());
+            }
 
             // Remove almanac button
             var almanacButton = __instance.transform.Find("P_OptionsPanel_Canvas/Layout/Center/P_ControllerPrompt_Legend");
-            UnityEngine.Object.Destroy(almanacButton.gameObject);
+            if (almanacButton != null)
+            {
+                UnityEngine.Object.Destroy(almanacButton.gameObject);
+            }
         }
     }
 }
