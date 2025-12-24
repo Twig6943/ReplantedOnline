@@ -36,6 +36,6 @@ internal static class SeedPacketDefinitions
     /// </summary>
     internal static void Initialize()
     {
-        Instances.DataServiceActivity.Service.GetPlantDefinition(SeedType.ZombieFlag).m_versusCost = 225;
+        Instances.DataServiceActivity.Service.GetPlantDefinition(SeedType.ZombieFlag).m_versusCost = 250;
     }
 }
