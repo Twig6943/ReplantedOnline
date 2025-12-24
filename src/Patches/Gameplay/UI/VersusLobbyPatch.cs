@@ -58,7 +58,7 @@ internal static class VersusLobbyPatch
                 // Temporarily disable on release builds 
                 VsSideChooser.SetVSButton("CustomAll", () =>
                 {
-                    if (ModInfo.DEBUG)
+                    if (!ModInfo.DEBUG)
                     {
                         ReplantedOnlinePopup.Show("Under Construction", "This game mode will be coming soon!");
                         return;
@@ -71,7 +71,7 @@ internal static class VersusLobbyPatch
                 // Temporarily disable on release builds 
                 VsSideChooser.SetVSButton("Random", () =>
                 {
-                    if (ModInfo.DEBUG)
+                    if (!ModInfo.DEBUG)
                     {
                         ReplantedOnlinePopup.Show("Under Construction", "This game mode will be coming soon!");
                         return;
