@@ -5,6 +5,7 @@ using Il2CppSource.Utils;
 using MelonLoader;
 using ReplantedOnline.Attributes;
 using ReplantedOnline.Enums;
+using ReplantedOnline.Helper;
 using ReplantedOnline.Managers;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
@@ -52,7 +53,7 @@ internal sealed class StartGameHandler : RPCHandler
                 case SelectionSet.CustomAll:
                     Instances.GameplayActivity.VersusMode.Phase = VersusPhase.ChooseZombiePacket;
                     Transitions.ToChooseSeeds();
-                    MelonCoroutines.Start(CoWaitSeedChooserVSSwap());
+                    Instances.GameplayActivity.StartCoroutine(CoWaitSeedChooserVSSwap().WrapToIl2cpp());
                     break;
                 case SelectionSet.Random:
                 case SelectionSet.QuickPlay:

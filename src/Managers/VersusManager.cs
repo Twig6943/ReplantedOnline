@@ -243,7 +243,7 @@ internal static class VersusManager
             EventTrigger.Entry pointerClick = new() { eventID = EventTriggerType.PointerClick };
             pointerClick.callback.AddListener((UnityAction<BaseEventData>)((eventData) =>
             {
-                if (!copyingLobbyCode) MelonCoroutines.Start(CoCopyLobbyCode());
+                if (!copyingLobbyCode) Instances.GameplayActivity.StartCoroutine(CoCopyLobbyCode().WrapToIl2cpp());
             }));
             trigger.triggers.Add(pointerClick);
         }

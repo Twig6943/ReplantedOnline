@@ -15,10 +15,7 @@ internal static class SeedPacketDefinitions
         SeedType.None,
 
         // Plants
-        SeedType.Hypnoshroom,
         SeedType.Gravebuster,
-        SeedType.Iceshroom,
-        SeedType.Doomshroom,
         SeedType.Lilypad,
         SeedType.Tanglekelp,
         SeedType.Seashroom,
@@ -30,14 +27,10 @@ internal static class SeedPacketDefinitions
 
         // Zombies
         SeedType.ZombiePolevaulter,
-        SeedType.ZombieLadder,
-        SeedType.ZombieDigger,
-        SeedType.ZombieBungee,
         SeedType.Zomboni,
-        SeedType.ZombiePogo,
         SeedType.ZombieJackInTheBox,
         SeedType.ZombieCatapult
-        ];
+    ];
 
     /// <summary>
     /// Initializes plant definitions and applies custom modifications.

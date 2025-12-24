@@ -1,5 +1,4 @@
 ﻿using Il2CppTMPro;
-using MelonLoader;
 using ReplantedOnline.Enums;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Modules;
@@ -46,7 +45,7 @@ internal static class EndGameManager
             }
         }
 
-        MelonCoroutines.Start(CoEndGame(winningTeam));
+        Instances.GameplayActivity.StartCoroutine(CoEndGame(winningTeam).WrapToIl2cpp());
     }
 
     /// <summary>
@@ -105,7 +104,7 @@ internal static class EndGameManager
         winner.Dispose();
         loser.Dispose();
 
-        MelonCoroutines.Start(CoWinScreen());
+        Instances.GameplayActivity.StartCoroutine(CoWinScreen().WrapToIl2cpp());
     }
 
     /// <summary>

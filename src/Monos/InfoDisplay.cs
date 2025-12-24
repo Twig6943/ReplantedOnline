@@ -24,7 +24,6 @@ internal sealed class InfoDisplay : MonoBehaviour
         go.AddComponent<InfoDisplay>();
         DontDestroyOnLoad(go);
     }
-
     private GUIStyle _style;
 
     public void Update()

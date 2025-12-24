@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using Il2CppReloaded.Gameplay;
-using MelonLoader;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Object.Game;
@@ -64,7 +63,7 @@ internal static class PotatominePlantPatch
                         // Override the result with the networked zombie target
                         __result = zombie;
                         netPlant._State = null;
-                        MelonCoroutines.Start(CoWaitAndDie(__instance));
+                        __instance.mController.StartCoroutine(CoWaitAndDie(__instance).WrapToIl2cpp());
                     }
                 }
             }

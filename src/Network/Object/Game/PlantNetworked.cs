@@ -100,7 +100,7 @@ internal sealed class PlantNetworked : NetworkClass
             {
                 _State = States.UpdateState;
                 SendSetUpdateStateRpc();
-                DespawnAndDestroy();
+                DespawnAndDestroyWhen(() => _Plant.mDead);
             }
         }
         else

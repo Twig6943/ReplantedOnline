@@ -1,6 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Attributes;
 using Il2CppReloaded.Gameplay;
-using MelonLoader;
 using ReplantedOnline.Enums;
 using ReplantedOnline.Helper;
 using ReplantedOnline.Managers;
@@ -177,7 +176,7 @@ internal sealed class ZombieNetworked : NetworkClass
                 Dead = true;
                 _State = States.UpdateState;
                 SendSetUpdateStateRpc();
-                DespawnAndDestroy();
+                DespawnAndDestroyWhen(() => _Zombie.mDead);
             }
         }
         else
@@ -446,9 +445,9 @@ internal sealed class ZombieNetworked : NetworkClass
     }
 
     /// <summary>
-    /// Token used to track and manage position interpolation coroutines.
+    /// The Coroutine for the larp.
     /// </summary>
-    private object larpToken;
+    private Il2CppSystem.Collections.IEnumerator larpCoroutine;
 
     /// <summary>
     /// Smoothly interpolates the zombie's position to the target position when distance threshold is exceeded.
@@ -472,7 +471,8 @@ internal sealed class ZombieNetworked : NetworkClass
 
             if (distance < 100f && _Zombie.mZombieType != ZombieType.Pogo)
             {
-                larpToken = MelonCoroutines.Start(CoLarpPos(posX));
+                larpCoroutine = CoLarpPos(posX).WrapToIl2cpp();
+                StartCoroutine(larpCoroutine);
             }
             else
             {
@@ -486,9 +486,9 @@ internal sealed class ZombieNetworked : NetworkClass
     /// </summary>
     private void StopLarpPos()
     {
-        if (larpToken != null)
+        if (larpCoroutine != null)
         {
-            MelonCoroutines.Stop(larpToken);
+            StopCoroutine(larpCoroutine);
         }
     }
 
@@ -528,7 +528,7 @@ internal sealed class ZombieNetworked : NetworkClass
         // Ensure final position is exact
         _Zombie?.mPosX = targetX;
 
-        larpToken = null;
+        larpCoroutine = null;
     }
 
     private static float SmoothStep(float t)
