@@ -98,9 +98,9 @@ internal sealed class PlantNetworked : NetworkClass
         {
             if (_Plant.mDoSpecialCountdown < 10 && _State is not States.UpdateState)
             {
-                dead = true;
                 _State = States.UpdateState;
                 SendSetUpdateStateRpc();
+                DespawnAndDestroy();
             }
         }
         else
