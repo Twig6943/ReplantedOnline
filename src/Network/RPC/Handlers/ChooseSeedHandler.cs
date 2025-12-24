@@ -27,7 +27,7 @@ internal sealed class ChooseSeedHandler : RPCHandler
     {
         // Read the chosen seed type from the packet
         var seedType = (SeedType)packetReader.ReadInt();
-        var SeedChooserScreen = Instances.GameplayDataProvider.m_gameplayDataModel.m_seedChooserDataModel.m_seedChooserScreen;
+        var SeedChooserScreen = Instances.GameplayActivity.SeedChooserScreen;
         var theChosenSeed = SeedChooserScreen.GetChosenSeedFromType(seedType);
 
         // Use player index 1 (opposite player) when choosing seed for remote player
