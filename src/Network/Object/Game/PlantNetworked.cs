@@ -60,14 +60,7 @@ internal sealed class PlantNetworked : NetworkClass
         if (_Plant == null) return;
 
         // If zombie dies immediately without animation despawn
-        if (AmOwner)
-        {
-            if (!dead && _Plant.mDead)
-            {
-                DespawnAndDestroy();
-            }
-        }
-        else
+        if (!AmOwner)
         {
             if (!dead)
             {
