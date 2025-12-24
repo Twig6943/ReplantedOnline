@@ -33,6 +33,47 @@ internal static class VersusModePatch
                 }
             }
         }
+        else if (__instance.SelectionSet == SelectionSet.Random)
+        {
+            if (VersusState.AmPlantSide)
+            {
+                var plantSeeds = Enum.GetValues<SeedType>().Where(seed =>
+                    seed != SeedType.Sunflower &&
+                    !Challenge.IsZombieSeedType(seed) &&
+                    !SeedPacketDefinitions.DisabledSeedTypes.Contains(seed) &&
+                    Instances.DataServiceActivity.Service.GetPlantDefinition(seed).VersusCost > 0
+                );
+
+                var shuffledSeeds = plantSeeds.OrderBy(x => Guid.NewGuid()).ToList();
+
+                __instance.m_board.SeedBanks.LocalItem().AddSeed(SeedType.Sunflower, true);
+
+                for (int i = 0; i < 5 && i < shuffledSeeds.Count; i++)
+                {
+                    var seedType = shuffledSeeds[i];
+                    __instance.m_board.SeedBanks.LocalItem().AddSeed(seedType, true);
+                }
+            }
+            else if (VersusState.AmZombieSide)
+            {
+                var zombieSeeds = Enum.GetValues<SeedType>().Where(seed =>
+                    seed != SeedType.ZombieGravestone &&
+                    Challenge.IsZombieSeedType(seed) &&
+                    !SeedPacketDefinitions.DisabledSeedTypes.Contains(seed) &&
+                    Instances.DataServiceActivity.Service.GetPlantDefinition(seed).VersusCost > 0
+                );
+
+                var shuffledSeeds = zombieSeeds.OrderBy(x => Guid.NewGuid()).ToList();
+
+                __instance.m_board.SeedBanks.LocalItem().AddSeed(SeedType.ZombieGravestone, true);
+
+                for (int i = 0; i < 5 && i < shuffledSeeds.Count; i++)
+                {
+                    var seedType = shuffledSeeds[i];
+                    __instance.m_board.SeedBanks.LocalItem().AddSeed(seedType, true);
+                }
+            }
+        }
 
         VersusManager.OnStart();
 

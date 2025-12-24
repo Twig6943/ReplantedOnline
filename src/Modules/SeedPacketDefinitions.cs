@@ -8,11 +8,19 @@ namespace ReplantedOnline.Modules;
 internal static class SeedPacketDefinitions
 {
     internal static SeedType[] DisabledSeedTypes = [
+        // Misc
+        SeedType.NumSeedsInChooser,
+        SeedType.NumSeedTypes,
+        SeedType.LastZombieIndex,
+        SeedType.None,
+
         // Plants
         SeedType.Hypnoshroom,
+        SeedType.Gravebuster,
         SeedType.Iceshroom,
         SeedType.Doomshroom,
         SeedType.Lilypad,
+        SeedType.Tanglekelp,
         SeedType.Seashroom,
         SeedType.Plantern,
         SeedType.Blover,
