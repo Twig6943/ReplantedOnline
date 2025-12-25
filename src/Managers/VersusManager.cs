@@ -367,7 +367,7 @@ internal static class VersusManager
     /// <param name="currentCounter">The current brain spawn counter value.</param>
     internal static int MultiplyBrainSpawnCounter(int currentCounter)
     {
-        int plantMultiplier = 25 * Instances.GameplayActivity.Board.m_plants.m_itemLookup.Keys.Count;
+        int plantMultiplier = 25 * Instances.GameplayActivity.Board.GetPlants().Length;
         return currentCounter + plantMultiplier;
     }
 
@@ -378,7 +378,7 @@ internal static class VersusManager
     internal static int MultiplyGraveCounter(int currentCounter)
     {
         int zombieMultiplier = 0;
-        foreach (var zombie in Instances.GameplayActivity.Board.m_zombies.m_itemLookup.Keys)
+        foreach (var zombie in Instances.GameplayActivity.Board.GetZombies())
         {
             zombieMultiplier += zombie.mZombieType switch
             {
