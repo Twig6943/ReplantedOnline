@@ -15,6 +15,7 @@ internal static class SeedPacketDefinitions
         SeedType.None,
 
         // Plants
+        SeedType.Sunflower,
         SeedType.Gravebuster,
         SeedType.Lilypad,
         SeedType.Tanglekelp,
@@ -27,6 +28,7 @@ internal static class SeedPacketDefinitions
         SeedType.Marigold,
 
         // Zombies
+        SeedType.ZombieGravestone,
         SeedType.ZombieDancer,
         SeedType.ZombiePolevaulter,
         SeedType.Zomboni,

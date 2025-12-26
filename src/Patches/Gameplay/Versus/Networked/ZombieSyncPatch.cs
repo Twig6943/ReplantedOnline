@@ -28,8 +28,6 @@ internal static class ZombieSyncPatch
                 __instance.PlayDeathAnimOriginal(theDamageFlags);
             });
 
-            // Get the networked zombie representation and send death RPC to other players
-            // Includes damage flags to communicate how the zombie died
             __instance.GetNetworked<ZombieNetworked>().SendDeathRpc(theDamageFlags);
 
             return false;
@@ -71,6 +69,7 @@ internal static class ZombieSyncPatch
             if (!VersusState.AmPlantSide) return false;
 
             __instance.TakeDamageOriginal(theDamage, theDamageFlags);
+
             __instance.GetNetworked<ZombieNetworked>().SendTakeDamageRpc(theDamage, theDamageFlags);
 
             return false;
@@ -99,6 +98,92 @@ internal static class ZombieSyncPatch
         }
     }
 
+    [HarmonyPatch(typeof(Zombie), nameof(Zombie.HitIceTrap))]
+    [HarmonyPrefix]
+    private static bool Zombie_HitIceTrap_Prefix(Zombie __instance)
+    {
+        // Skip network logic if this is an internal call (prevents infinite recursion)
+        if (InternalCallContext.IsInternalCall_HitIceTrap) return true;
+
+        // Only handle network synchronization if we're in a multiplayer lobby
+        if (NetLobby.AmInLobby())
+        {
+            if (!VersusState.AmPlantSide) return false;
+
+            // Execute the original HitIceTrap logic locally
+            __instance.HitIceTrapOriginal();
+
+            __instance.GetNetworked<ZombieNetworked>().SendSetFrozenRpc(true);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Extension method that safely calls the original HitIceTrap method
+    /// while preventing our patch from intercepting the call (avoiding recursion)
+    /// </summary>
+    public static void HitIceTrapOriginal(this Zombie __instance)
+    {
+        // Set flag to indicate this is an internal call
+        InternalCallContext.IsInternalCall_HitIceTrap = true;
+        try
+        {
+            // Call the original method - this won't trigger our patch due to the flag
+            __instance.HitIceTrap();
+        }
+        finally
+        {
+            // Always reset the flag, even if an exception occurs
+            InternalCallContext.IsInternalCall_HitIceTrap = false;
+        }
+    }
+
+    [HarmonyPatch(typeof(Zombie), nameof(Zombie.RemoveIceTrap))]
+    [HarmonyPrefix]
+    private static bool Zombie_RemoveIceTrap_Prefix(Zombie __instance)
+    {
+        // Skip network logic if this is an internal call (prevents infinite recursion)
+        if (InternalCallContext.IsInternalCall_RemoveIceTrap) return true;
+
+        // Only handle network synchronization if we're in a multiplayer lobby
+        if (NetLobby.AmInLobby())
+        {
+            if (!VersusState.AmPlantSide) return false;
+
+            // Execute the original RemoveIceTrap logic locally
+            __instance.RemoveIceTrapOriginal();
+
+            __instance.GetNetworked<ZombieNetworked>().SendSetFrozenRpc(false);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Extension method that safely calls the original RemoveIceTrap method
+    /// while preventing our patch from intercepting the call (avoiding recursion)
+    /// </summary>
+    public static void RemoveIceTrapOriginal(this Zombie __instance)
+    {
+        // Set flag to indicate this is an internal call
+        InternalCallContext.IsInternalCall_RemoveIceTrap = true;
+        try
+        {
+            // Call the original method - this won't trigger our patch due to the flag
+            __instance.RemoveIceTrap();
+        }
+        finally
+        {
+            // Always reset the flag, even if an exception occurs
+            InternalCallContext.IsInternalCall_RemoveIceTrap = false;
+        }
+    }
+
     /// <summary>
     /// Thread-safe context flags to prevent infinite recursion when calling patched methods from within patches.
     /// [ThreadStatic] ensures each thread has its own copy of these flags.
@@ -110,5 +195,11 @@ internal static class ZombieSyncPatch
 
         [ThreadStatic]
         public static bool IsInternalCall_TakeDamage;
+
+        [ThreadStatic]
+        public static bool IsInternalCall_HitIceTrap;
+
+        [ThreadStatic]
+        public static bool IsInternalCall_RemoveIceTrap;
     }
 }

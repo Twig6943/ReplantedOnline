@@ -81,6 +81,16 @@ internal sealed class ZombieNetworked : NetworkClass
                 return;
             }
         }
+        else
+        {
+            if (_Zombie.CanBeFrozen())
+            {
+                if (_Zombie.mIceTrapCounter > 0)
+                {
+                    _Zombie.mIceTrapCounter = 5;
+                }
+            }
+        }
 
         switch (ZombieType)
         {
@@ -343,9 +353,34 @@ internal sealed class ZombieNetworked : NetworkClass
         _Zombie.StartMindControlled();
     }
 
+    internal void SendSetFrozenRpc(bool frozen)
+    {
+        var writer = PacketWriter.Get();
+        writer.WriteBool(frozen);
+        if (!frozen)
+        {
+            writer.WriteInt(_Zombie.mChilledCounter);
+        }
+        this.SendRpc(5, writer);
+        writer.Recycle();
+    }
+
+    private void HandleSetFrozenRpc(bool frozen, int chilledCounter)
+    {
+        if (frozen)
+        {
+            _Zombie.HitIceTrapOriginal();
+        }
+        else
+        {
+            _Zombie.RemoveIceTrapOriginal();
+            _Zombie.mChilledCounter = chilledCounter;
+        }
+    }
+
     private void SendSetUpdateStateRpc()
     {
-        this.SendRpc(5);
+        this.SendRpc(6);
     }
 
     private void HandleSetUpdateStateRpc()
@@ -390,6 +425,17 @@ internal sealed class ZombieNetworked : NetworkClass
                 }
                 break;
             case 5:
+                {
+                    var frozen = packetReader.ReadBool();
+                    int chilledCounter = 0;
+                    if (!frozen)
+                    {
+                        chilledCounter = packetReader.ReadInt();
+                    }
+                    HandleSetFrozenRpc(frozen, chilledCounter);
+                }
+                break;
+            case 6:
                 {
                     HandleSetUpdateStateRpc();
                 }

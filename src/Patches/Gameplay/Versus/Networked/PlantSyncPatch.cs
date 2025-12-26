@@ -28,11 +28,10 @@ internal static class PlantSyncPatch
 
             if (!VersusState.AmPlantSide) return false;
 
-            // Get the networked plant representation and send death RPC to other players
-            __instance.GetNetworked<PlantNetworked>().SendDieRpc();
-
             // Execute the original die method logic locally
             __instance.DieOriginal();
+
+            __instance.GetNetworked<PlantNetworked>().SendDieRpc();
 
             return false;
         }
