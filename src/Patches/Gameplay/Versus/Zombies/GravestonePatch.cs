@@ -16,7 +16,7 @@ internal static class GravestonePatch
         if (__instance.mZombiePhase == ZombiePhase.ZombieNormal)
         {
             __instance.mZombiePhase = (ZombiePhase)100;
-            __instance.mPhaseCounter = UnityEngine.Random.Range(1000, 2000);
+            __instance.mPhaseCounter = UnityEngine.Random.Range(500, 2000);
         }
     }
 }

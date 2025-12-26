@@ -120,11 +120,11 @@ internal static class BloomEngineManager
                 value =>
                 {
                     bool changed = value != m_modifyMusic.Value;
-                    m_modifyMusic.Value = value;
                     if (changed)
                     {
-                        MelonPreferences.Save();
                         AudioManager.OnModifyMusic(value, true);
+                        m_modifyMusic.Value = value;
+                        MelonPreferences.Save();
                     }
                 }
             );
