@@ -1,4 +1,6 @@
 ﻿using HarmonyLib;
+using Il2CppReloaded.Binders;
+using Il2CppReloaded.Gameplay;
 using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
 using UnityEngine;
@@ -35,12 +37,30 @@ internal static class VersusHudPatch
     {
         if (VersusState.AmZombieSide)
         {
-            plantHud?.gameObject?.SetActive(false);
+            if (VersusState.SelectionSet == SelectionSet.Random)
+            {
+                plantHud?.gameObject?.SetActive(false);
+            }
+            else
+            {
+                var numberLabelBinder = plantHud?.transform?.Find("SeedBankContainer/SeedBank/SunAmount_Background")?.GetComponentInChildren<NumberLabelBinder>(true);
+                numberLabelBinder.m_formatString = "???";
+                numberLabelBinder.BindNumber(0);
+            }
         }
         else
         {
-            plantHud?.transform?.parent?.Find("MenuButtonVisiblityContainer")?.transform?.position += new Vector3(0f, 350f, 0f);
-            zombieHud?.gameObject?.SetActive(false);
+            if (VersusState.SelectionSet == SelectionSet.Random)
+            {
+                plantHud?.transform?.parent?.Find("MenuButtonVisiblityContainer")?.transform?.position += new Vector3(0f, 350f, 0f);
+                zombieHud?.gameObject?.SetActive(false);
+            }
+            else
+            {
+                var numberLabelBinder = zombieHud?.transform?.Find("VersusBankContainer/P_VsZombiePacks_Layout/Seedpacks_Background")?.GetComponentInChildren<NumberLabelBinder>(true);
+                numberLabelBinder.m_formatString = "???";
+                numberLabelBinder.BindNumber(0);
+            }
         }
     }
 }
