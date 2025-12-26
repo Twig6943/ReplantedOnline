@@ -382,7 +382,7 @@ internal static class VersusManager
         {
             zombieMultiplier += zombie.mZombieType switch
             {
-                ZombieType.Target => 250,
+                ZombieType.Target => 200,
                 ZombieType.Gargantuar => 150,
                 ZombieType.Gravestone => 100,
                 ZombieType.Zamboni => 50,

@@ -321,8 +321,8 @@ internal static class NetworkDispatcher
                 networkClass.OwnerId = spawnPacket.OwnerId;
                 networkClass.NetworkId = spawnPacket.NetworkId;
                 networkClass.transform.SetParent(NetworkClass.NetworkClassesObj.transform);
-                NetLobby.LobbyData.OnNetworkClassSpawn(networkClass);
                 NetworkSpawnPacket.DeserializeNetworkClass(networkClass, packetReader);
+                NetLobby.LobbyData.OnNetworkClassSpawn(networkClass);
                 networkClass.gameObject.SetActive(true);
                 networkClass.name = $"{networkClass.GetType().Name}({networkClass.NetworkId})";
                 MelonLogger.Msg($"[NetworkDispatcher] Spawned prefab NetworkClass from {sender.Name}: {spawnPacket.NetworkId}, Prefab: {spawnPacket.PrefabId}");
