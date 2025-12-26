@@ -3,6 +3,8 @@ using BloomEngine.Config.Inputs;
 using BloomEngine.Menu;
 using MelonLoader;
 using ReplantedOnline.Enums;
+using ReplantedOnline.Helper;
+using System.Reflection;
 
 namespace ReplantedOnline.Managers;
 
@@ -67,8 +69,9 @@ internal static class BloomEngineManager
         BloomConfigs.Init();
 
         var mod = ModMenu.CreateEntry(replantedOnline);
+        mod.AddIcon(Assembly.GetExecutingAssembly().LoadSpriteFromResources("ReplantedOnline.Resources.Images.PVZR-Online-Logo-BG.png"));
         mod.AddDisplayName(ModInfo.MOD_NAME);
-        mod.AddDescription("PVZR Online is a mod that adds online support to versus!");
+        mod.AddDescription("PvZ-R Online is a mod that adds online support to versus!");
         mod.AddConfig(typeof(BloomConfigs));
         mod.Register();
     }
