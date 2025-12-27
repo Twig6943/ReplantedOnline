@@ -14,7 +14,7 @@ namespace ReplantedOnline.Network.Object.Game;
 /// </summary>
 internal sealed class AnimationControllerNetworked : NetworkClass
 {
-    private CharacterAnimationController _AnimationController;
+    internal CharacterAnimationController _AnimationController;
 
     internal void Init(CharacterAnimationController animationController)
     {

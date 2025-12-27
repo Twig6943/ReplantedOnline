@@ -91,23 +91,42 @@ internal static class DebugRenderHelper
     }
 
     /// <summary>
-    /// Draws text with a drop shadow effect at the specified position.
+    /// Draws text with a drop shadow effect, always centered in the specified position.
     /// </summary>
-    /// <param name="X">The X coordinate of the text position.</param>
-    /// <param name="Y">The Y coordinate of the text position.</param>
+    /// <param name="X">The X coordinate for the center position of the text.</param>
+    /// <param name="Y">The Y coordinate for the center position of the text.</param>
+    /// <param name="W">The width available for the text.</param>
+    /// <param name="H">The height available for the text.</param>
+    /// <param name="strs">The text strings to display.</param>
+    /// <param name="col">The color of the main text (shadow will be black).</param>
+    /// <param name="offset">The offsets between each text.</param>
+    internal static void Strings(float X, float Y, float W, float H, string[] strs, Color col, Vector2? offset = null)
+    {
+        offset ??= new Vector2(0f, 15f);
+        foreach (var str in strs)
+        {
+            String(X, Y, W, H, str, col);
+            X += offset.Value.x;
+            Y += offset.Value.y;
+        }
+    }
+
+    /// <summary>
+    /// Draws text with a drop shadow effect, always centered in the specified position.
+    /// </summary>
+    /// <param name="X">The X coordinate for the center position of the text.</param>
+    /// <param name="Y">The Y coordinate for the center position of the text.</param>
     /// <param name="W">The width available for the text.</param>
     /// <param name="H">The height available for the text.</param>
     /// <param name="str">The text string to display.</param>
     /// <param name="col">The color of the main text (shadow will be black).</param>
-    /// <param name="centerx">If true, centers the text horizontally around X.</param>
-    /// <param name="centery">If true, centers the text vertically around Y.</param>
-    internal static void String(float X, float Y, float W, float H, string str, Color col, bool centerx = false, bool centery = false)
+    internal static void String(float X, float Y, float W, float H, string str, Color col)
     {
         GUIContent content = new(str);
-
         Vector2 size = InfoDisplay.Style.CalcSize(content);
-        float fX = centerx ? X - size.x / 2f : X,
-            fY = centery ? Y - size.y / 2f : Y;
+
+        float fX = X - size.x / 2f;
+        float fY = Y - size.y / 2f;
 
         InfoDisplay.Style.normal.textColor = Color.black;
         GUI.Label(new Rect(fX, fY, size.x, H), str, InfoDisplay.Style);

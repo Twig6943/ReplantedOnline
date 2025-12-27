@@ -35,7 +35,10 @@ internal sealed class NetworkedDebugger : MonoBehaviour
             if (zombieNetworked.ZombieType is ZombieType.Target or ZombieType.Gravestone) return;
 
             var wPos = GetWorldPos(zombieNetworked._Zombie.mController.transform.position) + new Vector3(85f, 175f, 0f);
-            DebugRenderHelper.String(wPos.x - 50f, wPos.y + 15f, 1f, 1f, $"{Enum.GetName(zombieNetworked.ZombieType)} Zombie", Color.white);
+            DebugRenderHelper.Strings(wPos.x, wPos.y + 15f, 1f, 1f,
+                [$"{Enum.GetName(zombieNetworked.ZombieType)} Zombie",
+                $"{Enum.GetName(zombieNetworked._Zombie.mZombiePhase)}: {zombieNetworked._Zombie.mPhaseCounter}"],
+                Color.white);
             DebugRenderHelper.Box(new(wPos.x, wPos.y - 75), new Vector2(100f, 150f), 1f, Color.white);
             if (zombieNetworked.lastSyncPosX != null)
             {
