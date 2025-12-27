@@ -22,13 +22,12 @@ internal static class ZombieSyncPatch
         {
             if (!VersusState.AmPlantSide) return false;
 
-            // Execute the original death animation logic locally
+            __instance.GetNetworked<ZombieNetworked>().SendDeathRpc(theDamageFlags);
+
             __instance.GetNetworked<ZombieNetworked>().CheckDeath(() =>
             {
                 __instance.PlayDeathAnimOriginal(theDamageFlags);
             });
-
-            __instance.GetNetworked<ZombieNetworked>().SendDeathRpc(theDamageFlags);
 
             return false;
         }
@@ -68,9 +67,9 @@ internal static class ZombieSyncPatch
         {
             if (!VersusState.AmPlantSide) return false;
 
-            __instance.TakeDamageOriginal(theDamage, theDamageFlags);
-
             __instance.GetNetworked<ZombieNetworked>().SendTakeDamageRpc(theDamage, theDamageFlags);
+
+            __instance.TakeDamageOriginal(theDamage, theDamageFlags);
 
             return false;
         }
@@ -196,10 +195,12 @@ internal static class ZombieSyncPatch
         {
             if (!VersusState.AmPlantSide) return false;
 
-            // Execute the original RemoveIceTrap logic locally
-            __instance.ApplyBurnOriginal();
+            if (__instance.mZombieType is not (ZombieType.Gargantuar or ZombieType.RedeyeGargantuar))
+            {
+                __instance.GetNetworked<ZombieNetworked>().SendApplyBurnRpc();
+            }
 
-            __instance.GetNetworked<ZombieNetworked>().SendApplyBurnRpc();
+            __instance.ApplyBurnOriginal();
 
             return false;
         }

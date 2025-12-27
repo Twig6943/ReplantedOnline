@@ -65,11 +65,14 @@ internal sealed class ZombieNetworked : NetworkClass
 
     public void OnDestroy()
     {
-        _Zombie.RemoveNetworkedLookup();
-
-        if (!Dead)
+        if (_Zombie != null)
         {
-            _Zombie.DieDeserialize();
+            _Zombie.RemoveNetworkedLookup();
+
+            if (!Dead && !_Zombie.IsDeadOrDying())
+            {
+                _Zombie.DieDeserialize();
+            }
         }
     }
 
@@ -78,24 +81,11 @@ internal sealed class ZombieNetworked : NetworkClass
         if (!IsOnNetwork) return;
         if (_Zombie == null) return;
 
-        // If zombie dies immediately without animation despawn
-        if (AmOwner)
+        if (_Zombie.mDead)
         {
-            if (!Dead && _Zombie.mDead)
-            {
-                DespawnAndDestroy();
-                return;
-            }
-        }
-        else
-        {
-            if (_Zombie.CanBeFrozen())
-            {
-                if (_Zombie.mIceTrapCounter > 0)
-                {
-                    _Zombie.mIceTrapCounter = 5;
-                }
-            }
+            _Zombie.RemoveNetworkedLookup();
+            _Zombie = null;
+            return;
         }
 
         switch (ZombieType)
@@ -361,37 +351,55 @@ internal sealed class ZombieNetworked : NetworkClass
 
     internal void SendSetFrozenRpc(bool frozen)
     {
-        var writer = PacketWriter.Get();
-        writer.WriteBool(frozen);
-        if (!frozen)
+        StartCoroutine(CoroutineUtils.WaitForCondition(() => !frozen || _Zombie.mChilledCounter > 0, () =>
         {
-            writer.WriteInt(_Zombie.mChilledCounter);
-        }
-        this.SendRpc(5, writer);
-        writer.Recycle();
+            var writer = PacketWriter.Get();
+            writer.WriteBool(frozen);
+            if (frozen)
+            {
+                writer.WriteInt(_Zombie.mIceTrapCounter);
+            }
+            else
+            {
+                writer.WriteInt(_Zombie.mChilledCounter);
+            }
+            this.SendRpc(5, writer);
+            writer.Recycle();
+        }).WrapToIl2cpp());
     }
 
-    private void HandleSetFrozenRpc(bool frozen, int chilledCounter)
+    private void HandleSetFrozenRpc(bool frozen, int counter)
     {
         if (frozen)
         {
+            StopLarpPos();
             _Zombie.HitIceTrapOriginal();
+            _Zombie.mIceTrapCounter = counter;
         }
         else
         {
             _Zombie.RemoveIceTrapOriginal();
-            _Zombie.mChilledCounter = chilledCounter;
+            _Zombie.mChilledCounter = counter;
         }
     }
 
     internal void SendApplyBurnRpc()
     {
-        this.SendRpc(6);
+        if (!Dead)
+        {
+            Dead = true;
+            this.SendRpc(6);
+            DespawnAndDestroy();
+        }
     }
 
     private void HandleApplyBurnRpc()
     {
-        _State = States.UpdateState;
+        if (!Dead)
+        {
+            Dead = true;
+            _Zombie.ApplyBurnOriginal();
+        }
     }
 
     private void SendSetUpdateStateRpc()
@@ -443,12 +451,8 @@ internal sealed class ZombieNetworked : NetworkClass
             case 5:
                 {
                     var frozen = packetReader.ReadBool();
-                    int chilledCounter = 0;
-                    if (!frozen)
-                    {
-                        chilledCounter = packetReader.ReadInt();
-                    }
-                    HandleSetFrozenRpc(frozen, chilledCounter);
+                    var counter = packetReader.ReadInt();
+                    HandleSetFrozenRpc(frozen, counter);
                 }
                 break;
             case 6:
@@ -522,7 +526,7 @@ internal sealed class ZombieNetworked : NetworkClass
             _Zombie.mVelX = packetReader.ReadFloat();
             _Zombie.UpdateAnimSpeed();
             var posX = packetReader.ReadFloat();
-            lastSyncPosX = GameExtensions.GetBoardXPosFromXPos(posX);
+            lastSyncPosX = posX;
             LarpPos(posX);
         }
     }

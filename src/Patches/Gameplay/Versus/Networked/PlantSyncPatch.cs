@@ -28,10 +28,9 @@ internal static class PlantSyncPatch
 
             if (!VersusState.AmPlantSide) return false;
 
-            // Execute the original die method logic locally
-            __instance.DieOriginal();
-
             __instance.GetNetworked<PlantNetworked>().SendDieRpc();
+
+            __instance.DieOriginal();
 
             return false;
         }

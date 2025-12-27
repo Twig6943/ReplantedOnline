@@ -74,14 +74,14 @@ internal sealed class PlantNetworked : NetworkClass
         if (!IsOnNetwork) return;
         if (_Plant == null) return;
 
-        if (AmOwner)
+        if (_Plant.mDead)
         {
-            if (!dead && _Plant.mDead)
-            {
-                DespawnAndDestroy();
-            }
+            _Plant.RemoveNetworkedLookup();
+            _Plant = null;
+            return;
         }
-        else
+
+        if (!AmOwner)
         {
             if (!dead)
             {
@@ -127,11 +127,14 @@ internal sealed class PlantNetworked : NetworkClass
 
     public void OnDestroy()
     {
-        _Plant.RemoveNetworkedLookup();
-
-        if (!dead)
+        if (_Plant != null)
         {
-            _Plant.DieOriginal();
+            _Plant.RemoveNetworkedLookup();
+
+            if (!dead && !_Plant.mDead)
+            {
+                _Plant.DieOriginal();
+            }
         }
     }
 
