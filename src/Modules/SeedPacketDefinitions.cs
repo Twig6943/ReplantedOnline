@@ -38,6 +38,21 @@ internal static class SeedPacketDefinitions
         SeedType.ZombieGargantuar
     ];
 
+    internal static SeedType[] IgnoreInitialCooldown = [
+        // Plants
+        SeedType.Sunflower,
+        SeedType.Peashooter,
+        SeedType.Potatomine,
+        SeedType.Wallnut,
+        SeedType.GiantWallnut,
+        SeedType.Puffshroom,
+
+        // Zombies
+        SeedType.ZombieGravestone,
+        SeedType.ZombieNormal,
+        SeedType.ZombieTrashCan
+    ];
+
     /// <summary>
     /// Initializes plant definitions and applies custom modifications.
     /// </summary>

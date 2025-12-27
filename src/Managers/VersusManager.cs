@@ -329,8 +329,7 @@ internal static class VersusManager
         // Initial cooldowns
         foreach (var seedPacket in allSeedPackets)
         {
-            if (seedPacket.mPacketType is SeedType.Sunflower or SeedType.Peashooter or SeedType.Potatomine or SeedType.Wallnut or SeedType.Puffshroom
-                or SeedType.ZombieGravestone or SeedType.ZombieNormal) continue;
+            if (SeedPacketDefinitions.IgnoreInitialCooldown.Contains(seedPacket.mPacketType)) continue;
 
             seedPacket.Deactivate();
             seedPacket.mRefreshTime = Instances.DataServiceActivity.Service.GetPlantDefinition(seedPacket.mPacketType)?.m_versusBaseRefreshTime ?? 0;
