@@ -1,5 +1,8 @@
 ﻿using HarmonyLib;
+using Il2Cpp;
 using Il2CppReloaded.Gameplay;
+using Il2CppSource.Binders;
+using ReplantedOnline.Modules;
 using ReplantedOnline.Network.Online;
 using ReplantedOnline.Network.RPC.Handlers;
 
@@ -19,6 +22,25 @@ internal static class SeedChooserScreenSyncPatch
         {
             ChooseSeedHandler.Send(theChosenSeed);
             __instance.ClickedSeedInChooserOriginal(theChosenSeed, playerIndex);
+
+            if (ModInfo.DEBUG)
+            {
+                if (NetLobby.GetLobbyMemberCount() == 1)
+                {
+                    var seedChooserVSSwap = UnityEngine.Object.FindObjectOfType<SeedChooserVSSwap>();
+                    seedChooserVSSwap.playerTurn = 0;
+                    seedChooserVSSwap.GetComponent<VersusChooserSwapBinder>().PlayerTurn = 0;
+
+                    if (VersusState.AmPlantSide)
+                    {
+                        Instances.GameplayActivity.VersusMode.Phase = VersusPhase.ChoosePlantPacket;
+                    }
+                    else
+                    {
+                        Instances.GameplayActivity.VersusMode.Phase = VersusPhase.ChooseZombiePacket;
+                    }
+                }
+            }
 
             return false;
         }

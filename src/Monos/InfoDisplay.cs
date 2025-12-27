@@ -13,6 +13,7 @@ namespace ReplantedOnline.Monos;
 /// </summary>
 internal sealed class InfoDisplay : MonoBehaviour
 {
+    internal static bool DebugEnabled { get; private set; }
     private bool _enabled = true;
 
     /// <summary>
@@ -24,13 +25,19 @@ internal sealed class InfoDisplay : MonoBehaviour
         go.AddComponent<InfoDisplay>();
         DontDestroyOnLoad(go);
     }
-    private GUIStyle _style;
+
+    internal static GUIStyle Style;
 
     public void Update()
     {
+        if (Keyboard.current.f1Key.wasPressedThisFrame)
+        {
+            DebugEnabled = !DebugEnabled;
+        }
+
         if (ModInfo.DEBUG)
         {
-            if (Keyboard.current.f1Key.wasPressedThisFrame)
+            if (Keyboard.current.f2Key.wasPressedThisFrame)
             {
                 _enabled = !_enabled;
             }
@@ -39,47 +46,51 @@ internal sealed class InfoDisplay : MonoBehaviour
 
     public void OnGUI()
     {
-        if (!_enabled) return;
-
-        if (_style == null)
+        if (Style == null)
         {
-            _style = new GUIStyle()
+            Style = new GUIStyle()
             {
                 fontStyle = FontStyle.Bold,
                 fontSize = 12,
                 padding = new RectOffset() { left = 4, right = 4, top = 2, bottom = 2 }
             };
-            GUIStyle.Internal_Copy(_style, GUI.skin.label);
+            GUIStyle.Internal_Copy(Style, GUI.skin.label);
         }
 
         float padding = 5f;
 
         // Bottom right info
-        var info = GetInfo();
-        DrawLabelWithOutline(
-            info,
-            new Rect(
-                Screen.width - _style.CalcSize(new GUIContent(info)).x - padding,
-                Screen.height - _style.CalcSize(new GUIContent(info)).y - padding,
-                _style.CalcSize(new GUIContent(info)).x,
-                _style.CalcSize(new GUIContent(info)).y
-            ),
-            _style,
-            Color.white,
-            Color.black
-        );
+        if (_enabled)
+        {
+            var info = GetInfo();
+            DrawLabelWithOutline(
+                info,
+                new Rect(
+                    Screen.width - Style.CalcSize(new GUIContent(info)).x - padding,
+                    Screen.height - Style.CalcSize(new GUIContent(info)).y - padding,
+                    Style.CalcSize(new GUIContent(info)).x,
+                    Style.CalcSize(new GUIContent(info)).y
+                ),
+                Style,
+                Color.white,
+                Color.black
+            );
+        }
 
         // Top left debug info
-        var debugInfo = GetDebugInfo();
-        DrawLabelWithOutline(
-            debugInfo,
-            new Rect(padding, padding,
-                    _style.CalcSize(new GUIContent(debugInfo)).x,
-                    _style.CalcSize(new GUIContent(debugInfo)).y),
-            _style,
-            Color.white * 0.95f,
-            Color.black
-        );
+        if (DebugEnabled)
+        {
+            var debugInfo = GetDebugInfo();
+            DrawLabelWithOutline(
+                debugInfo,
+                new Rect(padding, padding,
+                        Style.CalcSize(new GUIContent(debugInfo)).x,
+                        Style.CalcSize(new GUIContent(debugInfo)).y),
+                Style,
+                Color.white * 0.95f,
+                Color.black
+            );
+        }
     }
 
     /// <summary>

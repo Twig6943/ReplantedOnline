@@ -1,5 +1,6 @@
 ﻿using Il2CppReloaded.Gameplay;
 using Il2CppReloaded.Utils;
+using ReplantedOnline.Modules;
 
 namespace ReplantedOnline.Helper;
 
@@ -9,6 +10,16 @@ namespace ReplantedOnline.Helper;
 /// </summary>
 internal static class GameExtensions
 {
+    /// <summary>
+    /// Converts a X position field to X position on board.
+    /// </summary>
+    /// <param name="posX">The world X coordinate to convert.</param>
+    /// <returns>The corresponding board X position after applying the transformation.</returns>
+    internal static float GetBoardXPosFromXPos(float posX)
+    {
+        return posX * 2.92f + Instances.GameplayActivity?.m_boardOffset?.localPosition.x ?? 975f;
+    }
+
     /// <summary>
     /// Gets the local player's item from a multiplayer collection.
     /// </summary>

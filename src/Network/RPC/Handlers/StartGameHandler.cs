@@ -82,6 +82,35 @@ internal sealed class StartGameHandler : RPCHandler
             yield return null;
         }
 
+        if (ModInfo.DEBUG)
+        {
+            if (NetLobby.GetLobbyMemberCount() == 1)
+            {
+                if (VersusState.AmPlantSide)
+                {
+                    foreach (var seedType in Instances.GameplayActivity.VersusMode.m_quickPlayZombies.Skip(1))
+                    {
+                        Instances.GameplayActivity.Board.SeedBanks.OpponentItem().AddSeed(seedType, true);
+                    }
+
+                    var seedChooserVSSwapDebug = UnityEngine.Object.FindObjectOfType<SeedChooserVSSwap>();
+                    seedChooserVSSwapDebug.playerTurn = 1;
+                    seedChooserVSSwapDebug.GetComponent<VersusChooserSwapBinder>().PlayerTurn = 1;
+                    DisableSeedPackets();
+                    Instances.GameplayActivity.VersusMode.Phase = VersusPhase.ChoosePlantPacket;
+
+                    yield break;
+                }
+                else if (VersusState.AmZombieSide)
+                {
+                    foreach (var seedType in Instances.GameplayActivity.VersusMode.m_quickPlayPlants.Skip(1))
+                    {
+                        Instances.GameplayActivity.Board.SeedBanks.OpponentItem().AddSeed(seedType, true);
+                    }
+                }
+            }
+        }
+
         var seedChooserVSSwap = UnityEngine.Object.FindObjectOfType<SeedChooserVSSwap>();
         seedChooserVSSwap.swapCanvasOrder();
         seedChooserVSSwap.m_vsSeedChooserAnimator.Play(-160334332, 0, 1f);

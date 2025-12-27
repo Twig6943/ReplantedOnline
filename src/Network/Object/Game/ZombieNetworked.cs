@@ -55,6 +55,12 @@ internal sealed class ZombieNetworked : NetworkClass
     {
         AnimationControllerNetworked = gameObject.AddComponent<AnimationControllerNetworked>();
         AddChild(AnimationControllerNetworked);
+
+        if (ModInfo.DEBUG)
+        {
+            var networkedDebugger = gameObject.AddComponent<NetworkedDebugger>();
+            networkedDebugger.Initialize(this);
+        }
     }
 
     public void OnDestroy()
@@ -516,14 +522,13 @@ internal sealed class ZombieNetworked : NetworkClass
             _Zombie.mVelX = packetReader.ReadFloat();
             _Zombie.UpdateAnimSpeed();
             var posX = packetReader.ReadFloat();
+            lastSyncPosX = GameExtensions.GetBoardXPosFromXPos(posX);
             LarpPos(posX);
         }
     }
 
-    /// <summary>
-    /// The Coroutine for the larp.
-    /// </summary>
     private Coroutine larpCoroutine;
+    internal float? lastSyncPosX;
 
     /// <summary>
     /// Smoothly interpolates the zombie's position to the target position when distance threshold is exceeded.
@@ -563,6 +568,7 @@ internal sealed class ZombieNetworked : NetworkClass
     {
         if (larpCoroutine != null)
         {
+            lastSyncPosX = null;
             StopCoroutine(larpCoroutine);
         }
     }
@@ -603,6 +609,7 @@ internal sealed class ZombieNetworked : NetworkClass
         // Ensure final position is exact
         _Zombie?.mPosX = targetX;
 
+        lastSyncPosX = null;
         larpCoroutine = null;
     }
 
