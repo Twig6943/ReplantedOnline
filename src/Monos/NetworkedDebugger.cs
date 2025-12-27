@@ -96,7 +96,7 @@ internal sealed class NetworkedDebugger : MonoBehaviour
             if (plant.mDead) return;
 
             _cachedControllerPosition = plant.mController.transform.position;
-            _cachedWPos = GetWorldPos(_cachedControllerPosition) + new Vector3(55f, 100f, 0f);
+            _cachedWPos = GetWorldPos(_cachedControllerPosition) + new Vector3(55f, 90f, 0f);
 
             _cachedTexts =
             [
