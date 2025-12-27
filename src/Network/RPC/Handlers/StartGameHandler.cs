@@ -51,6 +51,7 @@ internal sealed class StartGameHandler : RPCHandler
             switch (selectionSet)
             {
                 case SelectionSet.CustomAll:
+                    NetLobby.LobbyData.UnsetAllClientsReady();
                     Instances.GameplayActivity.VersusMode.Phase = VersusPhase.ChooseZombiePacket;
                     Transitions.ToChooseSeeds();
                     Instances.GameplayActivity.StartCoroutine(CoWaitSeedChooserVSSwap().WrapToIl2cpp());
@@ -80,6 +81,11 @@ internal sealed class StartGameHandler : RPCHandler
             }
 
             yield return null;
+        }
+
+        if (!SteamNetClient.LocalClient.Ready)
+        {
+            SetClientReadyHandler.Send();
         }
 
         if (ModInfo.DEBUG)

@@ -20,6 +20,8 @@ internal static class SeedChooserScreenSyncPatch
 
         if (NetLobby.AmInLobby())
         {
+            if (!NetLobby.LobbyData.AllClientsReady()) return false;
+
             ChooseSeedHandler.Send(theChosenSeed);
             __instance.ClickedSeedInChooserOriginal(theChosenSeed, playerIndex);
 
