@@ -184,6 +184,49 @@ internal static class ZombieSyncPatch
         }
     }
 
+    [HarmonyPatch(typeof(Zombie), nameof(Zombie.ApplyBurn))]
+    [HarmonyPrefix]
+    private static bool Zombie_ApplyBurn_Prefix(Zombie __instance)
+    {
+        // Skip network logic if this is an internal call (prevents infinite recursion)
+        if (InternalCallContext.IsInternalCall_ApplyBurn) return true;
+
+        // Only handle network synchronization if we're in a multiplayer lobby
+        if (NetLobby.AmInLobby())
+        {
+            if (!VersusState.AmPlantSide) return false;
+
+            // Execute the original RemoveIceTrap logic locally
+            __instance.ApplyBurnOriginal();
+
+            __instance.GetNetworked<ZombieNetworked>().SendApplyBurnRpc();
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Extension method that safely calls the original ApplyBurn method
+    /// while preventing our patch from intercepting the call (avoiding recursion)
+    /// </summary>
+    public static void ApplyBurnOriginal(this Zombie __instance)
+    {
+        // Set flag to indicate this is an internal call
+        InternalCallContext.IsInternalCall_ApplyBurn = true;
+        try
+        {
+            // Call the original method - this won't trigger our patch due to the flag
+            __instance.ApplyBurn();
+        }
+        finally
+        {
+            // Always reset the flag, even if an exception occurs
+            InternalCallContext.IsInternalCall_ApplyBurn = false;
+        }
+    }
+
     /// <summary>
     /// Thread-safe context flags to prevent infinite recursion when calling patched methods from within patches.
     /// [ThreadStatic] ensures each thread has its own copy of these flags.
@@ -201,5 +244,8 @@ internal static class ZombieSyncPatch
 
         [ThreadStatic]
         public static bool IsInternalCall_RemoveIceTrap;
+
+        [ThreadStatic]
+        public static bool IsInternalCall_ApplyBurn;
     }
 }

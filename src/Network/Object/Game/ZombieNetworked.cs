@@ -378,9 +378,19 @@ internal sealed class ZombieNetworked : NetworkClass
         }
     }
 
-    private void SendSetUpdateStateRpc()
+    internal void SendApplyBurnRpc()
     {
         this.SendRpc(6);
+    }
+
+    private void HandleApplyBurnRpc()
+    {
+        _State = States.UpdateState;
+    }
+
+    private void SendSetUpdateStateRpc()
+    {
+        this.SendRpc(7);
     }
 
     private void HandleSetUpdateStateRpc()
@@ -436,6 +446,11 @@ internal sealed class ZombieNetworked : NetworkClass
                 }
                 break;
             case 6:
+                {
+                    HandleApplyBurnRpc();
+                }
+                break;
+            case 7:
                 {
                     HandleSetUpdateStateRpc();
                 }
