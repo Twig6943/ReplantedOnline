@@ -15,7 +15,7 @@ internal sealed class PacketReader
     private byte[] _data = [];
     private int _position = 0;
     private static readonly Queue<PacketReader> _pool = [];
-    private const int MAX_POOL_SIZE = 100;
+    private const int MAX_POOL_SIZE = 10;
     internal static int AmountInUse;
 
     /// <summary>

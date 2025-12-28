@@ -13,7 +13,7 @@ internal sealed class PacketWriter
 {
     private readonly List<byte> _data = [];
     private static readonly Queue<PacketWriter> _pool = [];
-    private const int MAX_POOL_SIZE = 100;
+    private const int MAX_POOL_SIZE = 10;
     internal static int AmountInUse;
 
     /// <summary>

@@ -10,8 +10,8 @@ namespace ReplantedOnline.Network.Packet;
 internal sealed class P2PPacketBuffer
 {
     private static readonly Queue<P2PPacketBuffer> _pool = [];
-    private const int MAX_POOL_SIZE = 100;
-    private const int BUFFER_SIZE = 500;
+    private const int MAX_POOL_SIZE = 5;
+    private const int BUFFER_SIZE = 250;
     internal static int AmountInUse;
 
     /// <summary>

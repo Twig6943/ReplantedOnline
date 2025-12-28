@@ -187,7 +187,7 @@ internal static class NetworkDispatcher
     /// <returns>Enumerator for coroutine execution</returns>
     internal static IEnumerator CoListening()
     {
-        MelonLogger.Msg("[NetworkDispatcher] Starting to listen for network packets and send dirty Network Classes");
+        MelonLogger.Msg("Starting NetworkDispatcher");
 
         while (NetLobby.AmInLobby())
         {
@@ -200,7 +200,7 @@ internal static class NetworkDispatcher
                 packet.Recycle();
             }
 
-            processed = 30;
+            processed = 5;
             while (SteamNetworking.IsP2PPacketAvailable(out uint messageSize, (int)PacketChannel.Rpc))
             {
                 if (processed <= 0) break;
@@ -208,7 +208,7 @@ internal static class NetworkDispatcher
                 processed--;
             }
 
-            processed = 50;
+            processed = 5;
             while (SteamNetworking.IsP2PPacketAvailable(out uint messageSize, (int)PacketChannel.Main))
             {
                 if (processed <= 0) break;
@@ -216,7 +216,7 @@ internal static class NetworkDispatcher
                 processed--;
             }
 
-            processed = 20;
+            processed = 5;
             while (SteamNetworking.IsP2PPacketAvailable(out uint messageSize, (int)PacketChannel.Buffered))
             {
                 if (processed <= 0) break;
@@ -227,7 +227,7 @@ internal static class NetworkDispatcher
             yield return null;
         }
 
-        MelonLogger.Msg("[NetworkDispatcher] Stoping to listen for network packets and send dirty Network Classes");
+        MelonLogger.Msg("Stoping NetworkDispatcher");
 
         listeningToken = null;
     }
